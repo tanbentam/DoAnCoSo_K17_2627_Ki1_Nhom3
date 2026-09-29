@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartRecruit AI — HR Dashboard</title>
+  <title>SmartRecruit AI — Tìm việc làm</title>
 
   <!-- Bootstrap 5 CDN -->
   <link
@@ -17,22 +17,25 @@
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
       <a class="navbar-brand fw-bold" href="#">🤖 SmartRecruit AI</a>
-      <span class="navbar-text text-white-50 ms-auto">HR Dashboard</span>
+      <span class="navbar-text text-white-50">Cổng thông tin tuyển dụng</span>
     </div>
   </nav>
 
-  <!-- Kanban Placeholder -->
-  <div class="container-fluid py-4">
-    <h2 class="mb-4">Bảng Kanban Tuyển dụng</h2>
+  <!-- Hero -->
+  <div class="bg-light py-5 text-center border-bottom">
+    <h1 class="display-5 fw-bold">Cơ hội việc làm</h1>
+    <p class="lead text-muted">Nộp hồ sơ trực tuyến — AI sẽ đánh giá và phản hồi nhanh chóng.</p>
+  </div>
 
-    <div class="row g-3" id="kanban-board">
-      <!-- Columns rendered by JS -->
+  <!-- Job listings (populated by JS) -->
+  <div class="container py-4">
+    <div id="job-list" class="row g-3">
       <div class="col-12 text-center text-muted py-5">
         <div class="spinner-border" role="status"></div>
-        <p class="mt-2">Đang tải dữ liệu Kanban…</p>
+        <p class="mt-2">Đang tải danh sách việc làm…</p>
       </div>
     </div>
   </div>
@@ -44,10 +47,7 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- SortableJS CDN (Kanban drag-and-drop) -->
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-
   <script src="js/api.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/index.js"></script>
 </body>
 </html>

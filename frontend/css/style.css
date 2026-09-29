@@ -1,0 +1,45 @@
+/* SmartRecruit AI — Custom styles */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Matching score badges */
+.badge-high   { background-color: #198754; color: #fff; } /* >= 80% — green  */
+.badge-medium { background-color: #ffc107; color: #000; } /* 50-79% — yellow */
+.badge-low    { background-color: #dc3545; color: #fff; } /* < 50%  — red    */
+
+/* Kanban columns */
+.kanban-col {
+  min-height: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.kanban-col .col-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* Candidate card */
+.candidate-card {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: grab;
+  transition: box-shadow 0.15s;
+}
+
+.candidate-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.candidate-card.sortable-ghost {
+  opacity: 0.4;
+}

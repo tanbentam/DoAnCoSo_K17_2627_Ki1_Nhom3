@@ -22,12 +22,12 @@ Ký hiệu:
 * [x] Thống nhất đề tài, hoàn thiện Bản đề xuất dự án (Proposal) và Biên bản họp lần 1
 * [x] Thống nhất phân chia phạm vi công việc 02 người (Frontend/Docs vs Backend/AI)
 * [x] Khởi tạo Git repository và quy tắc phân nhánh (`main`, `dev`, `feature/*`)
-* [ ] Thiết lập cấu trúc thư mục dự án chuẩn (`/backend`, `/frontend`, `/docs`, `/uploads`)
-* [ ] Cấu hình môi trường Python ảo (`venv`) và xuất file `requirements.txt`
+* [x] Thiết lập cấu trúc thư mục dự án chuẩn (`/backend`, `/frontend`, `/docs`, `/uploads`)
+* [x] Cấu hình môi trường Python ảo (`venv`) và xuất file `requirements.txt`
 * [ ] Khởi tạo instance MySQL 8.0 miễn phí trên Cloud Aiven
 * [ ] Tạo file `.env` chứa chuỗi kết nối Aiven MySQL, Gemini API Key và cờ cấu hình AI
-* [ ] Khởi tạo ứng dụng FastAPI cơ bản, kiểm tra trang tự sinh tài liệu `/docs` (Swagger UI)
-* [ ] Dựng trang Frontend tĩnh cơ bản kiểm tra tích hợp Bootstrap 5 và SortableJS qua CDN
+* [x] Khởi tạo ứng dụng FastAPI cơ bản, kiểm tra trang tự sinh tài liệu `/docs` (Swagger UI)
+* [x] Dựng trang Frontend tĩnh cơ bản kiểm tra tích hợp Bootstrap 5 và SortableJS qua CDN
 
 ## 2. Database & Data Access Layer (Aiven MySQL)
 
