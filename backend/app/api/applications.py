@@ -236,13 +236,23 @@ def update_application_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_hr),
 ):
-    """Cập nhật trạng thái Kanban của ứng viên (chỉ HR/Admin)."""
-    app_record = db.query(Application).filter(Application.id == application_id).first()
+    """
+    Cập nhật trạng thái Kanban của ứng viên khi kéo thả (chỉ HR/Admin):
+    - Cho phép chuyển đổi trạng thái giữa: applied, screening, interview, offer, rejected.
+    - Trả về đầy đủ thông tin ứng viên để frontend Kanban cập nhật thẻ ngay lập tức.
+    """
+    app_record = (
+        db.query(Application)
+        .options(joinedload(Application.candidate))
+        .filter(Application.id == application_id)
+        .first()
+    )
     if not app_record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy hồ sơ ứng tuyển",
         )
+
     app_record.status = status_update.status
     db.commit()
     db.refresh(app_record)
