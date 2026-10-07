@@ -19,6 +19,7 @@ from app.schemas.application import (
     ApplicationResponse,
     ApplicationStatusUpdate,
 )
+from app.services.ai_tasks import process_application_ai
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
@@ -30,7 +31,7 @@ async def apply_job(
     email: str = Form(..., max_length=255, description="Email liên hệ của ứng viên"),
     phone: Optional[str] = Form(None, max_length=30, description="Số điện thoại liên hệ"),
     cv_file: UploadFile = File(..., description="Tệp CV định dạng PDF hoặc DOCX"),
-    background_tasks: BackgroundTasks = None,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db),
 ):
     """
@@ -132,6 +133,9 @@ async def apply_job(
     db.add(application)
     db.commit()
     db.refresh(application)
+
+    # 6. Kích hoạt xử lý AI ngầm qua BackgroundTasks (không làm chậm response của ứng viên)
+    background_tasks.add_task(process_application_ai, application.id)
 
     return ApplicationApplyResponse(
         message="Nộp hồ sơ ứng tuyển thành công!",
