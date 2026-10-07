@@ -4,8 +4,18 @@ api/applications.py — API quản lý hồ sơ ứng tuyển & Nộp hồ sơ
 import os
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
-from sqlalchemy.orm import Session
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import MAX_UPLOAD_SIZE_MB, UPLOAD_DIR_PATH
 from app.core.database import get_db
@@ -148,22 +158,58 @@ async def apply_job(
 
 @router.get("", response_model=List[ApplicationResponse])
 def get_applications(
-    job_id: Optional[int] = None,
-    status_filter: Optional[ApplicationStatus] = None,
+    job_id: Optional[int] = Query(None, description="Lọc theo ID tin tuyển dụng"),
+    status: Optional[ApplicationStatus] = Query(None, description="Lọc theo trạng thái Kanban (applied, screening, interview, offer, rejected)"),
+    min_score: Optional[float] = Query(None, ge=0.0, le=100.0, description="Lọc điểm matching tối thiểu (0 - 100)"),
+    max_score: Optional[float] = Query(None, ge=0.0, le=100.0, description="Lọc điểm matching tối đa (0 - 100)"),
+    sort_by: Optional[str] = Query("newest", description="Sắp xếp: 'newest', 'oldest', 'score_desc' (điểm cao đến thấp), 'score_asc'"),
+    skip: int = Query(0, ge=0, description="Số bản ghi bỏ qua"),
+    limit: int = Query(100, ge=1, le=500, description="Số bản ghi tối đa trả về"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_hr),
 ):
     """
     Lấy danh sách hồ sơ ứng tuyển (chỉ HR/Admin):
-    - Có thể lọc theo job_id và status
+    - job_id: Lọc theo Job cụ thể
+    - status: Lọc theo trạng thái Kanban
+    - min_score, max_score: Bộ lọc theo dải điểm Matching Score
+    - sort_by: Sắp xếp theo ngày ('newest', 'oldest') hoặc điểm số ('score_desc', 'score_asc')
     """
-    query = db.query(Application)
+    query = db.query(Application).options(joinedload(Application.candidate))
+
     if job_id is not None:
         query = query.filter(Application.job_id == job_id)
-    if status_filter is not None:
-        query = query.filter(Application.status == status_filter)
-    
-    apps = query.order_by(Application.created_at.desc()).all()
+
+    if status is not None:
+        query = query.filter(Application.status == status)
+
+    if min_score is not None:
+        query = query.filter(Application.matching_score >= min_score)
+
+    if max_score is not None:
+        query = query.filter(Application.matching_score <= max_score)
+
+    # Xử lý sắp xếp
+    if sort_by == "score_desc":
+        # Sắp xếp điểm cao xuống thấp (hồ sơ chưa có điểm xếp cuối)
+        query = query.order_by(
+            Application.matching_score.is_(None),
+            Application.matching_score.desc(),
+            Application.created_at.desc(),
+        )
+    elif sort_by == "score_asc":
+        # Sắp xếp điểm thấp lên cao (hồ sơ chưa có điểm xếp cuối)
+        query = query.order_by(
+            Application.matching_score.is_(None),
+            Application.matching_score.asc(),
+            Application.created_at.desc(),
+        )
+    elif sort_by == "oldest":
+        query = query.order_by(Application.created_at.asc())
+    else:  # newest
+        query = query.order_by(Application.created_at.desc())
+
+    apps = query.offset(skip).limit(limit).all()
     return apps
 
 

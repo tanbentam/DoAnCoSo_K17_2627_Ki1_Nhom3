@@ -49,7 +49,7 @@ Ký hiệu:
 * [x] Xây dựng API tiếp nhận nộp hồ sơ (`/api/applications/apply` hỗ trợ multipart `UploadFile`)
 * [x] Lưu trữ tệp PDF CV cục bộ an toàn trong thư mục `/uploads/cv`
 * [x] Tích hợp `BackgroundTasks` của FastAPI để xử lý đọc và chấm điểm AI ngầm sau khi nộp
-* [ ] Xây dựng API lấy danh sách ứng viên theo từng Job kèm bộ lọc trạng thái và điểm số
+* [x] Xây dựng API lấy danh sách ứng viên theo từng Job kèm bộ lọc trạng thái và điểm số
 * [ ] Xây dựng API cập nhật trạng thái ứng viên khi kéo thả trên Kanban (`/api/applications/{id}/status`)
 * [ ] Xây dựng API lấy chi tiết phân tích AI (kỹ năng bóc tách, điểm số, gợi ý phỏng vấn)
 
