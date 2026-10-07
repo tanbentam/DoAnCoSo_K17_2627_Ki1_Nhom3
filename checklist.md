@@ -43,8 +43,8 @@ Ký hiệu:
 
 ## 3. Backend RESTful APIs (FastAPI)
 
-* [ ] Tạo module xác thực và đăng nhập cơ bản cho HR
-* [ ] Xây dựng nhóm API quản lý tin tuyển dụng (`/api/jobs`): tạo, sửa, đóng tin, xem chi tiết
+* [x] Tạo module xác thực và đăng nhập cơ bản cho HR
+* [x] Xây dựng nhóm API quản lý tin tuyển dụng (`/api/jobs`): tạo, sửa, đóng tin, xem chi tiết
 * [ ] Xây dựng API public cho ứng viên lấy danh sách việc làm đang mở
 * [ ] Xây dựng API tiếp nhận nộp hồ sơ (`/api/applications/apply` hỗ trợ multipart `UploadFile`)
 * [ ] Lưu trữ tệp PDF CV cục bộ an toàn trong thư mục `/uploads/cv`
