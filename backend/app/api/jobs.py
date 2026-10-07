@@ -49,6 +49,24 @@ def create_job(
     db.refresh(new_job)
     return new_job
 
+@router.get("/open", response_model=List[JobResponse])
+def get_open_jobs(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """API public cho ứng viên: Lấy danh sách việc làm đang mở (status = open)."""
+    jobs = (
+        db.query(Job)
+        .filter(Job.status == JobStatus.open)
+        .order_by(Job.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return jobs
+
+
 @router.get("/{job_id}", response_model=JobResponse)
 def get_job(job_id: int, db: Session = Depends(get_db)):
     """Xem chi tiết 1 tin tuyển dụng."""
@@ -73,6 +91,22 @@ def update_job(
     for field, value in update_data.items():
         setattr(job, field, value)
         
+    db.commit()
+    db.refresh(job)
+    return job
+
+
+@router.patch("/{job_id}/close", response_model=JobResponse)
+def close_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_hr),
+):
+    """Đóng tin tuyển dụng (chỉ HR/Admin)."""
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Không tìm thấy tin tuyển dụng")
+    job.status = JobStatus.closed
     db.commit()
     db.refresh(job)
     return job

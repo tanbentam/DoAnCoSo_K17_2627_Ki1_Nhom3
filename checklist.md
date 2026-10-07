@@ -45,9 +45,9 @@ Ký hiệu:
 
 * [x] Tạo module xác thực và đăng nhập cơ bản cho HR
 * [x] Xây dựng nhóm API quản lý tin tuyển dụng (`/api/jobs`): tạo, sửa, đóng tin, xem chi tiết
-* [ ] Xây dựng API public cho ứng viên lấy danh sách việc làm đang mở
-* [ ] Xây dựng API tiếp nhận nộp hồ sơ (`/api/applications/apply` hỗ trợ multipart `UploadFile`)
-* [ ] Lưu trữ tệp PDF CV cục bộ an toàn trong thư mục `/uploads/cv`
+* [x] Xây dựng API public cho ứng viên lấy danh sách việc làm đang mở
+* [x] Xây dựng API tiếp nhận nộp hồ sơ (`/api/applications/apply` hỗ trợ multipart `UploadFile`)
+* [x] Lưu trữ tệp PDF CV cục bộ an toàn trong thư mục `/uploads/cv`
 * [ ] Tích hợp `BackgroundTasks` của FastAPI để xử lý đọc và chấm điểm AI ngầm sau khi nộp
 * [ ] Xây dựng API lấy danh sách ứng viên theo từng Job kèm bộ lọc trạng thái và điểm số
 * [ ] Xây dựng API cập nhật trạng thái ứng viên khi kéo thả trên Kanban (`/api/applications/{id}/status`)
@@ -106,7 +106,7 @@ Ký hiệu:
 * [ ] Kiểm thử hiệu năng và độ ổn định của API xử lý nền (`BackgroundTasks`)
 * [ ] Kiểm thử chuyển đổi sang chạy mô hình Local Ollama trên GPU RTX 4060 ở trạng thái ngắt mạng
 * [ ] Tối ưu hóa mã nguồn Frontend, loại bỏ code thừa và chuẩn hóa thông báo lỗi giao diện
-* [ ] Soạn thảo tài liệu hướng dẫn cài đặt và chạy hệ thống trong file `README.md`
+* [x] Soạn thảo tài liệu hướng dẫn cài đặt và chạy hệ thống trong file `README.md`
 * [ ] Đóng gói tài liệu báo cáo đồ án, thiết kế slide thuyết trình và kịch bản demo bảo vệ
 
 ---
