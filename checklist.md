@@ -37,9 +37,9 @@ Ký hiệu:
 * [x] Thiết kế và tạo model `Candidate` (hồ sơ ứng viên, thông tin liên hệ, link file CV)
 * [x] Thiết kế và tạo model `Application` (liên kết Job - Candidate, trạng thái Kanban, Matching Score, JSON phân tích AI)
 * [x] Cấu hình quan hệ (Foreign Keys, Relationships) giữa các bảng
-* [ ] Viết script tự động khởi tạo bảng (`Base.metadata.create_all`)
-* [ ] Viết script Seed dữ liệu mẫu (01 tài khoản HR, 02 tin tuyển dụng lập trình viên)
-* [ ] Kiểm tra kết nối và truy vấn CSDL đồng thời từ cả máy chính và máy phụ
+* [x] Viết script tự động khởi tạo bảng (`Base.metadata.create_all`)
+* [x] Viết script Seed dữ liệu mẫu (01 tài khoản HR, 02 tin tuyển dụng lập trình viên)
+* [x] Kiểm tra kết nối và truy vấn CSDL đồng thời từ cả máy chính và máy phụ
 
 ## 3. Backend RESTful APIs (FastAPI)
 
