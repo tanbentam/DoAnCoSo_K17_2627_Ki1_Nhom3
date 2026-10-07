@@ -3,11 +3,15 @@ models/user.py — SQLAlchemy ORM model cho tài khoản HR / Quản trị viên
 """
 import enum
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Enum, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.job import Job
 
 
 class UserRole(str, enum.Enum):
@@ -84,3 +88,10 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email!r} role={self.role.value}>"
+
+    # ── Relationships ──────────────────────────────────────────────────────────
+    jobs: Mapped[list["Job"]] = relationship(
+        "Job",
+        back_populates="creator",
+        foreign_keys="Job.created_by",
+    )
