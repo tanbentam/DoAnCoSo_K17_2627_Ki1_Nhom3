@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import (
+    CheckConstraint,
     DateTime,
     Enum,
     Float,
@@ -16,6 +17,7 @@ from sqlalchemy import (
     Integer,
     JSON,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -54,6 +56,24 @@ class Application(Base):
     """
 
     __tablename__ = "applications"
+
+    __table_args__ = (
+        # Mỗi ứng viên chỉ được nộp 1 lần vào 1 job
+        UniqueConstraint("job_id", "candidate_id", name="uq_application_job_candidate"),
+        # Matching score phải trong khoảng 0–100 (nếu đã có giá trị)
+        CheckConstraint(
+            "matching_score IS NULL OR (matching_score >= 0 AND matching_score <= 100)",
+            name="chk_matching_score_range",
+        ),
+        CheckConstraint(
+            "semantic_score IS NULL OR (semantic_score >= 0 AND semantic_score <= 100)",
+            name="chk_semantic_score_range",
+        ),
+        CheckConstraint(
+            "hard_filter_score IS NULL OR (hard_filter_score >= 0 AND hard_filter_score <= 100)",
+            name="chk_hard_filter_score_range",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, index=True, autoincrement=True
