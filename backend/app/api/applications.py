@@ -25,6 +25,7 @@ from app.models.candidate import Candidate
 from app.models.job import Job, JobStatus
 from app.models.user import User
 from app.schemas.application import (
+    ApplicationAIDetailResponse,
     ApplicationApplyResponse,
     ApplicationResponse,
     ApplicationStatusUpdate,
@@ -219,14 +220,72 @@ def get_application_detail(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_hr),
 ):
-    """Lấy chi tiết một hồ sơ ứng tuyển (chỉ HR/Admin)."""
-    app_record = db.query(Application).filter(Application.id == application_id).first()
+    """
+    Lấy chi tiết một hồ sơ ứng tuyển kèm thông tin AI phân tích (chỉ HR/Admin):
+    - Đầy đủ thông tin ứng viên (candidate) và tin tuyển dụng (job).
+    - Toàn bộ kết quả phân tích AI: điểm số, kỹ năng khớp/thiếu, câu hỏi phỏng vấn.
+    """
+    app_record = (
+        db.query(Application)
+        .options(
+            joinedload(Application.candidate),
+            joinedload(Application.job),
+        )
+        .filter(Application.id == application_id)
+        .first()
+    )
     if not app_record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Không tìm thấy hồ sơ ứng tuyển",
         )
     return app_record
+
+
+@router.get("/{application_id}/ai-analysis", response_model=ApplicationAIDetailResponse)
+def get_application_ai_analysis(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_hr),
+):
+    """
+    API chuyên biệt lấy chi tiết phân tích AI của hồ sơ ứng viên (chỉ HR/Admin):
+    - Kỹ năng bóc tách từ CV (ai_extracted_info)
+    - Danh sách kỹ năng trùng khớp với JD (matched_skills)
+    - Danh sách kỹ năng còn thiếu so với JD (missing_skills)
+    - 3 - 5 câu hỏi phỏng vấn gợi ý (interview_questions)
+    - Điểm số tổng hợp Hybrid Matching Score và điểm thành phần
+    """
+    app_record = (
+        db.query(Application)
+        .options(
+            joinedload(Application.candidate),
+            joinedload(Application.job),
+        )
+        .filter(Application.id == application_id)
+        .first()
+    )
+    if not app_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy hồ sơ ứng tuyển",
+        )
+    return ApplicationAIDetailResponse(
+        application_id=app_record.id,
+        job_id=app_record.job_id,
+        candidate_id=app_record.candidate_id,
+        status=app_record.status,
+        matching_score=app_record.matching_score,
+        semantic_score=app_record.semantic_score,
+        hard_filter_score=app_record.hard_filter_score,
+        ai_extracted_info=app_record.ai_extracted_info,
+        matched_skills=app_record.matched_skills or [],
+        missing_skills=app_record.missing_skills or [],
+        interview_questions=app_record.interview_questions or [],
+        ai_summary=app_record.ai_summary,
+        candidate_name=app_record.candidate.full_name if app_record.candidate else None,
+        job_title=app_record.job.title if app_record.job else None,
+    )
 
 
 @router.patch("/{application_id}/status", response_model=ApplicationResponse)
