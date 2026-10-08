@@ -16,6 +16,7 @@ from pdfminer.pdfparser import PDFSyntaxError
 from pdfplumber.utils.exceptions import PdfminerException
 
 from app.core.config import BASE_DIR
+from app.services.text_cleaner import clean_cv_text
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ def extract_text_from_pdf(
     pdf_source: Union[str, Path, bytes, BinaryIO],
     password: Optional[str] = None,
     keep_blank_chars: bool = False,
+    clean: bool = False,
 ) -> str:
     """
     Trích xuất toàn bộ văn bản thô từ file PDF sử dụng pdfplumber.
@@ -59,9 +61,10 @@ def extract_text_from_pdf(
         pdf_source: Đường dẫn file (str, Path), chuỗi bytes hoặc file-like stream (BytesIO).
         password: Mật khẩu mở file nếu PDF bị khóa.
         keep_blank_chars: Giữ lại các ký tự khoảng trắng nguyên bản từ layout.
+        clean: Nếu True, áp dụng bộ làm sạch clean_cv_text lên kết quả trích xuất.
 
     Trả về:
-        str: Toàn bộ văn bản thô đã trích xuất từ tất cả các trang, phân cách bởi ký tự xuống dòng.
+        str: Toàn bộ văn bản đã trích xuất từ tất cả các trang, phân cách bởi ký tự xuống dòng.
 
     Ngoại lệ:
         PDFFileNotFoundError: File không tìm thấy trên hệ thống.
@@ -77,6 +80,8 @@ def extract_text_from_pdf(
     
     # Ghép văn bản các trang lại với nhau
     full_text = "\n\n".join(text for text in pages_text if text.strip())
+    if clean:
+        full_text = clean_cv_text(full_text)
     return full_text.strip()
 
 
@@ -172,16 +177,20 @@ def get_pdf_metadata(
         raise PDFServiceError(f"Lỗi khi đọc metadata PDF: {e}") from e
 
 
-def extract_text_from_candidate_cv(cv_relative_or_absolute_path: Union[str, Path]) -> str:
+def extract_text_from_candidate_cv(
+    cv_relative_or_absolute_path: Union[str, Path],
+    clean: bool = True,
+) -> str:
     """
     Helper chuyên biệt để trích xuất văn bản từ đường dẫn CV ứng viên lưu trong hệ thống.
     Tự động chuẩn hóa đường dẫn tương đối (ví dụ: uploads/cv/abc.pdf) về đường dẫn tuyệt đối dựa trên BASE_DIR.
 
     Tham số:
         cv_relative_or_absolute_path: Đường dẫn tới file CV (tương đối hoặc tuyệt đối).
+        clean: Có áp dụng bộ làm sạch clean_cv_text hay không (mặc định True).
 
     Trả về:
-        str: Toàn bộ nội dung văn bản thô của CV.
+        str: Toàn bộ nội dung văn bản CV đã được trích xuất (và làm sạch nếu clean=True).
     """
     abs_path = _to_absolute_path(cv_relative_or_absolute_path)
     if not abs_path.exists():
@@ -191,7 +200,7 @@ def extract_text_from_candidate_cv(cv_relative_or_absolute_path: Union[str, Path
     if ext != ".pdf":
         raise PDFServiceError(f"Định dạng tệp {ext} không được hỗ trợ bởi PDF service. Chỉ hỗ trợ .pdf")
 
-    return extract_text_from_pdf(abs_path)
+    return extract_text_from_pdf(abs_path, clean=clean)
 
 
 # ── Hàm bổ trợ nội bộ ────────────────────────────────────────────────────────

@@ -39,12 +39,12 @@ def process_application_ai(application_id: int) -> None:
         if candidate and candidate.cv_file_path:
             if candidate.cv_file_path.lower().endswith(".pdf"):
                 try:
-                    logger.info(f"[BackgroundTasks] Đang trích xuất text PDF từ {candidate.cv_file_path}...")
-                    raw_text = extract_text_from_candidate_cv(candidate.cv_file_path)
-                    candidate.cv_text_raw = raw_text
+                    logger.info(f"[BackgroundTasks] Đang trích xuất và làm sạch text PDF từ {candidate.cv_file_path}...")
+                    cleaned_text = extract_text_from_candidate_cv(candidate.cv_file_path, clean=True)
+                    candidate.cv_text_raw = cleaned_text
                     db.commit()
                     logger.info(
-                        f"[BackgroundTasks] Trích xuất thành công {len(raw_text)} ký tự cho Candidate ID {candidate.id}."
+                        f"[BackgroundTasks] Trích xuất & làm sạch thành công {len(cleaned_text)} ký tự cho Candidate ID {candidate.id}."
                     )
                 except PDFServiceError as pe:
                     logger.error(
@@ -57,8 +57,9 @@ def process_application_ai(application_id: int) -> None:
 
         # 3. Hook kết nối AI Pipeline tiếp theo (Gemini Structured Outputs & Hybrid Matching Score)
         # Các bước tiếp theo trong Mục 4:
-        # - Làm sạch chuỗi văn bản (Mục 4.2)
-        # - Gọi Gemini trích xuất Structured Output JSON (Mục 4.3 & 4.4)
+        # - Trích xuất văn bản thô (Mục 4.1: Đã hoàn thành)
+        # - Làm sạch chuỗi văn bản (Mục 4.2: Đã hoàn thành với text_cleaner)
+        # - Tích hợp Google Gemini API Structured Outputs (Mục 4.3 & 4.4)
         # - Tính điểm Hybrid Matching Score (Semantic + Hard filter) (Mục 4.5 - 4.7)
         # - Lưu matched_skills, missing_skills, interview_questions, matching_score
 

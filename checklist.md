@@ -56,7 +56,7 @@ Ký hiệu:
 ## 4. AI Pipeline & Scoring Engine
 
 * [x] Tạo service trích xuất văn bản thô từ file PDF bằng thư viện `pdfplumber`
-* [ ] Xử lý làm sạch chuỗi văn bản (loại bỏ ký tự đặc biệt, ngắt dòng thừa)
+* [x] Xử lý làm sạch chuỗi văn bản (loại bỏ ký tự đặc biệt, ngắt dòng thừa)
 * [ ] Tích hợp Google Gemini API (Flash model) với chế độ Structured Outputs
 * [ ] Xây dựng prompt chuẩn hóa thông tin CV trả về JSON (họ tên, kỹ năng, số năm kinh nghiệm, học vấn)
 * [ ] Tải và cấu hình mô hình nhúng `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`)
