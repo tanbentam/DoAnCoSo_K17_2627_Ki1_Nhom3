@@ -1,4 +1,12 @@
 # app/services/__init__.py
+from app.services.gemini_service import (
+    GeminiAPIError,
+    GeminiConfigError,
+    GeminiResponseError,
+    GeminiServiceError,
+    generate_structured,
+    get_gemini_client,
+)
 from app.services.pdf_service import (
     PDFCorruptedError,
     PDFEmptyError,
@@ -21,6 +29,13 @@ from app.services.text_cleaner import (
 )
 
 __all__ = [
+    # Gemini Service
+    "GeminiServiceError",
+    "GeminiConfigError",
+    "GeminiAPIError",
+    "GeminiResponseError",
+    "get_gemini_client",
+    "generate_structured",
     # PDF Service
     "PDFServiceError",
     "PDFFileNotFoundError",

@@ -59,7 +59,8 @@ def process_application_ai(application_id: int) -> None:
         # Các bước tiếp theo trong Mục 4:
         # - Trích xuất văn bản thô (Mục 4.1: Đã hoàn thành)
         # - Làm sạch chuỗi văn bản (Mục 4.2: Đã hoàn thành với text_cleaner)
-        # - Tích hợp Google Gemini API Structured Outputs (Mục 4.3 & 4.4)
+        # - Tích hợp Google Gemini API Structured Outputs (Mục 4.3: Đã hoàn thành với gemini_service.generate_structured)
+        # - Prompt chuẩn hóa thông tin CV trả về JSON (Mục 4.4)
         # - Tính điểm Hybrid Matching Score (Semantic + Hard filter) (Mục 4.5 - 4.7)
         # - Lưu matched_skills, missing_skills, interview_questions, matching_score
 
