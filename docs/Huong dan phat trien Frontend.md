@@ -21,6 +21,11 @@ Tài liệu cho người làm frontend SmartRecruit AI (Mục 5 – Cổng ứng
 - **Công nghệ** (đã chốt trong đề xuất dự án):
   - HTML5, CSS3, **JavaScript thuần ES6+**.
   - **Bootstrap 5.3.3** và **SortableJS 1.15.2** qua CDN.
+  - Giao diện (16/10/2026):
+    - `index.html`: theme **Bootswatch Zephyr 5.3.3** (thay `bootstrap.min.css`) và Bootstrap JS 5.3.3.
+    - `admin.html`: **Tabler 1.6.1** (dựng trên Bootstrap 5, thay cả CSS lẫn JS của Bootstrap). Tabler đặt Bootstrap ở `window.tabler`; `admin.html` đã gán `window.bootstrap = window.tabler` nên vẫn gọi được `bootstrap.Modal`, `bootstrap.Toast`… Class Bootstrap dùng như bình thường; thành phần riêng của Tabler xem https://preview.tabler.io.
+    - Chung: icon **Bootstrap Icons 1.13.1** (`<i class="bi bi-..."></i>`), font **Be Vietnam Pro** (Google Fonts). Màu và font khai báo bằng biến CSS ở đầu `css/style.css` (`--sr-*`).
+    - Mọi thẻ CDN đều có `integrity` (SRI) tính từ file thật. Đổi phiên bản thì phải tính lại mã: `curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
   - Không dùng framework, không có bước build. Mở file HTML là chạy.
 - **Không làm ở frontend:** chấm điểm, phân tích CV, gửi email. Backend lo hết, frontend chỉ hiển thị kết quả.
 
@@ -53,6 +58,8 @@ Khung đã có từ Mục 1.9: `index.html`, `admin.html`, `css/style.css` (đã
 | 4 | `api.js` chưa gửi token, chưa xử lý 401 và lỗi 422, thiếu các API: đăng nhập, `/jobs/open`, `ai-analysis`, `/cv`. `apply` không kiểm tra `response.ok` | Gọi API HR sẽ bị 401; lỗi nộp CV không hiện cho ứng viên | Bổ sung theo [Mục 5](#5-quy-ước-code) |
 
 Các lỗi 1 và 2 đã được kiểm tra: lỗi 1 bằng `node --check`, lỗi 2 bằng cách so mã hash của file CDN thật.
+
+> **Cập nhật 16/10/2026:** lỗi 1 và 2 **đã sửa** khi đổi giao diện sang Bootswatch / Tabler. Còn lại lỗi 3 và 4 trong `api.js`.
 
 ---
 

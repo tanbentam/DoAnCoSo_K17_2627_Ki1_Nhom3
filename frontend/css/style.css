@@ -1,45 +1,127 @@
-/* SmartRecruit AI — Custom styles */
+/* SmartRecruit AI — Custom styles (dùng chung cho index.html và admin.html) */
+
+:root {
+  --sr-font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sr-brand: #3459e6;
+  --sr-brand-2: #7c3aed;
+  --sr-score-high: #2fb344;
+  --sr-score-medium: #f59f00;
+  --sr-score-low: #d63939;
+  /* Tabler đọc font từ biến này */
+  --tblr-font-sans-serif: var(--sr-font);
+}
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--sr-font);
+}
+
+/* Logo */
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--sr-brand), var(--sr-brand-2));
+  color: #fff;
 }
 
 /* Matching score badges */
-.badge-high   { background-color: #198754; color: #fff; } /* >= 80% — green  */
-.badge-medium { background-color: #ffc107; color: #000; } /* 50-79% — yellow */
-.badge-low    { background-color: #dc3545; color: #fff; } /* < 50%  — red    */
+.badge-high   { background-color: var(--sr-score-high);   color: #fff; } /* >= 80% — green  */
+.badge-medium { background-color: var(--sr-score-medium); color: #fff; } /* 50-79% — yellow */
+.badge-low    { background-color: var(--sr-score-low);    color: #fff; } /* < 50%  — red    */
 
-/* Kanban columns */
+/* ===== Cổng ứng viên (index.html) ===== */
+.portal-body {
+  background: #f6f8fc;
+}
+
+.hero {
+  background: radial-gradient(1200px 400px at 10% -10%, rgba(124, 58, 237, 0.35), transparent),
+    linear-gradient(135deg, #2a46c9 0%, var(--sr-brand) 55%, #5b6cf0 100%);
+  color: #fff;
+}
+
+.job-card {
+  border: 1px solid #e6e9f2;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(30, 40, 90, 0.1);
+}
+
+.skill-tag {
+  background: #eef2ff;
+  color: #3449b8;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.3em 0.75em;
+  font-size: 0.78rem;
+}
+
+/* ===== Bảng HR (admin.html) ===== */
 .kanban-col {
-  min-height: 200px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  min-height: 420px;
+  background: #f1f4f9;
+  border-radius: 12px;
   padding: 12px;
-  border: 1px solid #dee2e6;
 }
 
 .kanban-col .col-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #dee2e6;
 }
 
 /* Candidate card */
 .candidate-card {
   background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  border: 1px solid #e3e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
   cursor: grab;
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.15s, transform 0.15s;
 }
 
 .candidate-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 18px rgba(25, 40, 80, 0.1);
+  transform: translateY(-1px);
 }
 
 .candidate-card.sortable-ghost {
-  opacity: 0.4;
+  opacity: 0.35;
+}
+
+.candidate-card.sortable-chosen {
+  box-shadow: 0 12px 28px rgba(25, 40, 80, 0.2);
+  transform: rotate(1.5deg);
+}
+
+/* Vòng tròn điểm trong modal hồ sơ: đặt --v (0–100) và --c (màu) bằng style inline */
+.score-ring {
+  --v: 0;
+  --c: var(--sr-score-high);
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c) calc(var(--v) * 1%), #e9edf3 0);
+  display: grid;
+  place-items: center;
+}
+
+.score-ring > div {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  text-align: center;
 }
