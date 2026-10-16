@@ -15,9 +15,10 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.config import MAX_UPLOAD_SIZE_MB, UPLOAD_DIR_PATH
+from app.core.config import BASE_DIR, MAX_UPLOAD_SIZE_MB, UPLOAD_DIR_PATH
 from app.core.database import get_db
 from app.api.deps import get_current_active_hr
 from app.models.application import Application, ApplicationStatus
@@ -154,6 +155,7 @@ async def apply_job(
         candidate_id=candidate.id,
         job_id=job.id,
         status=application.status,
+        ai_status=application.ai_status,
     )
 
 
@@ -275,6 +277,8 @@ def get_application_ai_analysis(
         job_id=app_record.job_id,
         candidate_id=app_record.candidate_id,
         status=app_record.status,
+        ai_status=app_record.ai_status,
+        ai_error=app_record.ai_error,
         matching_score=app_record.matching_score,
         semantic_score=app_record.semantic_score,
         hard_filter_score=app_record.hard_filter_score,
@@ -285,6 +289,53 @@ def get_application_ai_analysis(
         ai_summary=app_record.ai_summary,
         candidate_name=app_record.candidate.full_name if app_record.candidate else None,
         job_title=app_record.job.title if app_record.job else None,
+    )
+
+
+_CV_MEDIA_TYPES = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+
+
+@router.get("/{application_id}/cv", response_class=FileResponse)
+def download_application_cv(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_hr),
+):
+    """
+    Xem / tải tệp CV gốc của hồ sơ ứng tuyển (chỉ HR/Admin):
+    - Trả về tệp PDF (hiển thị trực tiếp trên trình duyệt) hoặc DOCX.
+    - Cần header Authorization, nên frontend tải bằng fetch() → Blob → URL.createObjectURL() để mở hoặc nhúng.
+    - Lưu ý: mỗi ứng viên lưu một tệp CV mới nhất (nộp lại sẽ thay tệp cũ).
+    """
+    app_record = (
+        db.query(Application)
+        .options(joinedload(Application.candidate))
+        .filter(Application.id == application_id)
+        .first()
+    )
+    if not app_record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy hồ sơ ứng tuyển")
+
+    candidate = app_record.candidate
+    if not candidate or not candidate.cv_file_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hồ sơ này không có tệp CV")
+
+    # Chỉ phục vụ tệp nằm trong thư mục uploads/cv (chống path traversal nếu dữ liệu bị sửa)
+    upload_root = UPLOAD_DIR_PATH.resolve()
+    file_path = (BASE_DIR / candidate.cv_file_path).resolve()
+    if upload_root not in file_path.parents or not file_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy tệp CV trên máy chủ")
+
+    ext = file_path.suffix.lower()
+    safe_name = "".join(c if c.isascii() and (c.isalnum() or c in "-_") else "_" for c in candidate.full_name)
+    return FileResponse(
+        path=file_path,
+        media_type=_CV_MEDIA_TYPES.get(ext, "application/octet-stream"),
+        filename=f"CV_{safe_name.strip('_') or candidate.id}{ext}",
+        content_disposition_type="inline",
     )
 
 

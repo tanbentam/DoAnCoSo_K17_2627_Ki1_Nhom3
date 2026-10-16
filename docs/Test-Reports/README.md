@@ -15,6 +15,7 @@ Ký hiệu:
 | Thời điểm | Commit | AI_PROVIDER | Unit | Smoke API | E2E | Kết quả | Báo cáo / Ghi chú |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-16 14:28 | `9b56890`* | `local` | 184 ✅ | 30/30 | 10/10 | ✅ | [2026-10-16_1428_backend-local.md](2026-10-16_1428_backend-local.md) — Test toàn bộ backend sau Mục 4.8 (chạy local, test Gemini đầy đủ vào ngày 17/10) |
+| 2026-10-16 15:05 | `4487368`* | `local` | 184 ✅ | 35/35 | 3/3 | ✅ | [2026-10-16_1505_backend-local.md](2026-10-16_1505_backend-local.md) — Thêm ai_status + API xem CV cho frontend; sửa cắt câu có/không |
 <!-- Dòng mới được thêm tự động phía trên dòng này -->
 
 ## Các lần test thủ công trước khi có script tự động (16/10/2026)

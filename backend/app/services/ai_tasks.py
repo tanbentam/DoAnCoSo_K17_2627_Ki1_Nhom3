@@ -2,8 +2,9 @@
 services/ai_tasks.py — BackgroundTasks xử lý phân tích và chấm điểm AI ngầm
 """
 import logging
+from typing import List
 from app.core.database import SessionLocal
-from app.models.application import Application, ApplicationStatus
+from app.models.application import AIStatus, Application, ApplicationStatus
 from app.services.ai_errors import AIProviderError
 from app.services.ai_provider import get_provider_mode
 from app.services.cv_extractor import extract_cv_info_detailed
@@ -24,13 +25,14 @@ def process_application_ai(application_id: int) -> None:
     """
     Hàm tác vụ ngầm (FastAPI BackgroundTasks) được gọi ngay sau khi ứng viên nộp hồ sơ:
     1. Mở session CSDL độc lập cho background worker.
-    2. Chuyển trạng thái Application sang 'screening' (đang sàng lọc/chấm điểm).
+    2. Đặt ai_status = processing; chuyển Kanban sang 'screening' nếu hồ sơ vẫn ở 'applied'.
     3. Trích xuất text CV từ tệp PDF (bằng pdfplumber) và lưu vào candidate.cv_text_raw.
     4. AI (Gemini / Ollama theo AI_PROVIDER) bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
     5. Tính Cosine Similarity giữa vector JD và vector CV, lưu semantic_score (0–100).
     6. Tính Hybrid Matching Score (40% Hard Filter + 60% Semantic), lưu matched/missing skills.
     7. AI sinh 3–5 câu hỏi phỏng vấn khai thác kỹ năng còn thiếu, lưu interview_questions.
-    8. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
+    8. Chốt ai_status (done | partial | failed) kèm ai_error để frontend biết hồ sơ đã chấm xong chưa.
+    Mọi kết quả được ghi vào CSDL bất đồng bộ, không làm nghẽn request nộp hồ sơ của ứng viên.
     """
     db = SessionLocal()
     try:
@@ -40,9 +42,13 @@ def process_application_ai(application_id: int) -> None:
             return
 
         logger.info(f"[BackgroundTasks] Bắt đầu xử lý AI cho Application ID {application_id}...")
+        errors: List[str] = []  # Các bước AI bị lỗi → ai_status = partial/failed, ai_error cho frontend hiển thị
 
-        # 1. Cập nhật trạng thái sang 'screening'
-        app_record.status = ApplicationStatus.screening
+        # 1. Đánh dấu đang xử lý AI; chuyển Kanban sang 'screening' chỉ khi HR chưa kéo thẻ đi nơi khác
+        app_record.ai_status = AIStatus.processing
+        app_record.ai_error = None
+        if app_record.status == ApplicationStatus.applied:
+            app_record.status = ApplicationStatus.screening
         db.commit()
 
         # 2. Trích xuất text CV từ file PDF bằng pdfplumber
@@ -58,10 +64,12 @@ def process_application_ai(application_id: int) -> None:
                         f"[BackgroundTasks] Trích xuất & làm sạch thành công {len(cleaned_text)} ký tự cho Candidate ID {candidate.id}."
                     )
                 except PDFServiceError as pe:
+                    errors.append(f"Đọc PDF: {pe}")
                     logger.error(
                         f"[BackgroundTasks] Lỗi khi trích xuất text CV Candidate ID {candidate.id}: {pe}"
                     )
             else:
+                errors.append("Định dạng CV chưa hỗ trợ đọc tự động (chỉ hỗ trợ PDF)")
                 logger.info(
                     f"[BackgroundTasks] Tệp CV {candidate.cv_file_path} không phải PDF (bỏ qua pdfplumber)."
                 )
@@ -93,8 +101,10 @@ def process_application_ai(application_id: int) -> None:
                     f"{extracted.experience_years} năm kinh nghiệm (Application ID {application_id})."
                 )
             except AIProviderError as ae:
+                errors.append(f"AI bóc tách CV: {type(ae).__name__}")
                 logger.error(f"[BackgroundTasks] Lỗi AI khi bóc tách CV Application ID {application_id}: {ae}")
         else:
+            errors.append("Không có văn bản CV để phân tích")
             logger.info(f"[BackgroundTasks] Không có văn bản CV để bóc tách cho Application ID {application_id}.")
 
         # 4. Tính độ tương đồng ngữ nghĩa Cosine Similarity giữa vector JD và vector CV (Mục 4.6)
@@ -109,6 +119,7 @@ def process_application_ai(application_id: int) -> None:
                     f"cosine={semantic.similarity:.4f}, semantic_score={semantic.score}."
                 )
             except (EmbeddingServiceError, ValueError) as ee:
+                errors.append(f"So khớp ngữ nghĩa: {type(ee).__name__}")
                 logger.error(f"[BackgroundTasks] Lỗi tính semantic score Application ID {application_id}: {ee}")
 
         # 5. Hybrid Matching Score: 40% Hard Filter + 60% Semantic Match (Mục 4.7)
@@ -160,13 +171,38 @@ def process_application_ai(application_id: int) -> None:
                     f"{interview.model} ({interview.latency_seconds:.1f}s) cho Application ID {application_id}."
                 )
             except (AIProviderError, ValueError) as ie:
+                errors.append(f"Sinh câu hỏi phỏng vấn: {type(ie).__name__}")
                 logger.error(f"[BackgroundTasks] Lỗi sinh câu hỏi phỏng vấn Application ID {application_id}: {ie}")
 
-        logger.info(f"[BackgroundTasks] Hoàn tất chấm điểm AI cho Application ID {application_id}.")
+        # 7. Chốt tiến trình AI: done (đủ bước) | partial (có điểm nhưng thiếu bước) | failed (không có điểm)
+        if app_record.matching_score is None:
+            app_record.ai_status = AIStatus.failed
+        else:
+            app_record.ai_status = AIStatus.partial if errors else AIStatus.done
+        app_record.ai_error = "; ".join(errors)[:1000] or None
+        db.commit()
+
+        logger.info(
+            f"[BackgroundTasks] Hoàn tất chấm điểm AI cho Application ID {application_id} "
+            f"(ai_status={app_record.ai_status.value}{', lỗi: ' + app_record.ai_error if app_record.ai_error else ''})."
+        )
 
     except Exception as e:
         db.rollback()
         logger.error(f"[BackgroundTasks] Lỗi khi xử lý Application ID {application_id}: {str(e)}")
+        _mark_failed(db, application_id, f"Lỗi hệ thống: {type(e).__name__}: {e}")
     finally:
         db.close()
 
+
+def _mark_failed(db, application_id: int, message: str) -> None:
+    """Ghi ai_status = failed khi tác vụ ngầm gặp lỗi không lường trước (không ném lỗi tiếp)."""
+    try:
+        record = db.query(Application).filter(Application.id == application_id).first()
+        if record:
+            record.ai_status = AIStatus.failed
+            record.ai_error = message[:1000]
+            db.commit()
+    except Exception as e:  # CSDL cũng lỗi → chỉ ghi log
+        db.rollback()
+        logger.error(f"[BackgroundTasks] Không ghi được ai_status=failed cho Application ID {application_id}: {e}")

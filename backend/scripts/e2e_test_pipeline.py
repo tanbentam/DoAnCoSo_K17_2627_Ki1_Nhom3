@@ -36,6 +36,7 @@ HR_PASSWORD = os.getenv("E2E_HR_PASSWORD", "admin123")
 TEST_EMAIL_PATTERN = "test.%@example.com"
 TEST_JOB_TITLE_PATTERN = "[TEST]%"
 INTERVIEW_GRACE_SECONDS = 120
+AI_FINISHED_STATUSES = ("done", "partial", "failed")
 
 # (tên file, họ tên, job_id, kỳ vọng) — job 1: Backend Python/FastAPI, job 2: Frontend VueJS
 SAMPLE_CASES = [
@@ -76,8 +77,8 @@ def apply(client: httpx.Client, path: Path, full_name: str, job_id: int, run_tag
 
 def wait_for_analysis(client: httpx.Client, token: str, application_id: int, timeout: int) -> dict:
     """
-    Chờ tác vụ ngầm chạy xong: đã chấm điểm (scoring_details) và đã sinh câu hỏi phỏng vấn (bước cuối, Mục 4.8).
-    Nếu chấm điểm xong mà quá INTERVIEW_GRACE_SECONDS vẫn chưa có câu hỏi (AI lỗi) thì trả kết quả hiện có.
+    Chờ tác vụ ngầm chạy xong: ai_status chuyển sang done / partial / failed (cách frontend cũng nên dùng).
+    Dự phòng cho server cũ chưa có ai_status: đã chấm điểm và có câu hỏi phỏng vấn, hoặc quá INTERVIEW_GRACE_SECONDS.
     """
     deadline = time.time() + timeout
     scored_at = None
@@ -89,7 +90,9 @@ def wait_for_analysis(client: httpx.Client, token: str, application_id: int, tim
         )
         resp.raise_for_status()
         data = resp.json()
-        if (data.get("ai_extracted_info") or {}).get("scoring_details"):
+        if data.get("ai_status") in AI_FINISHED_STATUSES:
+            return data
+        if "ai_status" not in data and (data.get("ai_extracted_info") or {}).get("scoring_details"):
             scored_at = scored_at or time.time()
             if data.get("interview_questions") or time.time() - scored_at > INTERVIEW_GRACE_SECONDS:
                 return data
@@ -111,6 +114,7 @@ def evaluate_case(label: str, job_id: int, expected, data: dict, elapsed: float)
 
     checks = {
         "Hoàn tất trước khi hết giờ chờ": not data.get("_timeout"),
+        "ai_status = done": data.get("ai_status") == "done",
         "Có Matching Score": score is not None,
         "AI bóc tách được CV": bool(info.get("full_name")),
         "Có giải thích số năm kinh nghiệm": "final" in experience,

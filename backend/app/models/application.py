@@ -34,6 +34,15 @@ class ApplicationStatus(str, enum.Enum):
     rejected   = "rejected"    # Đã từ chối
 
 
+class AIStatus(str, enum.Enum):
+    """Tiến trình xử lý AI ngầm của hồ sơ (để frontend hiển thị trạng thái thẻ ứng viên)."""
+    pending    = "pending"     # Vừa nộp, tác vụ ngầm chưa bắt đầu
+    processing = "processing"  # Đang đọc CV / chấm điểm / sinh câu hỏi
+    done       = "done"        # Hoàn tất mọi bước
+    partial    = "partial"     # Đã có điểm nhưng một số bước AI lỗi (xem ai_error)
+    failed     = "failed"      # Không chấm được điểm (xem ai_error)
+
+
 class Application(Base):
     """
     Bảng `applications` — Liên kết Job ↔ Candidate, trung tâm của ATS.
@@ -51,6 +60,8 @@ class Application(Base):
         missing_skills  : JSON array — kỹ năng còn thiếu so với JD.
         interview_questions: JSON array — 3–5 câu hỏi phỏng vấn do AI gợi ý.
         ai_summary      : Đoạn tóm tắt ngắn do AI sinh ra về ứng viên.
+        ai_status       : Tiến trình xử lý AI ngầm: pending|processing|done|partial|failed.
+        ai_error        : Mô tả các bước AI bị lỗi (nếu có).
         created_at      : Thời điểm nộp hồ sơ (UTC, tự động).
         updated_at      : Thời điểm cập nhật cuối (UTC, tự động cập nhật).
     """
@@ -154,6 +165,22 @@ class Application(Base):
         Text,
         nullable=True,
         comment="Đoạn tóm tắt ngắn về ứng viên do AI sinh ra",
+    )
+
+    # ── Tiến trình xử lý AI ────────────────────────────────────────────────────
+    ai_status: Mapped[AIStatus] = mapped_column(
+        Enum(AIStatus),
+        nullable=False,
+        default=AIStatus.pending,
+        server_default=AIStatus.pending.value,
+        index=True,
+        comment="Tiến trình AI: pending|processing|done|partial|failed",
+    )
+
+    ai_error: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Mô tả ngắn các bước AI bị lỗi (khi ai_status = partial/failed)",
     )
 
     # ── Timestamps ─────────────────────────────────────────────────────────────

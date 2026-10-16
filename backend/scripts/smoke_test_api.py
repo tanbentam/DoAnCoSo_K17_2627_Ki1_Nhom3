@@ -192,6 +192,34 @@ def run_smoke_tests(client: httpx.Client, run_tag: str, processed_app_id: Option
     else:
         r.checks.append(Check("Kanban", "Cập nhật trạng thái", False, "bỏ qua: không có hồ sơ đã chấm xong"))
 
+    # ── Tiến trình AI & tệp CV ───────────────────────────────────────────────
+    def new_app_ai_status():
+        app = _expect(client.get(f"/api/applications/{state['app_id']}", headers=r.auth), 200).json()
+        assert app["ai_status"] in ("pending", "processing", "done", "partial"), app["ai_status"]
+        return app["ai_status"]
+
+    r.check("Tiến trình AI", "Hồ sơ vừa nộp có ai_status (pending/processing/...)", new_app_ai_status)
+
+    if processed_app_id:
+        def processed_ai_status():
+            data = _expect(client.get(f"/api/applications/{processed_app_id}/ai-analysis", headers=r.auth), 200).json()
+            assert data["ai_status"] == "done", f"{data['ai_status']} — {data.get('ai_error')}"
+
+        r.check("Tiến trình AI", "Hồ sơ đã chấm xong có ai_status = done", processed_ai_status)
+
+        def cv_download():
+            resp = _expect(client.get(f"/api/applications/{processed_app_id}/cv", headers=r.auth), 200)
+            assert resp.headers["content-type"] == "application/pdf", resp.headers["content-type"]
+            assert resp.content.startswith(b"%PDF"), "nội dung không phải PDF"
+            assert resp.headers.get("content-disposition", "").startswith("inline"), "không hiển thị inline"
+            return f"{len(resp.content)} bytes"
+
+        r.check("Tệp CV", "HR xem tệp CV gốc → 200, application/pdf, inline", cv_download)
+        r.check("Tệp CV", "Xem tệp CV không có token → 401",
+                lambda: _expect(client.get(f"/api/applications/{processed_app_id}/cv"), 401) and None)
+    r.check("Tệp CV", "Tệp CV của hồ sơ không tồn tại → 404",
+            lambda: _expect(client.get("/api/applications/99999999/cv", headers=r.auth), 404) and None)
+
     # ── Đóng tin ────────────────────────────────────────────────────────────
     def close_job():
         job = _expect(client.patch(f"/api/jobs/{state['job_id']}/close", headers=r.auth), 200).json()

@@ -24,8 +24,8 @@ Ký hiệu:
 * [x] Khởi tạo Git repository và quy tắc phân nhánh (`main`, `dev`, `feature/*`)
 * [x] Thiết lập cấu trúc thư mục dự án chuẩn (`/backend`, `/frontend`, `/docs`, `/uploads`)
 * [x] Cấu hình môi trường Python ảo (`venv`) và xuất file `requirements.txt`
-* [ ] Khởi tạo instance MySQL 8.0 miễn phí trên Cloud Aiven
-* [ ] Tạo file `.env` chứa chuỗi kết nối Aiven MySQL, Gemini API Key và cờ cấu hình AI
+* [x] Khởi tạo instance MySQL 8.0 miễn phí trên Cloud Aiven
+* [x] Tạo file `.env` chứa chuỗi kết nối Aiven MySQL, Gemini API Key và cờ cấu hình AI
 * [x] Khởi tạo ứng dụng FastAPI cơ bản, kiểm tra trang tự sinh tài liệu `/docs` (Swagger UI)
 * [x] Dựng trang Frontend tĩnh cơ bản kiểm tra tích hợp Bootstrap 5 và SortableJS qua CDN
 
@@ -52,6 +52,7 @@ Ký hiệu:
 * [x] Xây dựng API lấy danh sách ứng viên theo từng Job kèm bộ lọc trạng thái và điểm số
 * [x] Xây dựng API cập nhật trạng thái ứng viên khi kéo thả trên Kanban (`/api/applications/{id}/status`)
 * [x] Xây dựng API lấy chi tiết phân tích AI (kỹ năng bóc tách, điểm số, gợi ý phỏng vấn)
+* [x] Bổ sung cho frontend: trường `ai_status` (tiến trình AI) và API xem tệp CV gốc (`/api/applications/{id}/cv`)
 
 ## 4. AI Pipeline & Scoring Engine
 
@@ -92,22 +93,35 @@ Ký hiệu:
 * [ ] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
 * [ ] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview*
 * [ ] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
-* [ ] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp
+* [~] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (backend xong `sort_by=score_desc`, chờ frontend)
 
 ## 8. Quality, Testing & Defense Preparation
 
-* [ ] Chuẩn bị bộ dữ liệu thử nghiệm gồm 03 hồ sơ CV mẫu:
+* [x] Chuẩn bị bộ dữ liệu thử nghiệm gồm 03 hồ sơ CV mẫu:
 * *CV 1:* Rất phù hợp với JD (kỳ vọng điểm $> 85\%$)
 * *CV 2:* Trái ngành / Không liên quan (kỳ vọng điểm $< 40\%$)
 * *CV 3:* Khác từ ngữ nhưng đồng nghĩa (kiểm tra tính năng Semantic Matching)
 
 
-* [ ] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban
-* [ ] Kiểm thử hiệu năng và độ ổn định của API xử lý nền (`BackgroundTasks`)
-* [ ] Kiểm thử chuyển đổi sang chạy mô hình Local Ollama trên GPU RTX 4060 ở trạng thái ngắt mạng
+* [~] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban (backend/API đã test, chờ frontend)
+* [~] Kiểm thử hiệu năng và độ ổn định của API xử lý nền (`BackgroundTasks`) (10 hồ sơ nộp lần lượt ổn định, chưa test nhiều hồ sơ cùng lúc)
+* [~] Kiểm thử chuyển đổi sang chạy mô hình Local Ollama trên GPU RTX 4060 ở trạng thái ngắt mạng (đã chạy `local`, chưa ngắt mạng)
 * [ ] Tối ưu hóa mã nguồn Frontend, loại bỏ code thừa và chuẩn hóa thông báo lỗi giao diện
 * [x] Soạn thảo tài liệu hướng dẫn cài đặt và chạy hệ thống trong file `README.md`
 * [ ] Đóng gói tài liệu báo cáo đồ án, thiết kế slide thuyết trình và kịch bản demo bảo vệ
+
+## 9. Việc tồn đọng sau kiểm thử thật
+
+Chi tiết từng vấn đề: `docs/Issues/`. Lịch sử test: `docs/Test-Reports/`.
+
+* [ ] Chạy test Gemini đầy đủ hạn mức (`AI_PROVIDER=auto`) vào đầu ngày 17/10
+* [ ] Issue 04: Một số PDF bị đọc ra chữ dính liền, mất dấu cách
+* [ ] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt giữ hay bỏ `.docx`)
+* [ ] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (cần thảo luận nhóm)
+* [ ] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp
+* [ ] Chốt cách hiển thị Kanban: checklist 4 cột, backend 5 trạng thái (`offer` và `rejected` tách riêng)
+* [ ] Tải CA certificate Aiven và đặt `DB_SSL_CA` để bật xác minh chứng chỉ máy chủ
+* [x] Viết tài liệu API cho frontend (`docs/API cho Frontend.md`)
 
 ---
 
@@ -142,4 +156,4 @@ ai-recruitment-system/
 
 ## Current Milestone
 
-Dự án đã hoàn thành giai đoạn khởi động (Milestone 1.1): thống nhất tên đề tài, chốt phạm vi nghiệp vụ cho nhóm 02 thành viên, phê duyệt kiến trúc Hybrid AI và phân công nhiệm vụ cụ thể. Giai đoạn tiếp theo tập trung vào việc thiết lập kết nối cơ sở dữ liệu Aiven MySQL, viết khung API FastAPI và xây dựng module bóc tách CV kết hợp thuật toán tính điểm Cosine Similarity.
+**Cập nhật 16/10/2026:** Đã xong backend lõi (Mục 1–4): CSDL Aiven (TLS), REST API, AI Pipeline Hybrid (Gemini + Ollama dự phòng, Sentence-Transformers), chấm điểm và sinh câu hỏi phỏng vấn. Lần test toàn bộ backend gần nhất đạt hết (unit 184, smoke API 35/35, E2E). Giai đoạn tiếp theo: frontend (Mục 5, 6) theo `docs/API cho Frontend.md`; song song backend làm Mục 7 (email) và các việc ở Mục 9.

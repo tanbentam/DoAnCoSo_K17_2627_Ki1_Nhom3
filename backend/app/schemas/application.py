@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from app.models.application import ApplicationStatus
+from app.models.application import AIStatus, ApplicationStatus
 from app.schemas.candidate import CandidateResponse
 from app.schemas.job import JobResponse
 
@@ -19,6 +19,8 @@ class ApplicationResponse(BaseModel):
     job_id: int
     candidate_id: int
     status: ApplicationStatus
+    ai_status: AIStatus = AIStatus.pending
+    ai_error: Optional[str] = None
     matching_score: Optional[float] = None
     semantic_score: Optional[float] = None
     hard_filter_score: Optional[float] = None
@@ -41,6 +43,8 @@ class ApplicationAIDetailResponse(BaseModel):
     job_id: int
     candidate_id: int
     status: ApplicationStatus
+    ai_status: AIStatus = AIStatus.pending
+    ai_error: Optional[str] = None
     matching_score: Optional[float] = None
     semantic_score: Optional[float] = None
     hard_filter_score: Optional[float] = None
@@ -59,4 +63,5 @@ class ApplicationApplyResponse(BaseModel):
     candidate_id: int
     job_id: int
     status: ApplicationStatus
+    ai_status: AIStatus = AIStatus.pending
 

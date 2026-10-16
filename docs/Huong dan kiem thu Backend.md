@@ -134,7 +134,7 @@ Muốn xem nhanh kết quả AI trên màn hình mà không ghi báo cáo:
 
 Toàn bộ test đạt (`OK`). Các test dùng mô hình nhúng thật sẽ tự bỏ qua nếu chưa tải mô hình.
 
-### Cấp 2 — Smoke test API (30 kiểm tra)
+### Cấp 2 — Smoke test API (35 kiểm tra)
 
 | Nhóm | Nội dung kiểm tra |
 | --- | --- |
@@ -143,12 +143,15 @@ Toàn bộ test đạt (`OK`). Các test dùng mô hình nhúng thật sẽ tự
 | Nộp hồ sơ | PDF hợp lệ (201, trạng thái `applied`); nộp trùng, sai định dạng, quá 5MB, nộp vào tin đã đóng đều bị từ chối (400); tin không tồn tại (404) |
 | Danh sách hồ sơ | Lọc theo `job_id`, `min_score`, `status`; sắp xếp `score_desc` (hồ sơ chưa có điểm xếp cuối); tham số sai (422); chi tiết hồ sơ; 404 |
 | Kanban | Chuyển trạng thái `interview → offer → rejected → screening`; trạng thái không hợp lệ (422); không có token (401) |
+| Tiến trình AI | Hồ sơ vừa nộp có `ai_status`; hồ sơ đã chấm xong có `ai_status = done` |
+| Tệp CV | HR xem tệp CV gốc (200, `application/pdf`, inline); không có token (401); hồ sơ không tồn tại (404) |
 
 ### Cấp 3 — End-to-End AI (với mỗi hồ sơ)
 
 | Kiểm tra | Đạt khi |
 | --- | --- |
 | Hoàn tất | Tác vụ ngầm chạy xong trong thời gian chờ |
+| Tiến trình AI | `ai_status = done` (không phải `partial` / `failed`) |
 | Matching Score | Có điểm; CV1 > 85, CV2 < 40 |
 | AI bóc tách CV | Có họ tên ứng viên (`ai_extracted_info.full_name`) |
 | Kinh nghiệm | Có `ai_extracted_info.experience_details` (số năm cuối cùng và nguồn) |

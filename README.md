@@ -104,6 +104,9 @@ Chạy 2 script sau để đồng bộ bảng lên Cloud Aiven MySQL và tạo d
 
 # 2. Seed dữ liệu mẫu (1 HR, 2 tin tuyển dụng lập trình viên)
 .\venv\bin\python.exe seed_db.py
+
+# 3. Cập nhật cấu trúc bảng đã có (thêm cột mới). Chạy lại nhiều lần an toàn
+.\venv\bin\python.exe migrate_db.py
 ```
 
 > **Tài khoản HR mặc định sau khi seed:**

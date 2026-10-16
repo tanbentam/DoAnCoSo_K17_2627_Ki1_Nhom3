@@ -1,7 +1,7 @@
 # Các vấn đề phát hiện qua kiểm thử thật
 
 **Lần test đầu tiên (phát hiện Issue 01 – 07):** 16/10/2026 11:22 – 11:29
-**Phạm vi:** Toàn bộ luồng AI từ Mục 4.1 đến 4.7. Ứng viên nộp CV qua API thật (`POST /api/applications/apply`), tác vụ ngầm chạy lần lượt: đọc PDF → làm sạch → Gemini bóc tách → so khớp ngữ nghĩa → Hybrid Score. Kết quả lưu vào CSDL Aiven MySQL và được đọc lại qua `GET /api/applications/{id}/ai-analysis`.
+**Phạm vi lần đầu:** Toàn bộ luồng AI từ Mục 4.1 đến 4.7. Ứng viên nộp CV qua API thật (`POST /api/applications/apply`), tác vụ ngầm chạy lần lượt: đọc PDF → làm sạch → Gemini bóc tách → so khớp ngữ nghĩa → Hybrid Score. Kết quả lưu vào CSDL Aiven MySQL và được đọc lại qua `GET /api/applications/{id}/ai-analysis`.
 **Công cụ:** `backend/scripts/e2e_test_pipeline.py`, cách chạy xem tại [Huong dan kiem thu Backend.md](../Huong%20dan%20kiem%20thu%20Backend.md).
 **Cập nhật:** 16/10/2026 14:40, sau lần test toàn bộ backend ([báo cáo](../Test-Reports/2026-10-16_1428_backend-local.md)). Lịch sử test: [Test-Reports](../Test-Reports/README.md).
 
@@ -19,7 +19,7 @@ Luồng chạy thông suốt cho cả 10 hồ sơ. Không có lỗi nào làm d�
 
 **5 CV thật** (lập trình viên Node.js / PHP / Full-stack, nộp vào Job 1): Matching từ 43.11 đến 56.66. Mức điểm này hợp lý vì các ứng viên đều thiếu FastAPI và SQLAlchemy. 2 hồ sơ nộp vào Job 2 (Frontend) không có kết quả Gemini, do vấn đề [01](done-01-gemini-het-han-muc-mien-phi.md).
 
-Dữ liệu của lần test đầu (#4 – #13) đã được xóa lúc 16/10/2026 14:28 (`--cleanup-first`). CSDL hiện giữ dữ liệu của lần test toàn bộ backend 14:28 (#40 – #50 và tin tuyển dụng test #4 đã đóng).
+Dữ liệu test cũ được xóa ở đầu mỗi lần chạy `run_backend_tests.py --cleanup-first`. CSDL hiện giữ dữ liệu của lần test gần nhất (xem [Test-Reports](../Test-Reports/README.md)).
 
 ## Danh sách vấn đề
 
