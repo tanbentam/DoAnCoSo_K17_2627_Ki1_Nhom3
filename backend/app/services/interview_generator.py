@@ -183,6 +183,9 @@ _YES_NO_OPENER = re.compile(
 )
 
 
+_DEPENDENT_FOLLOW_UP = re.compile(r"^(?:nếu|nêu|if|vậy|thế|khi đó|trong trường hợp)\b", re.IGNORECASE)
+
+
 def strip_yes_no_opener(question: str) -> str:
     """
     Bỏ vế mở đầu dạng có/không khi phía sau còn câu hỏi mở thật sự. Mô hình nhỏ (qwen2.5:7b) hay mở đầu
@@ -192,6 +195,10 @@ def strip_yes_no_opener(question: str) -> str:
     if not match:
         return question
     rest = match.group("rest").strip()
+    # Vế sau phụ thuộc câu trả lời có/không ("Nếu có, ...", "Nếu không, ... chúng") → giữ nguyên câu gốc,
+    # cắt đi sẽ thành câu cụt nghĩa (phát hiện ở báo cáo test 2026-10-16 14:28)
+    if _DEPENDENT_FOLLOW_UP.match(rest):
+        return question
     return rest[0].upper() + rest[1:]
 
 

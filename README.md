@@ -129,6 +129,15 @@ cd D:\3\DoAnCoSo\backend
   - **Cổng Ứng viên:** Mở file `frontend/index.html`
   - **Bảng Quản trị HR:** Mở file `frontend/admin.html`
 
+### 5.3. Kiểm thử Backend
+Khi server đang chạy, mở một terminal khác tại `backend/` và chạy toàn bộ kiểm thử. Lệnh này kiểm tra môi trường, chạy unit test, smoke test API và End-to-End luồng AI, rồi tự ghi báo cáo có mốc thời gian vào `docs/Test-Reports/`:
+```powershell
+.\venv\Scripts\python.exe scripts\run_backend_tests.py --cleanup-first --note "Lý do test"
+```
+- Hướng dẫn chi tiết và tiêu chí đạt: [docs/Huong dan kiem thu Backend.md](docs/Huong%20dan%20kiem%20thu%20Backend.md)
+- Lịch sử các lần test: [docs/Test-Reports/README.md](docs/Test-Reports/README.md)
+- Các vấn đề đã phát hiện: [docs/Issues/README.md](docs/Issues/README.md)
+
 ---
 
 ## 📡 6. Danh sách API Chính Hiện Có

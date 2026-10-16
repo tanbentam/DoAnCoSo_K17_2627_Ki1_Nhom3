@@ -2,8 +2,11 @@
 Kiểm thử End-to-End luồng AI qua API thật (server FastAPI đang chạy):
 
     Ứng viên nộp CV (POST /api/applications/apply)
-    → BackgroundTasks: đọc PDF → làm sạch → Gemini bóc tách → Semantic match → Hybrid score
+    → BackgroundTasks: đọc PDF → làm sạch → AI bóc tách → Semantic match → Hybrid score → câu hỏi phỏng vấn
     → HR xem kết quả (GET /api/applications/{id}/ai-analysis)
+
+Để chạy toàn bộ kiểm thử backend kèm báo cáo có mốc thời gian, dùng scripts/run_backend_tests.py.
+Script này dùng khi chỉ muốn xem nhanh kết quả AI trên màn hình.
 
 Chạy (server phải đang chạy ở cửa sổ khác: python -m uvicorn app.main:app):
     python scripts/e2e_test_pipeline.py                 # 3 CV mẫu Mục 8.1 + CV thật trong uploads/cv
@@ -31,6 +34,7 @@ REAL_CV_DIR = BACKEND_DIR / "uploads" / "cv"
 HR_EMAIL = os.getenv("E2E_HR_EMAIL", "hr@smartrecruit.com")
 HR_PASSWORD = os.getenv("E2E_HR_PASSWORD", "admin123")
 TEST_EMAIL_PATTERN = "test.%@example.com"
+TEST_JOB_TITLE_PATTERN = "[TEST]%"
 INTERVIEW_GRACE_SECONDS = 120
 
 # (tên file, họ tên, job_id, kỳ vọng) — job 1: Backend Python/FastAPI, job 2: Frontend VueJS
@@ -94,6 +98,59 @@ def wait_for_analysis(client: httpx.Client, token: str, application_id: int, tim
     return data
 
 
+def evaluate_case(label: str, job_id: int, expected, data: dict, elapsed: float) -> dict:
+    """
+    Tóm tắt kết quả một hồ sơ và chấm đạt/không đạt theo tiêu chí trong docs/Huong dan kiem thu Backend.md.
+    Dùng cho báo cáo tự động (scripts/run_backend_tests.py).
+    """
+    info = data.get("ai_extracted_info") or {}
+    experience = info.get("experience_details") or {}
+    interview = info.get("interview_details") or {}
+    questions = interview.get("questions") or []
+    score = data.get("matching_score")
+
+    checks = {
+        "Hoàn tất trước khi hết giờ chờ": not data.get("_timeout"),
+        "Có Matching Score": score is not None,
+        "AI bóc tách được CV": bool(info.get("full_name")),
+        "Có giải thích số năm kinh nghiệm": "final" in experience,
+        "Sinh 3–5 câu hỏi phỏng vấn": 3 <= len(questions) <= 5,
+    }
+    if expected == "> 85":
+        checks["Matching > 85"] = score is not None and score > 85
+    elif expected == "< 40":
+        checks["Matching < 40"] = score is not None and score < 40
+
+    return {
+        "label": label,
+        "job_id": job_id,
+        "application_id": data.get("application_id"),
+        "expected": expected,
+        "matching": score,
+        "hard_filter": data.get("hard_filter_score"),
+        "semantic": data.get("semantic_score"),
+        "missing_skills": data.get("missing_skills") or [],
+        "full_name": info.get("full_name"),
+        "skills_count": len(info.get("skills") or []),
+        "experience_years": experience.get("final", info.get("experience_years")),
+        "experience_source": experience.get("source"),
+        "experience_discrepancy": experience.get("discrepancy"),
+        "extract_model": _model_label(info.get("ai_meta")),
+        "questions": [q.get("question") for q in questions],
+        "questions_model": _model_label(interview.get("ai_meta")),
+        "elapsed": round(elapsed, 1),
+        "checks": checks,
+        "passed": all(checks.values()),
+    }
+
+
+def _model_label(meta) -> str:
+    if not meta:
+        return "—"
+    fallback = " (dự phòng)" if any(not a.endswith(": OK") for a in meta.get("attempts", [])) else ""
+    return f"{meta.get('provider')}/{meta.get('model')}{fallback}"
+
+
 def check_expectation(score, expected) -> str:
     if score is None:
         return "❌ chưa có điểm"
@@ -152,7 +209,11 @@ def cleanup() -> None:
             text("DELETE FROM applications WHERE candidate_id IN "
                  "(SELECT id FROM candidates WHERE email LIKE :p)"), {"p": TEST_EMAIL_PATTERN})
         conn.execute(text("DELETE FROM candidates WHERE email LIKE :p"), {"p": TEST_EMAIL_PATTERN})
-    print(f"🧹 Đã xóa {len(rows)} ứng viên test cùng hồ sơ ứng tuyển và tệp CV đã upload.")
+        # Tin tuyển dụng do smoke test tạo (tiêu đề bắt đầu bằng [TEST]); hồ sơ liên quan xóa theo khóa ngoại CASCADE
+        conn.execute(text("DELETE FROM applications WHERE job_id IN (SELECT id FROM jobs WHERE title LIKE :t)"),
+                     {"t": TEST_JOB_TITLE_PATTERN})
+        jobs = conn.execute(text("DELETE FROM jobs WHERE title LIKE :t"), {"t": TEST_JOB_TITLE_PATTERN}).rowcount
+    print(f"🧹 Đã xóa {len(rows)} ứng viên test (kèm hồ sơ ứng tuyển, tệp CV đã upload) và {jobs} tin tuyển dụng test.")
 
 
 def main() -> None:

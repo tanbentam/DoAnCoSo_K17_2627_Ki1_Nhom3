@@ -120,6 +120,11 @@ class TestNormalize(unittest.TestCase):
             "Bạn đã từng làm việc với Redis chưa?": "Bạn đã từng làm việc với Redis chưa?",
             "Bạn đã xây dựng API bằng Flask. Nếu chuyển sang FastAPI bạn làm gì?":
                 "Bạn đã xây dựng API bằng Flask. Nếu chuyển sang FastAPI bạn làm gì?",
+            # Vế sau phụ thuộc câu có/không → giữ nguyên (lỗi gặp ở báo cáo test 2026-10-16 14:28, hồ sơ #41, #49)
+            "Bạn đã từng làm việc với FastAPI chưa? Nếu có, hãy so sánh FastAPI với Flask.":
+                "Bạn đã từng làm việc với FastAPI chưa? Nếu có, hãy so sánh FastAPI với Flask.",
+            "Bạn đã từng làm việc với VueJS và Bootstrap 5 chưa? Nếu không, bạn sẽ làm thế nào để nắm bắt chúng?":
+                "Bạn đã từng làm việc với VueJS và Bootstrap 5 chưa? Nếu không, bạn sẽ làm thế nào để nắm bắt chúng?",
         }
         for raw, expected in cases.items():
             self.assertEqual(strip_yes_no_opener(raw), expected, raw)

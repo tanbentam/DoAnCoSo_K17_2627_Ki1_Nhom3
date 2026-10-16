@@ -1,8 +1,9 @@
-# Các vấn đề phát hiện sau lần kiểm thử thật đầu tiên
+# Các vấn đề phát hiện qua kiểm thử thật
 
-**Ngày kiểm thử:** 16/10/2026
+**Lần test đầu tiên (phát hiện Issue 01 – 07):** 16/10/2026 11:22 – 11:29
 **Phạm vi:** Toàn bộ luồng AI từ Mục 4.1 đến 4.7. Ứng viên nộp CV qua API thật (`POST /api/applications/apply`), tác vụ ngầm chạy lần lượt: đọc PDF → làm sạch → Gemini bóc tách → so khớp ngữ nghĩa → Hybrid Score. Kết quả lưu vào CSDL Aiven MySQL và được đọc lại qua `GET /api/applications/{id}/ai-analysis`.
-**Công cụ:** `backend/scripts/e2e_test_pipeline.py`, cách chạy xem tại [Huong dan kiem thu AI Pipeline.md](../Huong%20dan%20kiem%20thu%20AI%20Pipeline.md).
+**Công cụ:** `backend/scripts/e2e_test_pipeline.py`, cách chạy xem tại [Huong dan kiem thu Backend.md](../Huong%20dan%20kiem%20thu%20Backend.md).
+**Cập nhật:** 16/10/2026 14:40, sau lần test toàn bộ backend ([báo cáo](../Test-Reports/2026-10-16_1428_backend-local.md)). Lịch sử test: [Test-Reports](../Test-Reports/README.md).
 
 ## Tóm tắt kết quả
 
@@ -18,7 +19,7 @@ Luồng chạy thông suốt cho cả 10 hồ sơ. Không có lỗi nào làm d�
 
 **5 CV thật** (lập trình viên Node.js / PHP / Full-stack, nộp vào Job 1): Matching từ 43.11 đến 56.66. Mức điểm này hợp lý vì các ứng viên đều thiếu FastAPI và SQLAlchemy. 2 hồ sơ nộp vào Job 2 (Frontend) không có kết quả Gemini, do vấn đề [01](done-01-gemini-het-han-muc-mien-phi.md).
 
-Dữ liệu test (Application #4 – #13) vẫn còn trong CSDL. Xóa bằng lệnh `python scripts/e2e_test_pipeline.py --cleanup`.
+Dữ liệu của lần test đầu (#4 – #13) đã được xóa lúc 16/10/2026 14:28 (`--cleanup-first`). CSDL hiện giữ dữ liệu của lần test toàn bộ backend 14:28 (#40 – #50 và tin tuyển dụng test #4 đã đóng).
 
 ## Danh sách vấn đề
 
@@ -31,6 +32,7 @@ Dữ liệu test (Application #4 – #13) vẫn còn trong CSDL. Xóa bằng l�
 | [05](done-05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | ✅ Đã xử lý |
 | [06](06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `ai_tasks.py` | Chưa xử lý |
 | [07](07-kinh-nghiem-trai-nganh-van-co-diem.md) | Kinh nghiệm trái ngành vẫn được tính đủ điểm | 🟡 Thấp | `hybrid_scoring.py` | Cần thảo luận |
+| [08](08-qwen-cau-hoi-phong-van-chat-luong-thap.md) | qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (giả định đã dùng kỹ năng còn thiếu) | 🟡 Thấp | `interview_generator.py` | Chưa xử lý |
 
 Mức độ:
 - 🔴 Cao: chặn việc test và demo.
