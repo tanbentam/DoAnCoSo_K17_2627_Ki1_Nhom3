@@ -39,6 +39,12 @@ from app.services.hybrid_scoring import (
     match_skills,
     normalize_skill,
 )
+from app.services.interview_generator import (
+    INTERVIEW_SYSTEM_INSTRUCTION,
+    build_interview_prompt,
+    generate_interview_questions,
+    normalize_interview_questions,
+)
 from app.services.ollama_service import (
     OllamaConnectionError,
     OllamaModelNotFoundError,
@@ -83,6 +89,11 @@ __all__ = [
     "generate_structured",
     "get_provider_mode",
     "get_provider_status",
+    # Interview Generator (Mục 4.8)
+    "INTERVIEW_SYSTEM_INSTRUCTION",
+    "build_interview_prompt",
+    "generate_interview_questions",
+    "normalize_interview_questions",
     # Ollama Service
     "OllamaServiceError",
     "OllamaConnectionError",

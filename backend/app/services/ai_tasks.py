@@ -9,6 +9,7 @@ from app.services.ai_provider import get_provider_mode
 from app.services.cv_extractor import extract_cv_info_detailed
 from app.services.embedding_service import EmbeddingServiceError
 from app.services.hybrid_scoring import compute_hybrid_score
+from app.services.interview_generator import generate_interview_questions
 from app.services.semantic_matching import compute_job_cv_match
 from app.services.pdf_service import (
     PDFServiceError,
@@ -28,7 +29,8 @@ def process_application_ai(application_id: int) -> None:
     4. AI (Gemini / Ollama theo AI_PROVIDER) bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
     5. Tính Cosine Similarity giữa vector JD và vector CV, lưu semantic_score (0–100).
     6. Tính Hybrid Matching Score (40% Hard Filter + 60% Semantic), lưu matched/missing skills.
-    7. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
+    7. AI sinh 3–5 câu hỏi phỏng vấn khai thác kỹ năng còn thiếu, lưu interview_questions.
+    8. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
     """
     db = SessionLocal()
     try:
@@ -132,8 +134,33 @@ def process_application_ai(application_id: int) -> None:
                 f"(hard={hybrid.hard_filter_score}, semantic={hybrid.semantic_score})."
             )
 
-        # 6. Hook kết nối các bước tiếp theo trong Mục 4:
-        # - Gemini sinh 3–5 câu hỏi phỏng vấn khai thác kỹ năng còn thiếu (Mục 4.8) → interview_questions
+        # 6. AI sinh 3–5 câu hỏi phỏng vấn khai thác lỗ hổng kỹ năng (Mục 4.8)
+        if job and candidate and (candidate.cv_text_raw or app_record.ai_extracted_info):
+            try:
+                interview = generate_interview_questions(
+                    job=job,
+                    extracted_info=app_record.ai_extracted_info,
+                    missing_skills=app_record.missing_skills or [],
+                    cv_text=candidate.cv_text_raw,
+                )
+                questions = interview.data.questions
+                # Cột interview_questions giữ danh sách chuỗi (API/Kanban hiển thị trực tiếp),
+                # chi tiết từng câu (kỹ năng, mục đích, gợi ý đáp án) lưu kèm ai_extracted_info
+                app_record.interview_questions = [q.question for q in questions]
+                app_record.ai_extracted_info = {
+                    **(app_record.ai_extracted_info or {}),
+                    "interview_details": {
+                        "questions": [q.model_dump() for q in questions],
+                        "ai_meta": interview.meta(),
+                    },
+                }
+                db.commit()
+                logger.info(
+                    f"[BackgroundTasks] Sinh {len(questions)} câu hỏi phỏng vấn bằng {interview.provider}/"
+                    f"{interview.model} ({interview.latency_seconds:.1f}s) cho Application ID {application_id}."
+                )
+            except (AIProviderError, ValueError) as ie:
+                logger.error(f"[BackgroundTasks] Lỗi sinh câu hỏi phỏng vấn Application ID {application_id}: {ie}")
 
         logger.info(f"[BackgroundTasks] Hoàn tất chấm điểm AI cho Application ID {application_id}.")
 

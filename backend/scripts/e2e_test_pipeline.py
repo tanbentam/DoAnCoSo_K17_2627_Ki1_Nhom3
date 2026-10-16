@@ -31,6 +31,7 @@ REAL_CV_DIR = BACKEND_DIR / "uploads" / "cv"
 HR_EMAIL = os.getenv("E2E_HR_EMAIL", "hr@smartrecruit.com")
 HR_PASSWORD = os.getenv("E2E_HR_PASSWORD", "admin123")
 TEST_EMAIL_PATTERN = "test.%@example.com"
+INTERVIEW_GRACE_SECONDS = 120
 
 # (tên file, họ tên, job_id, kỳ vọng) — job 1: Backend Python/FastAPI, job 2: Frontend VueJS
 SAMPLE_CASES = [
@@ -70,8 +71,12 @@ def apply(client: httpx.Client, path: Path, full_name: str, job_id: int, run_tag
 
 
 def wait_for_analysis(client: httpx.Client, token: str, application_id: int, timeout: int) -> dict:
-    """Chờ tác vụ ngầm chấm điểm xong (có scoring_details) hoặc hết thời gian."""
+    """
+    Chờ tác vụ ngầm chạy xong: đã chấm điểm (scoring_details) và đã sinh câu hỏi phỏng vấn (bước cuối, Mục 4.8).
+    Nếu chấm điểm xong mà quá INTERVIEW_GRACE_SECONDS vẫn chưa có câu hỏi (AI lỗi) thì trả kết quả hiện có.
+    """
     deadline = time.time() + timeout
+    scored_at = None
     data = {}
     while time.time() < deadline:
         resp = client.get(
@@ -81,7 +86,9 @@ def wait_for_analysis(client: httpx.Client, token: str, application_id: int, tim
         resp.raise_for_status()
         data = resp.json()
         if (data.get("ai_extracted_info") or {}).get("scoring_details"):
-            return data
+            scored_at = scored_at or time.time()
+            if data.get("interview_questions") or time.time() - scored_at > INTERVIEW_GRACE_SECONDS:
+                return data
         time.sleep(3)
     data["_timeout"] = True
     return data
@@ -118,6 +125,15 @@ def print_result(label: str, job_id: int, expected, data: dict, elapsed: float) 
           f" | {info.get('experience_years')} năm KN")
     if data.get("ai_summary"):
         print(f"   Tóm tắt: {data['ai_summary'][:220]}")
+    interview = info.get("interview_details") or {}
+    questions = interview.get("questions") or []
+    if questions:
+        meta = interview.get("ai_meta") or {}
+        print(f"   Câu hỏi phỏng vấn ({len(questions)} câu, {meta.get('provider')}/{meta.get('model')}):")
+        for i, q in enumerate(questions, 1):
+            print(f"     {i}. [{q.get('category')} · {q.get('target_skill')}] {q.get('question')}")
+    else:
+        print("   Câu hỏi phỏng vấn: ❌ chưa có")
 
 
 def cleanup() -> None:
