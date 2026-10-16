@@ -70,7 +70,9 @@ DoAnCoSo/
 Tạo file `.env` tại thư mục gốc dự án dựa trên file `.env.example`:
 ```ini
 # Database (Aiven MySQL Cloud)
-DATABASE_URL=mysql+pymysql://avnadmin:<password>@<host>:<port>/defaultdb?ssl_disabled=false
+DATABASE_URL=mysql+pymysql://avnadmin:<password>@<host>:<port>/defaultdb
+DB_SSL_MODE=verify
+DB_SSL_CA=../ca.pem
 
 # Google Gemini AI Key
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -84,15 +86,16 @@ MAX_UPLOAD_SIZE_MB=5
 ```
 
 ### 4.3. Cài đặt Thư viện Python
-Mở Terminal tại thư mục `backend/` và kích hoạt venv:
+Mở PowerShell, tạo môi trường ảo và cài thư viện (gọi Python trực tiếp nên không cần kích hoạt venv):
 ```powershell
-cd D:\3\DoAnCoSo\backend
-.\venv\bin\python.exe -m pip install -r requirements.txt
+cd "D:\Đồ Án Cơ Sở\DoAnCoSo_K17_2627_Ki1_Nhom3\backend"
+python -m venv venv
+.\venv\Scripts\python.exe -X utf8 -m pip install -r requirements.txt
 ```
 
 Tải trước mô hình nhúng `paraphrase-multilingual-MiniLM-L12-v2` (~460MB, chỉ cần chạy 1 lần khi có mạng, sau đó dùng được offline):
 ```powershell
-.\venv\bin\python.exe download_embedding_model.py
+.\venv\Scripts\python.exe -X utf8 download_embedding_model.py
 ```
 
 ### 4.4. Khởi tạo Cơ sở Dữ liệu & Nạp Dữ liệu Mẫu
@@ -100,13 +103,13 @@ Chạy 2 script sau để đồng bộ bảng lên Cloud Aiven MySQL và tạo d
 
 ```powershell
 # 1. Tạo cấu trúc các bảng CSDL
-.\venv\bin\python.exe init_db.py
+.\venv\Scripts\python.exe -X utf8 init_db.py
 
 # 2. Seed dữ liệu mẫu (1 HR, 2 tin tuyển dụng lập trình viên)
-.\venv\bin\python.exe seed_db.py
+.\venv\Scripts\python.exe -X utf8 seed_db.py
 
 # 3. Cập nhật cấu trúc bảng đã có (thêm cột mới). Chạy lại nhiều lần an toàn
-.\venv\bin\python.exe migrate_db.py
+.\venv\Scripts\python.exe -X utf8 migrate_db.py
 ```
 
 > **Tài khoản HR mặc định sau khi seed:**
@@ -120,14 +123,22 @@ Chạy 2 script sau để đồng bộ bảng lên Cloud Aiven MySQL và tạo d
 ### 5.1. Chạy Backend (FastAPI Server)
 Mở Terminal và gõ:
 ```powershell
-cd D:\3\DoAnCoSo\backend
-.\venv\bin\python.exe -m uvicorn app.main:app --reload
+cd "D:\Đồ Án Cơ Sở\DoAnCoSo_K17_2627_Ki1_Nhom3\backend"
+.\venv\Scripts\python.exe -X utf8 -m uvicorn app.main:app --reload
 ```
 
 - **Swagger UI (Tài liệu API tương tác):** 👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **Kiểm tra trạng thái (Health Check):** 👉 [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
 
 ### 5.2. Chạy Frontend
+Chạy HTTP server trong một terminal PowerShell khác:
+```powershell
+cd "D:\Đồ Án Cơ Sở\DoAnCoSo_K17_2627_Ki1_Nhom3"
+.\backend\venv\Scripts\python.exe -X utf8 -m http.server 5500 --bind 127.0.0.1 --directory frontend
+```
+- **Cổng ứng viên:** http://127.0.0.1:5500/
+- **Quản trị HR:** http://127.0.0.1:5500/admin.html
+
 - Mở trực tiếp các file HTML trong trình duyệt hoặc sử dụng extension **Live Server** trong VS Code:
   - **Cổng Ứng viên:** Mở file `frontend/index.html`
   - **Bảng Quản trị HR:** Mở file `frontend/admin.html`
