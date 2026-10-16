@@ -7,6 +7,8 @@ xử lý ngoại lệ chuẩn hóa (file không tồn tại, file hỏng, mã h�
 
 import io
 import logging
+import re
+from datetime import date
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Union
 
@@ -175,6 +177,32 @@ def get_pdf_metadata(
         raise PDFCorruptedError(f"Không thể đọc metadata, file PDF bị hỏng: {e}") from e
     except Exception as e:
         raise PDFServiceError(f"Lỗi khi đọc metadata PDF: {e}") from e
+
+
+def get_pdf_document_date(pdf_source: Union[str, Path, bytes, BinaryIO]) -> Optional[date]:
+    """
+    Ngày lập tài liệu từ metadata PDF (ModDate, nếu không có thì CreationDate; định dạng "D:YYYYMMDD...").
+    Dùng làm mốc "hiện tại/present" khi tính số năm kinh nghiệm cho CV cũ (docs/Issues/05).
+    Trả về None nếu không đọc được hoặc ngày không hợp lệ / ở tương lai.
+    """
+    try:
+        meta = get_pdf_metadata(pdf_source).get("metadata") or {}
+    except PDFServiceError:
+        return None
+    for key in ("ModDate", "CreationDate"):
+        raw = meta.get(key)
+        if isinstance(raw, bytes):
+            raw = raw.decode("latin-1", errors="ignore")
+        match = re.match(r"^(?:D:)?(\d{4})(\d{2})(\d{2})", str(raw or ""))
+        if not match:
+            continue
+        try:
+            doc_date = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        except ValueError:
+            continue
+        if date(1990, 1, 1) <= doc_date <= date.today():
+            return doc_date
+    return None
 
 
 def extract_text_from_candidate_cv(

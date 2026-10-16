@@ -8,6 +8,10 @@ DATABASE_URL: str = os.getenv(
     "DATABASE_URL",
     "mysql+pymysql://root:root@localhost:3306/smartrecruit",
 )
+# SSL/TLS: auto | verify | required | disabled (xem core/database.py)
+DB_SSL_MODE: str = os.getenv("DB_SSL_MODE", "auto")
+# CA certificate của Aiven (Aiven Console → Overview → CA certificate), đường dẫn tương đối theo thư mục backend
+DB_SSL_CA: str = os.getenv("DB_SSL_CA", "")
 
 # --- AI Provider ---
 # cloud: chỉ Gemini | local: chỉ Ollama | auto: Gemini trước, lỗi/hết hạn mức thì chuyển Ollama

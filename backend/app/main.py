@@ -46,6 +46,7 @@ app.include_router(applications.router, prefix="/api")
 import threading
 
 from app.core.config import EMBEDDING_PRELOAD
+from app.core.database import get_connection_security
 from app.services import ai_provider, embedding_service
 
 
@@ -71,9 +72,14 @@ async def root():
 
 @app.get("/health", tags=["Health"])
 def health():
-    # Hàm đồng bộ (chạy trong threadpool) vì có kiểm tra kết nối Ollama
+    # Hàm đồng bộ (chạy trong threadpool) vì có kiểm tra kết nối CSDL và Ollama
+    try:
+        database = get_connection_security()
+    except Exception as e:  # CSDL lỗi không làm /health lỗi theo
+        database = {"error": f"{type(e).__name__}: {e}"}
     return {
         "status": "healthy",
+        "database": database,
         "embedding_model_loaded": embedding_service.is_model_loaded(),
         "ai_provider": ai_provider.get_provider_status(),
     }

@@ -16,7 +16,7 @@ Luồng chạy thông suốt cho cả 10 hồ sơ. Không có lỗi nào làm d�
 | CV2 – Trái ngành (kế toán) | 10.00 | 25 | 0 | < 40 ✅ |
 | CV3 – Khác từ ngữ, đồng nghĩa | 62.36 | 60 | 63.93 | Ở giữa ✅ |
 
-**5 CV thật** (lập trình viên Node.js / PHP / Full-stack, nộp vào Job 1): Matching từ 43.11 đến 56.66. Mức điểm này hợp lý vì các ứng viên đều thiếu FastAPI và SQLAlchemy. 2 hồ sơ nộp vào Job 2 (Frontend) không có kết quả Gemini, do vấn đề [01](01-gemini-het-han-muc-mien-phi.md).
+**5 CV thật** (lập trình viên Node.js / PHP / Full-stack, nộp vào Job 1): Matching từ 43.11 đến 56.66. Mức điểm này hợp lý vì các ứng viên đều thiếu FastAPI và SQLAlchemy. 2 hồ sơ nộp vào Job 2 (Frontend) không có kết quả Gemini, do vấn đề [01](done-01-gemini-het-han-muc-mien-phi.md).
 
 Dữ liệu test (Application #4 – #13) vẫn còn trong CSDL. Xóa bằng lệnh `python scripts/e2e_test_pipeline.py --cleanup`.
 
@@ -24,11 +24,11 @@ Dữ liệu test (Application #4 – #13) vẫn còn trong CSDL. Xóa bằng l�
 
 | # | Vấn đề | Mức độ | Thành phần | Trạng thái |
 | --- | --- | --- | --- | --- |
-| [01](01-gemini-het-han-muc-mien-phi.md) | Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích | 🔴 Cao | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
-| [02](02-gemini-qua-tai-503.md) | Gemini thường xuyên quá tải (503), xử lý mất tới 98 giây | 🟠 Trung bình | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
-| [03](03-ket-noi-aiven-chua-ssl.md) | Kết nối Aiven MySQL chưa mã hóa SSL | 🟠 Trung bình | `core/database.py` | Chưa xử lý (Mục 2.1 checklist) |
+| [01](done-01-gemini-het-han-muc-mien-phi.md) | Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích | 🔴 Cao | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
+| [02](done-02-gemini-qua-tai-503.md) | Gemini thường xuyên quá tải (503), xử lý mất tới 98 giây | 🟠 Trung bình | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
+| [03](done-03-ket-noi-aiven-chua-ssl.md) | Kết nối Aiven MySQL chưa mã hóa SSL | 🟠 Trung bình | `core/database.py` | ✅ Đã xử lý (TLS 1.3) |
 | [04](04-pdf-mat-dau-cach.md) | Một số PDF bị đọc ra chữ dính liền, mất dấu cách | 🟡 Thấp | `pdf_service.py` | Chưa xử lý |
-| [05](05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | Chưa xử lý |
+| [05](done-05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | ✅ Đã xử lý |
 | [06](06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `ai_tasks.py` | Chưa xử lý |
 | [07](07-kinh-nghiem-trai-nganh-van-co-diem.md) | Kinh nghiệm trái ngành vẫn được tính đủ điểm | 🟡 Thấp | `hybrid_scoring.py` | Cần thảo luận |
 

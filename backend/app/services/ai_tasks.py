@@ -13,6 +13,7 @@ from app.services.semantic_matching import compute_job_cv_match
 from app.services.pdf_service import (
     PDFServiceError,
     extract_text_from_candidate_cv,
+    get_pdf_document_date,
 )
 
 logger = logging.getLogger(__name__)
@@ -69,10 +70,19 @@ def process_application_ai(application_id: int) -> None:
                 logger.info(
                     f"[BackgroundTasks] Đang bóc tách CV Candidate ID {candidate.id} (AI_PROVIDER={get_provider_mode()})..."
                 )
-                result = extract_cv_info_detailed(candidate.cv_text_raw)
+                # Ngày lập CV (metadata PDF) làm mốc "present" để CV cũ không bị tính dư kinh nghiệm (Issues/05)
+                reference_date = None
+                if candidate.cv_file_path and candidate.cv_file_path.lower().endswith(".pdf"):
+                    reference_date = get_pdf_document_date(candidate.cv_file_path)
+                result = extract_cv_info_detailed(candidate.cv_text_raw, reference_date=reference_date)
                 extracted = result.data
+                experience_details = result.extras.get("experience_details", {})
                 # ai_meta: nhà cung cấp/model đã sinh kết quả, phục vụ truy vết và trình bày kiến trúc Hybrid
-                app_record.ai_extracted_info = {**extracted.model_dump(), "ai_meta": result.meta()}
+                app_record.ai_extracted_info = {
+                    **extracted.model_dump(),
+                    "experience_details": experience_details,
+                    "ai_meta": result.meta(),
+                }
                 app_record.ai_summary = extracted.summary or None
                 db.commit()
                 logger.info(

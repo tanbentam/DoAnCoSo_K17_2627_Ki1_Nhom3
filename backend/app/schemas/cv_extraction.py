@@ -39,6 +39,7 @@ class CVExtraction(BaseModel):
     skills: List[str] = Field(..., description="Danh sách kỹ năng chuyên môn / công nghệ, mỗi phần tử là một kỹ năng, giữ tên chuẩn (VD: Python, ReactJS, MySQL, Docker)")
     soft_skills: List[str] = Field(..., description="Kỹ năng mềm (giao tiếp, làm việc nhóm...)")
     experience_years: float = Field(..., description="Tổng số năm kinh nghiệm làm việc chuyên môn (thực tập tính theo thời gian thực tế); 0 nếu chưa có kinh nghiệm")
+    experience_years_stated: Optional[float] = Field(..., description="Số năm kinh nghiệm do chính CV ghi rõ bằng chữ (VD: 'hơn 3 năm kinh nghiệm', '5+ years of experience' → 3, 5); null nếu CV không ghi")
     work_experience: List[WorkExperience] = Field(..., description="Kinh nghiệm làm việc, mới nhất trước")
     education: List[Education] = Field(..., description="Quá trình học vấn, mới nhất trước")
     certifications: List[str] = Field(..., description="Chứng chỉ (VD: AWS SAA, TOEIC 850, IELTS 7.0)")

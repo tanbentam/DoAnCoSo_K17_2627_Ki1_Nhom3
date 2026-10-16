@@ -4,7 +4,7 @@ services/ai_errors.py — Exception và kiểu kết quả dùng chung cho mọi
 Tách riêng để gemini_service, ollama_service và ai_provider cùng dùng mà không bị import vòng.
 """
 from dataclasses import dataclass, field
-from typing import Generic, List, TypeVar
+from typing import Any, Dict, Generic, List, TypeVar
 
 from pydantic import BaseModel
 
@@ -25,6 +25,7 @@ class StructuredResult(Generic[T]):
     model: str                    # Tên model thực sự trả kết quả
     latency_seconds: float
     attempts: List[str] = field(default_factory=list)  # Nhật ký các lần thử, VD: "gemini-3.8-flash: 503"
+    extras: Dict[str, Any] = field(default_factory=dict)  # Thông tin bổ sung do tầng nghiệp vụ tính thêm
 
     def meta(self) -> dict:
         return {

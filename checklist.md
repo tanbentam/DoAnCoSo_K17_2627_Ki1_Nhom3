@@ -31,7 +31,7 @@ Ký hiệu:
 
 ## 2. Database & Data Access Layer (Aiven MySQL)
 
-* [ ] Cấu hình kết nối SQLAlchemy và `PyMySQL` với Aiven Cloud (hỗ trợ SSL)
+* [x] Cấu hình kết nối SQLAlchemy và `PyMySQL` với Aiven Cloud (hỗ trợ SSL)
 * [x] Thiết kế và tạo model `User` (tài khoản quản trị/HR)
 * [x] Thiết kế và tạo model `Job` (thông tin tin tuyển dụng, tiêu chí JD, kỹ năng yêu cầu)
 * [x] Thiết kế và tạo model `Candidate` (hồ sơ ứng viên, thông tin liên hệ, link file CV)

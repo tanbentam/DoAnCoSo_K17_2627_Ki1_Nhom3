@@ -4,7 +4,7 @@
 **Đã chốt:** Ollama + `qwen2.5:7b` do nhóm tự cài; `AI_PROVIDER=auto`.
 
 Kế hoạch kết hợp 2 việc:
-- Làm Gemini chịu lỗi tốt hơn, giải quyết vấn đề [01](../Issues/01-gemini-het-han-muc-mien-phi.md) và [02](../Issues/02-gemini-qua-tai-503.md) phát hiện trong lần test thật đầu tiên.
+- Làm Gemini chịu lỗi tốt hơn, giải quyết vấn đề [01](../Issues/done-01-gemini-het-han-muc-mien-phi.md) và [02](../Issues/done-02-gemini-qua-tai-503.md) phát hiện trong lần test thật đầu tiên.
 - Làm luôn **Mục 4.9 (Ollama) và Mục 4.10 (`AI_PROVIDER`)**.
 
 **Hiện trạng máy:**
@@ -46,7 +46,7 @@ Kế hoạch kết hợp 2 việc:
 - **qwen2.5:7b sẽ kém Gemini**, nhất là với tiếng Việt và cách tính số năm kinh nghiệm. Phần hậu xử lý và các tầng so khớp kỹ năng đã có sẵn sẽ bù lại được một phần. Kết quả so sánh ở giai đoạn D sẽ cho biết chênh lệch cụ thể.
 - **Tốc độ dự kiến khoảng 20–40 giây mỗi CV** trên 4060 Laptop. Đây là ước lượng, sẽ đo thực tế ở giai đoạn D. Mức này chấp nhận được vì phần bóc tách chạy ngầm.
 - **Mô hình nhúng vẫn chạy trên CPU**, để không tranh 8GB VRAM với Ollama.
-- SSL cho Aiven ([vấn đề 03](../Issues/03-ket-noi-aiven-chua-ssl.md)) là việc riêng, không nằm trong kế hoạch này. Có thể làm xen vào bất kỳ lúc nào, mất khoảng 10 phút.
+- SSL cho Aiven ([vấn đề 03](../Issues/done-03-ket-noi-aiven-chua-ssl.md)) là việc riêng, không nằm trong kế hoạch này. Có thể làm xen vào bất kỳ lúc nào, mất khoảng 10 phút.
 
 **Thứ tự đề xuất:** làm A trước, vì nhanh và Gemini dùng tốt hơn ngay. Sau đó làm B và C cùng lúc, rồi đến D.
 

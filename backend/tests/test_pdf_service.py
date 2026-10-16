@@ -155,3 +155,37 @@ class TestPDFService(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
+
+
+class TestPDFDocumentDate(unittest.TestCase):
+    """Ngày lập CV từ metadata PDF (mốc "present" khi tính kinh nghiệm — docs/Issues/05)."""
+
+    def _date_for(self, metadata):
+        from unittest import mock
+        from app.services import pdf_service
+        with mock.patch.object(pdf_service, "get_pdf_metadata", return_value={"metadata": metadata}):
+            return pdf_service.get_pdf_document_date("cv.pdf")
+
+    def test_formats_from_real_cvs(self):
+        from datetime import date
+        # Microsoft Word, pdf-lib, Canva (định dạng thật trong uploads/cv)
+        self.assertEqual(self._date_for({"ModDate": "D:20230205150632+07'00'"}), date(2023, 2, 5))
+        self.assertEqual(self._date_for({"ModDate": "D:20240128170549Z"}), date(2024, 1, 28))
+        self.assertEqual(self._date_for({"CreationDate": b"D:20231221041242+00'00'"}), date(2023, 12, 21))
+
+    def test_moddate_preferred_over_creation(self):
+        from datetime import date
+        meta = {"CreationDate": "D:20200101000000Z", "ModDate": "D:20230601000000Z"}
+        self.assertEqual(self._date_for(meta), date(2023, 6, 1))
+
+    def test_missing_invalid_or_future_dates(self):
+        self.assertIsNone(self._date_for({}))  # VD: CV xuất từ Google Docs không có ngày
+        self.assertIsNone(self._date_for({"ModDate": "garbage"}))
+        self.assertIsNone(self._date_for({"ModDate": "D:20231345000000Z"}))
+        self.assertIsNone(self._date_for({"ModDate": "D:29990101000000Z"}))
+
+    def test_unreadable_pdf_returns_none(self):
+        from unittest import mock
+        from app.services import pdf_service
+        with mock.patch.object(pdf_service, "get_pdf_metadata", side_effect=pdf_service.PDFCorruptedError("x")):
+            self.assertIsNone(pdf_service.get_pdf_document_date("cv.pdf"))
