@@ -6,6 +6,7 @@ from app.core.database import SessionLocal
 from app.models.application import Application, ApplicationStatus
 from app.services.cv_extractor import extract_cv_info
 from app.services.embedding_service import EmbeddingServiceError
+from app.services.hybrid_scoring import compute_hybrid_score
 from app.services.semantic_matching import compute_job_cv_match
 from app.services.gemini_service import GeminiServiceError
 from app.services.pdf_service import (
@@ -24,7 +25,8 @@ def process_application_ai(application_id: int) -> None:
     3. Trích xuất text CV từ tệp PDF (bằng pdfplumber) và lưu vào candidate.cv_text_raw.
     4. Gemini bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
     5. Tính Cosine Similarity giữa vector JD và vector CV, lưu semantic_score (0–100).
-    6. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
+    6. Tính Hybrid Matching Score (40% Hard Filter + 60% Semantic), lưu matched/missing skills.
+    7. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
     """
     db = SessionLocal()
     try:
@@ -91,11 +93,33 @@ def process_application_ai(application_id: int) -> None:
             except (EmbeddingServiceError, ValueError) as ee:
                 logger.error(f"[BackgroundTasks] Lỗi tính semantic score Application ID {application_id}: {ee}")
 
-        # 5. Hook kết nối các bước tiếp theo trong Mục 4:
-        # - Tính điểm Hybrid Matching Score: 40% Hard Filter + 60% Semantic Match (Mục 4.7)
-        # - Lưu matched_skills, missing_skills, interview_questions, matching_score
+        # 5. Hybrid Matching Score: 40% Hard Filter + 60% Semantic Match (Mục 4.7)
+        if job and candidate and (candidate.cv_text_raw or app_record.ai_extracted_info):
+            hybrid = compute_hybrid_score(
+                job=job,
+                extracted_info=app_record.ai_extracted_info,
+                cv_text=candidate.cv_text_raw,
+                semantic_score=app_record.semantic_score,
+            )
+            app_record.hard_filter_score = hybrid.hard_filter_score
+            app_record.matching_score = hybrid.matching_score
+            app_record.matched_skills = hybrid.hard_filter.matched_skills
+            app_record.missing_skills = hybrid.hard_filter.missing_skills
+            # Gán dict mới để SQLAlchemy nhận biết thay đổi trên cột JSON
+            app_record.ai_extracted_info = {
+                **(app_record.ai_extracted_info or {}),
+                "scoring_details": hybrid.to_details(),
+            }
+            db.commit()
+            logger.info(
+                f"[BackgroundTasks] Hybrid score Application ID {application_id}: matching={hybrid.matching_score} "
+                f"(hard={hybrid.hard_filter_score}, semantic={hybrid.semantic_score})."
+            )
 
-        logger.info(f"[BackgroundTasks] Hoàn tất bóc tách CV & semantic match cho Application ID {application_id}.")
+        # 6. Hook kết nối các bước tiếp theo trong Mục 4:
+        # - Gemini sinh 3–5 câu hỏi phỏng vấn khai thác kỹ năng còn thiếu (Mục 4.8) → interview_questions
+
+        logger.info(f"[BackgroundTasks] Hoàn tất chấm điểm AI cho Application ID {application_id}.")
 
     except Exception as e:
         db.rollback()

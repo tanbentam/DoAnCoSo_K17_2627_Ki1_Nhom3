@@ -33,6 +33,12 @@ EMBEDDING_PRELOAD: bool = os.getenv("EMBEDDING_PRELOAD", "true").lower() in ("1"
 SEMANTIC_SIM_FLOOR: float = float(os.getenv("SEMANTIC_SIM_FLOOR", "0.20"))
 SEMANTIC_SIM_CEIL: float = float(os.getenv("SEMANTIC_SIM_CEIL", "0.80"))
 
+# --- Hybrid Matching Score = 40% Hard Filter + 60% Semantic Match ---
+HYBRID_HARD_FILTER_WEIGHT: float = float(os.getenv("HYBRID_HARD_FILTER_WEIGHT", "0.4"))
+HYBRID_SEMANTIC_WEIGHT: float = float(os.getenv("HYBRID_SEMANTIC_WEIGHT", "0.6"))
+# Ngưỡng cosine để coi 2 tên kỹ năng là đồng nghĩa (VD: "MySQL" ~ "Cơ sở dữ liệu MySQL")
+SKILL_SEMANTIC_THRESHOLD: float = float(os.getenv("SKILL_SEMANTIC_THRESHOLD", "0.80"))
+
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 

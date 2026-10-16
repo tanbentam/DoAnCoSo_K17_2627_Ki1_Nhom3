@@ -22,6 +22,16 @@ from app.services.gemini_service import (
     generate_structured,
     get_gemini_client,
 )
+from app.services.hybrid_scoring import (
+    HardFilterResult,
+    HybridScoreResult,
+    SkillMatch,
+    combine_scores,
+    compute_hard_filter,
+    compute_hybrid_score,
+    match_skills,
+    normalize_skill,
+)
 from app.services.pdf_service import (
     PDFCorruptedError,
     PDFEmptyError,
@@ -83,6 +93,15 @@ __all__ = [
     "extract_pages_text",
     "get_pdf_metadata",
     "extract_text_from_candidate_cv",
+    # Hybrid Scoring
+    "SkillMatch",
+    "HardFilterResult",
+    "HybridScoreResult",
+    "normalize_skill",
+    "match_skills",
+    "compute_hard_filter",
+    "combine_scores",
+    "compute_hybrid_score",
     # Semantic Matching
     "SemanticMatchResult",
     "cosine_similarity",
