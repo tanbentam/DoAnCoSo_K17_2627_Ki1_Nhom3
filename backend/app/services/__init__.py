@@ -5,6 +5,15 @@ from app.services.cv_extractor import (
     extract_cv_info,
     normalize_cv_extraction,
 )
+from app.services.embedding_service import (
+    EmbeddingModelLoadError,
+    EmbeddingServiceError,
+    encode_document,
+    encode_texts,
+    get_embedding_model,
+    preload_embedding_model,
+    split_into_chunks,
+)
 from app.services.gemini_service import (
     GeminiAPIError,
     GeminiConfigError,
@@ -35,6 +44,14 @@ from app.services.text_cleaner import (
 )
 
 __all__ = [
+    # Embedding Service
+    "EmbeddingServiceError",
+    "EmbeddingModelLoadError",
+    "get_embedding_model",
+    "preload_embedding_model",
+    "split_into_chunks",
+    "encode_texts",
+    "encode_document",
     # CV Extractor
     "CV_EXTRACTION_SYSTEM_INSTRUCTION",
     "build_cv_extraction_prompt",

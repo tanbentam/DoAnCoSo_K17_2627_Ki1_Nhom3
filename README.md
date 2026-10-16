@@ -90,6 +90,11 @@ cd D:\3\DoAnCoSo\backend
 .\venv\bin\python.exe -m pip install -r requirements.txt
 ```
 
+Tải trước mô hình nhúng `paraphrase-multilingual-MiniLM-L12-v2` (~460MB, chỉ cần chạy 1 lần khi có mạng, sau đó dùng được offline):
+```powershell
+.\venv\bin\python.exe download_embedding_model.py
+```
+
 ### 4.4. Khởi tạo Cơ sở Dữ liệu & Nạp Dữ liệu Mẫu
 Chạy 2 script sau để đồng bộ bảng lên Cloud Aiven MySQL và tạo dữ liệu ban đầu:
 

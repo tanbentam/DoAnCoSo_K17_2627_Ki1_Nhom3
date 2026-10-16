@@ -32,3 +32,6 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+# Embedding model cache (tải bằng download_embedding_model.py)
+backend/models_cache/

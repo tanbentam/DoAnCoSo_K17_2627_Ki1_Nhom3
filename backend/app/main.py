@@ -28,6 +28,25 @@ app.include_router(applications.router, prefix="/api")
 
 
 # ---------------------------------------------------------------------------
+# Startup — nạp sẵn mô hình nhúng (chạy luồng nền để server khởi động ngay)
+# ---------------------------------------------------------------------------
+import threading
+
+from app.core.config import EMBEDDING_PRELOAD
+from app.services import embedding_service
+
+
+@app.on_event("startup")
+def preload_ai_models():
+    if EMBEDDING_PRELOAD:
+        threading.Thread(
+            target=embedding_service.preload_embedding_model,
+            name="embedding-preload",
+            daemon=True,
+        ).start()
+
+
+# ---------------------------------------------------------------------------
 # Health-check endpoint
 # ---------------------------------------------------------------------------
 @app.get("/", tags=["Health"])
@@ -37,4 +56,7 @@ async def root():
 
 @app.get("/health", tags=["Health"])
 async def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "embedding_model_loaded": embedding_service.is_model_loaded(),
+    }

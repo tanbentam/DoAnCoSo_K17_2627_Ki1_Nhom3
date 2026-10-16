@@ -17,6 +17,17 @@ GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.2"))
 GEMINI_TIMEOUT_SECONDS: int = int(os.getenv("GEMINI_TIMEOUT_SECONDS", "60"))
 GEMINI_MAX_RETRIES: int = int(os.getenv("GEMINI_MAX_RETRIES", "3"))
 
+# --- Embedding (Sentence-Transformers, chạy cục bộ) ---
+EMBEDDING_MODEL_NAME: str = os.getenv(
+    "EMBEDDING_MODEL_NAME", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+)
+EMBEDDING_DEVICE: str = os.getenv("EMBEDDING_DEVICE", "cpu")
+EMBEDDING_BATCH_SIZE: int = int(os.getenv("EMBEDDING_BATCH_SIZE", "16"))
+# Thư mục cache mô hình (tương đối theo thư mục backend) — tải 1 lần, dùng offline về sau
+EMBEDDING_CACHE_DIR: str = os.getenv("EMBEDDING_CACHE_DIR", "models_cache")
+# Nạp sẵn mô hình khi khởi động server để request đầu tiên không bị chậm
+EMBEDDING_PRELOAD: bool = os.getenv("EMBEDDING_PRELOAD", "true").lower() in ("1", "true", "yes")
+
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 
