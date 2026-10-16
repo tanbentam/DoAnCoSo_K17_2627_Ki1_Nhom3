@@ -10,7 +10,7 @@ Bộ Exception chuẩn hóa: GeminiServiceError (cơ sở), GeminiConfigError, G
 
 Cấu hình (backend/app/core/config.py, .env.example):
 
-GEMINI_MODEL mặc định chuyển sang gemini-2.5-flash (gemini-1.5-flash đã bị Google ngừng hỗ trợ).
+GEMINI_MODEL mặc định chuyển sang gemini-3.8-flash (gemini-1.5-flash và gemini-2.5-flash không còn khả dụng cho tài khoản mới).
 Bổ sung GEMINI_TEMPERATURE=0.2 (kết quả bóc tách ổn định), GEMINI_TIMEOUT_SECONDS=60, GEMINI_MAX_RETRIES=3.
 Cập nhật requirements.txt với google-genai==2.31.0 và các thư viện phụ thuộc.
 

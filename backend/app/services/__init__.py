@@ -1,4 +1,10 @@
 # app/services/__init__.py
+from app.services.cv_extractor import (
+    CV_EXTRACTION_SYSTEM_INSTRUCTION,
+    build_cv_extraction_prompt,
+    extract_cv_info,
+    normalize_cv_extraction,
+)
 from app.services.gemini_service import (
     GeminiAPIError,
     GeminiConfigError,
@@ -29,6 +35,11 @@ from app.services.text_cleaner import (
 )
 
 __all__ = [
+    # CV Extractor
+    "CV_EXTRACTION_SYSTEM_INSTRUCTION",
+    "build_cv_extraction_prompt",
+    "extract_cv_info",
+    "normalize_cv_extraction",
     # Gemini Service
     "GeminiServiceError",
     "GeminiConfigError",

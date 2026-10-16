@@ -4,6 +4,8 @@ services/ai_tasks.py — BackgroundTasks xử lý phân tích và chấm điểm
 import logging
 from app.core.database import SessionLocal
 from app.models.application import Application, ApplicationStatus
+from app.services.cv_extractor import extract_cv_info
+from app.services.gemini_service import GeminiServiceError
 from app.services.pdf_service import (
     PDFServiceError,
     extract_text_from_candidate_cv,
@@ -18,7 +20,7 @@ def process_application_ai(application_id: int) -> None:
     1. Mở session CSDL độc lập cho background worker.
     2. Chuyển trạng thái Application sang 'screening' (đang sàng lọc/chấm điểm).
     3. Trích xuất text CV từ tệp PDF (bằng pdfplumber) và lưu vào candidate.cv_text_raw.
-    4. Chuẩn bị dữ liệu đầu vào cho AI Pipeline (Gemini bóc tách & Hybrid scoring).
+    4. Gemini bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
     5. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
     """
     db = SessionLocal()
@@ -55,16 +57,28 @@ def process_application_ai(application_id: int) -> None:
                     f"[BackgroundTasks] Tệp CV {candidate.cv_file_path} không phải PDF (bỏ qua pdfplumber)."
                 )
 
-        # 3. Hook kết nối AI Pipeline tiếp theo (Gemini Structured Outputs & Hybrid Matching Score)
-        # Các bước tiếp theo trong Mục 4:
-        # - Trích xuất văn bản thô (Mục 4.1: Đã hoàn thành)
-        # - Làm sạch chuỗi văn bản (Mục 4.2: Đã hoàn thành với text_cleaner)
-        # - Tích hợp Google Gemini API Structured Outputs (Mục 4.3: Đã hoàn thành với gemini_service.generate_structured)
-        # - Prompt chuẩn hóa thông tin CV trả về JSON (Mục 4.4)
+        # 3. Gemini bóc tách thông tin CV thành JSON chuẩn hóa (Mục 4.4)
+        if candidate and candidate.cv_text_raw:
+            try:
+                logger.info(f"[BackgroundTasks] Đang gửi CV Candidate ID {candidate.id} tới Gemini để bóc tách...")
+                extracted = extract_cv_info(candidate.cv_text_raw)
+                app_record.ai_extracted_info = extracted.model_dump()
+                app_record.ai_summary = extracted.summary or None
+                db.commit()
+                logger.info(
+                    f"[BackgroundTasks] Bóc tách CV thành công: {len(extracted.skills)} kỹ năng, "
+                    f"{extracted.experience_years} năm kinh nghiệm (Application ID {application_id})."
+                )
+            except GeminiServiceError as ge:
+                logger.error(f"[BackgroundTasks] Lỗi Gemini khi bóc tách CV Application ID {application_id}: {ge}")
+        else:
+            logger.info(f"[BackgroundTasks] Không có văn bản CV để bóc tách cho Application ID {application_id}.")
+
+        # 4. Hook kết nối các bước tiếp theo trong Mục 4:
         # - Tính điểm Hybrid Matching Score (Semantic + Hard filter) (Mục 4.5 - 4.7)
         # - Lưu matched_skills, missing_skills, interview_questions, matching_score
 
-        logger.info(f"[BackgroundTasks] Hoàn tất bước đọc PDF và chuyển screening cho Application ID {application_id}.")
+        logger.info(f"[BackgroundTasks] Hoàn tất đọc PDF & bóc tách CV cho Application ID {application_id}.")
 
     except Exception as e:
         db.rollback()
