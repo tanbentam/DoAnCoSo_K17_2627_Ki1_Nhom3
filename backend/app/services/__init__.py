@@ -33,6 +33,15 @@ from app.services.pdf_service import (
     extract_text_from_pdf,
     get_pdf_metadata,
 )
+from app.services.semantic_matching import (
+    SemanticMatchResult,
+    build_job_text,
+    compute_job_cv_match,
+    compute_semantic_match,
+    cosine_similarity,
+    cosine_similarity_matrix,
+    similarity_to_score,
+)
 from app.services.text_cleaner import (
     clean_cv_text,
     clean_text,
@@ -74,6 +83,14 @@ __all__ = [
     "extract_pages_text",
     "get_pdf_metadata",
     "extract_text_from_candidate_cv",
+    # Semantic Matching
+    "SemanticMatchResult",
+    "cosine_similarity",
+    "cosine_similarity_matrix",
+    "similarity_to_score",
+    "build_job_text",
+    "compute_semantic_match",
+    "compute_job_cv_match",
     # Text Cleaner
     "clean_text",
     "clean_cv_text",

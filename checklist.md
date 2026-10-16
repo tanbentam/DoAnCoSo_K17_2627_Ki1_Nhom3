@@ -60,7 +60,7 @@ Ký hiệu:
 * [x] Tích hợp Google Gemini API (Flash model) với chế độ Structured Outputs
 * [x] Xây dựng prompt chuẩn hóa thông tin CV trả về JSON (họ tên, kỹ năng, số năm kinh nghiệm, học vấn)
 * [x] Tải và cấu hình mô hình nhúng `sentence-transformers` (`paraphrase-multilingual-MiniLM-L12-v2`)
-* [ ] Viết hàm tính độ tương đồng ngữ nghĩa Cosine Similarity giữa vector JD và vector CV
+* [x] Viết hàm tính độ tương đồng ngữ nghĩa Cosine Similarity giữa vector JD và vector CV
 * [ ] Cài đặt thuật toán Hybrid Matching Score: $40\% \text{ Hard Filter} + 60\% \text{ Semantic Match}$
 * [ ] Viết prompt cho Gemini sinh 3 – 5 câu hỏi phỏng vấn khai thác lỗ hổng kỹ năng của ứng viên
 * [ ] Tạo service adapter dự phòng gọi mô hình cục bộ `qwen2.5:7b` qua Ollama trên máy RTX 4060

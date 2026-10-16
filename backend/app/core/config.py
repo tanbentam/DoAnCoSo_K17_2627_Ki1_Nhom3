@@ -28,6 +28,11 @@ EMBEDDING_CACHE_DIR: str = os.getenv("EMBEDDING_CACHE_DIR", "models_cache")
 # Nạp sẵn mô hình khi khởi động server để request đầu tiên không bị chậm
 EMBEDDING_PRELOAD: bool = os.getenv("EMBEDDING_PRELOAD", "true").lower() in ("1", "true", "yes")
 
+# --- Semantic Matching (hiệu chỉnh cosine similarity → điểm 0–100) ---
+# cosine ≤ FLOOR → 0 điểm, cosine ≥ CEIL → 100 điểm (đo thực tế với MiniLM-L12-v2)
+SEMANTIC_SIM_FLOOR: float = float(os.getenv("SEMANTIC_SIM_FLOOR", "0.20"))
+SEMANTIC_SIM_CEIL: float = float(os.getenv("SEMANTIC_SIM_CEIL", "0.80"))
+
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 

@@ -5,6 +5,8 @@ import logging
 from app.core.database import SessionLocal
 from app.models.application import Application, ApplicationStatus
 from app.services.cv_extractor import extract_cv_info
+from app.services.embedding_service import EmbeddingServiceError
+from app.services.semantic_matching import compute_job_cv_match
 from app.services.gemini_service import GeminiServiceError
 from app.services.pdf_service import (
     PDFServiceError,
@@ -21,7 +23,8 @@ def process_application_ai(application_id: int) -> None:
     2. Chuyển trạng thái Application sang 'screening' (đang sàng lọc/chấm điểm).
     3. Trích xuất text CV từ tệp PDF (bằng pdfplumber) và lưu vào candidate.cv_text_raw.
     4. Gemini bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
-    5. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
+    5. Tính Cosine Similarity giữa vector JD và vector CV, lưu semantic_score (0–100).
+    6. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
     """
     db = SessionLocal()
     try:
@@ -74,11 +77,25 @@ def process_application_ai(application_id: int) -> None:
         else:
             logger.info(f"[BackgroundTasks] Không có văn bản CV để bóc tách cho Application ID {application_id}.")
 
-        # 4. Hook kết nối các bước tiếp theo trong Mục 4:
-        # - Tính điểm Hybrid Matching Score (Semantic + Hard filter) (Mục 4.5 - 4.7)
+        # 4. Tính độ tương đồng ngữ nghĩa Cosine Similarity giữa vector JD và vector CV (Mục 4.6)
+        job = app_record.job
+        if job and candidate and candidate.cv_text_raw:
+            try:
+                semantic = compute_job_cv_match(job, candidate.cv_text_raw)
+                app_record.semantic_score = semantic.score
+                db.commit()
+                logger.info(
+                    f"[BackgroundTasks] Semantic match Application ID {application_id}: "
+                    f"cosine={semantic.similarity:.4f}, semantic_score={semantic.score}."
+                )
+            except (EmbeddingServiceError, ValueError) as ee:
+                logger.error(f"[BackgroundTasks] Lỗi tính semantic score Application ID {application_id}: {ee}")
+
+        # 5. Hook kết nối các bước tiếp theo trong Mục 4:
+        # - Tính điểm Hybrid Matching Score: 40% Hard Filter + 60% Semantic Match (Mục 4.7)
         # - Lưu matched_skills, missing_skills, interview_questions, matching_score
 
-        logger.info(f"[BackgroundTasks] Hoàn tất đọc PDF & bóc tách CV cho Application ID {application_id}.")
+        logger.info(f"[BackgroundTasks] Hoàn tất bóc tách CV & semantic match cho Application ID {application_id}.")
 
     except Exception as e:
         db.rollback()
