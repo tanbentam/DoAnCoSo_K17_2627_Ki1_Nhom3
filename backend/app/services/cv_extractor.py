@@ -1,7 +1,8 @@
 """
-services/cv_extractor.py — Prompt chuẩn hóa thông tin CV trả về JSON bằng Gemini Structured Outputs
+services/cv_extractor.py — Prompt chuẩn hóa thông tin CV trả về JSON bằng Structured Outputs
 
-Nhận văn bản CV đã làm sạch (Mục 4.1 + 4.2), gửi Gemini kèm system instruction và
+Nhận văn bản CV đã làm sạch (Mục 4.1 + 4.2), gửi nhà cung cấp AI (Gemini hoặc Ollama theo
+AI_PROVIDER — Mục 4.10) kèm system instruction và
 schema CVExtraction, sau đó hậu xử lý (khử trùng lặp kỹ năng, giới hạn số năm kinh nghiệm...)
 để kết quả ổn định trước khi lưu vào Application.ai_extracted_info.
 """
@@ -12,7 +13,8 @@ from datetime import date
 from typing import Iterable, List, Optional
 
 from app.schemas.cv_extraction import CVExtraction
-from app.services.gemini_service import generate_structured
+from app.services.ai_errors import StructuredResult
+from app.services.ai_provider import generate_structured
 
 logger = logging.getLogger(__name__)
 
@@ -64,20 +66,26 @@ def build_cv_extraction_prompt(
     )
 
 
-def extract_cv_info(cv_text: str, model: Optional[str] = None) -> CVExtraction:
+def extract_cv_info(cv_text: str, mode: Optional[str] = None) -> CVExtraction:
+    """Bóc tách thông tin CV, chỉ trả về CVExtraction đã hậu xử lý (xem extract_cv_info_detailed)."""
+    return extract_cv_info_detailed(cv_text, mode).data
+
+
+def extract_cv_info_detailed(cv_text: str, mode: Optional[str] = None) -> StructuredResult[CVExtraction]:
     """
-    Bóc tách thông tin CV thành CVExtraction bằng Gemini Structured Outputs.
+    Bóc tách thông tin CV thành CVExtraction bằng nhà cung cấp AI theo AI_PROVIDER
+    (Gemini Structured Outputs hoặc Ollama cục bộ).
 
     Tham số:
         cv_text: Văn bản CV đã trích xuất & làm sạch.
-        model: Tên model Gemini (mặc định theo GEMINI_MODEL).
+        mode: Ghi đè AI_PROVIDER (cloud | local | auto), mặc định theo cấu hình.
 
     Trả về:
-        CVExtraction đã được hậu xử lý.
+        StructuredResult: dữ liệu CVExtraction đã hậu xử lý + provider/model đã dùng.
 
     Ngoại lệ:
         ValueError: cv_text rỗng.
-        GeminiServiceError (và các lớp con): lỗi cấu hình / API / phản hồi từ Gemini.
+        AIProviderError (và các lớp con): mọi nhà cung cấp AI đều lỗi.
     """
     if not cv_text or not cv_text.strip():
         raise ValueError("Văn bản CV rỗng, không thể bóc tách thông tin.")
@@ -86,9 +94,10 @@ def extract_cv_info(cv_text: str, model: Optional[str] = None) -> CVExtraction:
         prompt=build_cv_extraction_prompt(cv_text),
         schema=CVExtraction,
         system_instruction=CV_EXTRACTION_SYSTEM_INSTRUCTION,
-        model=model,
+        mode=mode,
     )
-    return normalize_cv_extraction(result)
+    result.data = normalize_cv_extraction(result.data)
+    return result
 
 
 def normalize_cv_extraction(data: CVExtraction) -> CVExtraction:
@@ -115,7 +124,27 @@ def normalize_cv_extraction(data: CVExtraction) -> CVExtraction:
 
     years = data.experience_years or 0.0
     data.experience_years = round(min(max(float(years), 0.0), MAX_EXPERIENCE_YEARS), 1)
+
+    # Trường lồng nhau: mô hình cục bộ hay trả "" thay vì null và viết "Present"/"nay" không thống nhất
+    for job in data.work_experience:
+        job.start_date = _clean_optional(job.start_date)
+        job.end_date = _normalize_end_date(job.end_date)
+        job.description = _clean_optional(job.description)
+    for edu in data.education:
+        edu.degree = _clean_optional(edu.degree)
+        edu.major = _clean_optional(edu.major)
+        edu.gpa = _clean_optional(edu.gpa)
     return data
+
+
+_PRESENT_WORDS = {"present", "now", "current", "currently", "nay", "hiện tại", "hiện nay", "đến nay"}
+
+
+def _normalize_end_date(value: Optional[str]) -> Optional[str]:
+    value = _clean_optional(value)
+    if value and value.casefold() in _PRESENT_WORDS:
+        return "present"
+    return value
 
 
 # ── Hàm bổ trợ nội bộ ────────────────────────────────────────────────────────

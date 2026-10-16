@@ -10,12 +10,20 @@ DATABASE_URL: str = os.getenv(
 )
 
 # --- AI Provider ---
-AI_PROVIDER: str = os.getenv("AI_PROVIDER", "cloud")
+# cloud: chỉ Gemini | local: chỉ Ollama | auto: Gemini trước, lỗi/hết hạn mức thì chuyển Ollama
+AI_PROVIDER: str = os.getenv("AI_PROVIDER", "auto").strip().lower()
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+# Chuỗi model dự phòng khi model chính quá tải / hết hạn mức (mỗi model có hạn mức miễn phí riêng)
+GEMINI_FALLBACK_MODELS: list = [
+    m.strip()
+    for m in os.getenv("GEMINI_FALLBACK_MODELS", "gemini-3.7-flash,gemini-3.5-flash,gemini-3.1-flash-lite").split(",")
+    if m.strip()
+]
 GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.2"))
-GEMINI_TIMEOUT_SECONDS: int = int(os.getenv("GEMINI_TIMEOUT_SECONDS", "60"))
-GEMINI_MAX_RETRIES: int = int(os.getenv("GEMINI_MAX_RETRIES", "3"))
+GEMINI_TIMEOUT_SECONDS: int = int(os.getenv("GEMINI_TIMEOUT_SECONDS", "30"))
+# Số lần thử lại MỖI model khi lỗi tạm thời, sau đó chuyển model dự phòng
+GEMINI_MAX_RETRIES: int = int(os.getenv("GEMINI_MAX_RETRIES", "1"))
 
 # --- Embedding (Sentence-Transformers, chạy cục bộ) ---
 EMBEDDING_MODEL_NAME: str = os.getenv(
@@ -39,8 +47,16 @@ HYBRID_SEMANTIC_WEIGHT: float = float(os.getenv("HYBRID_SEMANTIC_WEIGHT", "0.6")
 # Ngưỡng cosine để coi 2 tên kỹ năng là đồng nghĩa (VD: "MySQL" ~ "Cơ sở dữ liệu MySQL")
 SKILL_SEMANTIC_THRESHOLD: float = float(os.getenv("SKILL_SEMANTIC_THRESHOLD", "0.80"))
 
-OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# --- Ollama (mô hình cục bộ trên GPU, dùng khi AI_PROVIDER=local hoặc dự phòng khi auto) ---
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+# Lần gọi đầu phải nạp model vào VRAM (~25s) nên cần timeout rộng
+OLLAMA_TIMEOUT_SECONDS: int = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300"))
+# Cửa sổ ngữ cảnh: CV ~20.000 ký tự ≈ 6–7 nghìn token + schema + prompt
+OLLAMA_NUM_CTX: int = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
+# Giữ model trong VRAM sau lần gọi cuối để các hồ sơ tiếp theo không phải nạp lại
+OLLAMA_KEEP_ALIVE: str = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
+OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.2"))
 
 # --- Email ---
 SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")

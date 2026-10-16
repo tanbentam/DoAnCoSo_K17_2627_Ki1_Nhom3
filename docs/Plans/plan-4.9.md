@@ -1,5 +1,8 @@
 # Kế hoạch: Gemini chịu lỗi + AI cục bộ (Mục 4.9, 4.10)
 
+**Trạng thái:** ✅ Đã hoàn thành ngày 16/10/2026. Kết quả xem tại [Phan 4.9 - 4.10.md](../Phan%204/Phan%204.9%20-%204.10.md).
+**Đã chốt:** Ollama + `qwen2.5:7b` do nhóm tự cài; `AI_PROVIDER=auto`.
+
 Kế hoạch kết hợp 2 việc:
 - Làm Gemini chịu lỗi tốt hơn, giải quyết vấn đề [01](../Issues/01-gemini-het-han-muc-mien-phi.md) và [02](../Issues/02-gemini-qua-tai-503.md) phát hiện trong lần test thật đầu tiên.
 - Làm luôn **Mục 4.9 (Ollama) và Mục 4.10 (`AI_PROVIDER`)**.

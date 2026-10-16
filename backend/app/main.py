@@ -46,7 +46,7 @@ app.include_router(applications.router, prefix="/api")
 import threading
 
 from app.core.config import EMBEDDING_PRELOAD
-from app.services import embedding_service
+from app.services import ai_provider, embedding_service
 
 
 @app.on_event("startup")
@@ -57,6 +57,8 @@ def preload_ai_models():
             name="embedding-preload",
             daemon=True,
         ).start()
+    # AI_PROVIDER=local: nạp sẵn model Ollama vào GPU để hồ sơ đầu tiên không phải chờ ~25s
+    threading.Thread(target=ai_provider.preload_local_model, name="ollama-preload", daemon=True).start()
 
 
 # ---------------------------------------------------------------------------
@@ -68,8 +70,10 @@ async def root():
 
 
 @app.get("/health", tags=["Health"])
-async def health():
+def health():
+    # Hàm đồng bộ (chạy trong threadpool) vì có kiểm tra kết nối Ollama
     return {
         "status": "healthy",
         "embedding_model_loaded": embedding_service.is_model_loaded(),
+        "ai_provider": ai_provider.get_provider_status(),
     }

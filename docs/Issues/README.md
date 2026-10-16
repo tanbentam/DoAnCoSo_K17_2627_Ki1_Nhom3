@@ -22,14 +22,14 @@ Dữ liệu test (Application #4 – #13) vẫn còn trong CSDL. Xóa bằng l�
 
 ## Danh sách vấn đề
 
-| # | Vấn đề | Mức độ | Thành phần | Kế hoạch xử lý |
+| # | Vấn đề | Mức độ | Thành phần | Trạng thái |
 | --- | --- | --- | --- | --- |
-| [01](01-gemini-het-han-muc-mien-phi.md) | Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích | 🔴 Cao | `gemini_service.py` | [plan-4.9](../Plans/plan-4.9.md) – Giai đoạn A, B, C |
-| [02](02-gemini-qua-tai-503.md) | Gemini thường xuyên quá tải (503), xử lý mất tới 98 giây | 🟠 Trung bình | `gemini_service.py` | [plan-4.9](../Plans/plan-4.9.md) – Giai đoạn A, C |
-| [03](03-ket-noi-aiven-chua-ssl.md) | Kết nối Aiven MySQL chưa mã hóa SSL | 🟠 Trung bình | `core/database.py` | Mục 2.1 checklist |
-| [04](04-pdf-mat-dau-cach.md) | Một số PDF bị đọc ra chữ dính liền, mất dấu cách | 🟡 Thấp | `pdf_service.py` | Chưa lên kế hoạch |
-| [05](05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | Chưa lên kế hoạch |
-| [06](06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `ai_tasks.py` | Chưa lên kế hoạch |
+| [01](01-gemini-het-han-muc-mien-phi.md) | Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích | 🔴 Cao | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
+| [02](02-gemini-qua-tai-503.md) | Gemini thường xuyên quá tải (503), xử lý mất tới 98 giây | 🟠 Trung bình | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
+| [03](03-ket-noi-aiven-chua-ssl.md) | Kết nối Aiven MySQL chưa mã hóa SSL | 🟠 Trung bình | `core/database.py` | Chưa xử lý (Mục 2.1 checklist) |
+| [04](04-pdf-mat-dau-cach.md) | Một số PDF bị đọc ra chữ dính liền, mất dấu cách | 🟡 Thấp | `pdf_service.py` | Chưa xử lý |
+| [05](05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | Chưa xử lý |
+| [06](06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `ai_tasks.py` | Chưa xử lý |
 | [07](07-kinh-nghiem-trai-nganh-van-co-diem.md) | Kinh nghiệm trái ngành vẫn được tính đủ điểm | 🟡 Thấp | `hybrid_scoring.py` | Cần thảo luận |
 
 Mức độ:

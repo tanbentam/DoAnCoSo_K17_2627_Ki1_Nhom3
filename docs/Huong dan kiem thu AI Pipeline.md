@@ -56,6 +56,18 @@ Các trường cần kiểm tra trong kết quả:
 
 Email test nên có dạng `test.<tên>@example.com` để lệnh `--cleanup` xóa được.
 
-## 4. Lưu ý về giới hạn Gemini miễn phí
+## 4. Chọn nhà cung cấp AI khi test (`AI_PROVIDER`)
 
-Gói miễn phí của `gemini-3.8-flash` chỉ cho **20 lượt gọi mỗi ngày**. Khi hết, log hiện `429 RESOURCE_EXHAUSTED ... limit: 20` và hồ sơ vẫn được chấm điểm nhưng không có thông tin Gemini bóc tách (`ai_extracted_info` chỉ có `scoring_details`, kỹ năng được tìm trực tiếp trong văn bản CV). Hãy để dành lượt gọi cho buổi demo.
+Gói miễn phí cho mỗi model Gemini khoảng **20 lượt/ngày**. Đặt chế độ trong `.env`, hoặc ghi đè tạm thời khi chạy server:
+
+| Chế độ | Khi nào dùng | Lệnh chạy server (PowerShell) |
+| --- | --- | --- |
+| `local` | Test lặp lại nhiều lần, test offline, không tốn lượt Gemini | `$env:AI_PROVIDER='local'; .\venv\Scripts\python.exe -m uvicorn app.main:app` |
+| `auto` (mặc định) | Demo: Gemini trước, hết lượt hoặc lỗi thì tự chuyển Ollama | `.\venv\Scripts\python.exe -m uvicorn app.main:app` |
+| `cloud` | Chỉ test Gemini và chuỗi model dự phòng | `$env:AI_PROVIDER='cloud'; .\venv\Scripts\python.exe -m uvicorn app.main:app` |
+
+Chế độ `local` và `auto` cần Ollama đang chạy và đã có model (`ollama pull qwen2.5:7b`).
+
+Cách kiểm tra trạng thái:
+- **Trước khi test:** mở http://127.0.0.1:8000/health, trong `ai_provider` sẽ thấy chế độ đang dùng, các model Gemini đang hết lượt (kèm thời điểm dùng lại được) và Ollama đã sẵn sàng chưa.
+- **Sau khi chấm:** trong kết quả `ai-analysis`, trường `ai_extracted_info.ai_meta` cho biết hồ sơ được bóc tách bởi model nào, mất bao lâu và nhật ký các lần thử.

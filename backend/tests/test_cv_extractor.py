@@ -1,22 +1,28 @@
 """
 tests/test_cv_extractor.py — Unit test cho module cv_extractor (prompt bóc tách CV → JSON)
 
-Gemini được giả lập (mock generate_structured), không gọi mạng thật.
+Nhà cung cấp AI được giả lập (mock ai_provider.generate_structured), không gọi mạng thật.
 """
 
 import unittest
 from datetime import date
 from unittest import mock
 
-from app.schemas.cv_extraction import CVExtraction
+from app.schemas.cv_extraction import CVExtraction, Education, WorkExperience
 from app.services import cv_extractor
+from app.services.ai_errors import AIProviderError, StructuredResult
 from app.services.cv_extractor import (
     CV_EXTRACTION_SYSTEM_INSTRUCTION,
     build_cv_extraction_prompt,
     extract_cv_info,
+    extract_cv_info_detailed,
     normalize_cv_extraction,
 )
 from app.services.gemini_service import GeminiAPIError
+
+
+def _result(data, provider="gemini", model="gemini-test"):
+    return StructuredResult(data=data, provider=provider, model=model, latency_seconds=1.0)
 
 
 def _make_extraction(**overrides) -> CVExtraction:
@@ -76,26 +82,51 @@ class TestNormalize(unittest.TestCase):
     def test_phone_without_digits_becomes_none(self):
         self.assertIsNone(normalize_cv_extraction(_make_extraction(phone=" - ")).phone)
 
+    def test_nested_fields_normalized(self):
+        """Mô hình cục bộ hay trả "" thay vì null và viết "Present"/"nay" không thống nhất."""
+        data = _make_extraction(
+            work_experience=[
+                WorkExperience(company="FPT", position="Dev", start_date="2021-03", end_date="Present", description=""),
+                WorkExperience(company="VNG", position="Dev", start_date="", end_date="nay", description=" Làm API "),
+            ],
+            education=[Education(institution="HUST", degree="", major=" ", graduation_year=2020, gpa="")],
+        )
+        result = normalize_cv_extraction(data)
+        self.assertEqual([w.end_date for w in result.work_experience], ["present", "present"])
+        self.assertIsNone(result.work_experience[0].description)
+        self.assertIsNone(result.work_experience[1].start_date)
+        self.assertEqual(result.work_experience[1].description, "Làm API")
+        self.assertIsNone(result.education[0].degree)
+        self.assertIsNone(result.education[0].major)
+        self.assertIsNone(result.education[0].gpa)
+
 
 class TestExtractCVInfo(unittest.TestCase):
     """Kiểm thử luồng bóc tách CV."""
 
-    def test_calls_gemini_with_schema_and_system_instruction(self):
-        with mock.patch.object(cv_extractor, "generate_structured", return_value=_make_extraction()) as m:
-            extract_cv_info("CV nội dung", model="gemini-test")
+    def test_calls_ai_provider_with_schema_and_system_instruction(self):
+        with mock.patch.object(cv_extractor, "generate_structured", return_value=_result(_make_extraction())) as m:
+            extract_cv_info("CV nội dung", mode="local")
 
         kwargs = m.call_args.kwargs
         self.assertIs(kwargs["schema"], CVExtraction)
         self.assertEqual(kwargs["system_instruction"], CV_EXTRACTION_SYSTEM_INSTRUCTION)
-        self.assertEqual(kwargs["model"], "gemini-test")
+        self.assertEqual(kwargs["mode"], "local")
         self.assertIn("CV nội dung", kwargs["prompt"])
 
     def test_result_is_normalized(self):
         raw = _make_extraction(skills=["SQL", "sql"], experience_years=1.04)
-        with mock.patch.object(cv_extractor, "generate_structured", return_value=raw):
+        with mock.patch.object(cv_extractor, "generate_structured", return_value=_result(raw)):
             result = extract_cv_info("CV")
         self.assertEqual(result.skills, ["SQL"])
         self.assertEqual(result.experience_years, 1.0)
+
+    def test_detailed_keeps_provider_meta(self):
+        with mock.patch.object(cv_extractor, "generate_structured",
+                               return_value=_result(_make_extraction(), provider="ollama", model="qwen2.5:7b")):
+            result = extract_cv_info_detailed("CV")
+        self.assertEqual(result.meta()["provider"], "ollama")
+        self.assertEqual(result.meta()["model"], "qwen2.5:7b")
 
     def test_empty_cv_raises_value_error(self):
         with mock.patch.object(cv_extractor, "generate_structured") as m:
@@ -103,9 +134,9 @@ class TestExtractCVInfo(unittest.TestCase):
                 extract_cv_info("   ")
         m.assert_not_called()
 
-    def test_gemini_error_propagates(self):
+    def test_ai_error_propagates(self):
         with mock.patch.object(cv_extractor, "generate_structured", side_effect=GeminiAPIError("503", 503)):
-            with self.assertRaises(GeminiAPIError):
+            with self.assertRaises(AIProviderError):
                 extract_cv_info("CV")
 
 

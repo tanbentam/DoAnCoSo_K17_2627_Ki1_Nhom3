@@ -4,11 +4,12 @@ services/ai_tasks.py — BackgroundTasks xử lý phân tích và chấm điểm
 import logging
 from app.core.database import SessionLocal
 from app.models.application import Application, ApplicationStatus
-from app.services.cv_extractor import extract_cv_info
+from app.services.ai_errors import AIProviderError
+from app.services.ai_provider import get_provider_mode
+from app.services.cv_extractor import extract_cv_info_detailed
 from app.services.embedding_service import EmbeddingServiceError
 from app.services.hybrid_scoring import compute_hybrid_score
 from app.services.semantic_matching import compute_job_cv_match
-from app.services.gemini_service import GeminiServiceError
 from app.services.pdf_service import (
     PDFServiceError,
     extract_text_from_candidate_cv,
@@ -23,7 +24,7 @@ def process_application_ai(application_id: int) -> None:
     1. Mở session CSDL độc lập cho background worker.
     2. Chuyển trạng thái Application sang 'screening' (đang sàng lọc/chấm điểm).
     3. Trích xuất text CV từ tệp PDF (bằng pdfplumber) và lưu vào candidate.cv_text_raw.
-    4. Gemini bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
+    4. AI (Gemini / Ollama theo AI_PROVIDER) bóc tách CV thành JSON (họ tên, kỹ năng, kinh nghiệm, học vấn) lưu vào ai_extracted_info.
     5. Tính Cosine Similarity giữa vector JD và vector CV, lưu semantic_score (0–100).
     6. Tính Hybrid Matching Score (40% Hard Filter + 60% Semantic), lưu matched/missing skills.
     7. Cập nhật kết quả phân tích & điểm số vào CSDL một cách bất đồng bộ không làm nghẽn request của ứng viên.
@@ -62,20 +63,25 @@ def process_application_ai(application_id: int) -> None:
                     f"[BackgroundTasks] Tệp CV {candidate.cv_file_path} không phải PDF (bỏ qua pdfplumber)."
                 )
 
-        # 3. Gemini bóc tách thông tin CV thành JSON chuẩn hóa (Mục 4.4)
+        # 3. AI bóc tách thông tin CV thành JSON chuẩn hóa (Mục 4.4) — Gemini hoặc Ollama theo AI_PROVIDER (Mục 4.10)
         if candidate and candidate.cv_text_raw:
             try:
-                logger.info(f"[BackgroundTasks] Đang gửi CV Candidate ID {candidate.id} tới Gemini để bóc tách...")
-                extracted = extract_cv_info(candidate.cv_text_raw)
-                app_record.ai_extracted_info = extracted.model_dump()
+                logger.info(
+                    f"[BackgroundTasks] Đang bóc tách CV Candidate ID {candidate.id} (AI_PROVIDER={get_provider_mode()})..."
+                )
+                result = extract_cv_info_detailed(candidate.cv_text_raw)
+                extracted = result.data
+                # ai_meta: nhà cung cấp/model đã sinh kết quả, phục vụ truy vết và trình bày kiến trúc Hybrid
+                app_record.ai_extracted_info = {**extracted.model_dump(), "ai_meta": result.meta()}
                 app_record.ai_summary = extracted.summary or None
                 db.commit()
                 logger.info(
-                    f"[BackgroundTasks] Bóc tách CV thành công: {len(extracted.skills)} kỹ năng, "
+                    f"[BackgroundTasks] Bóc tách CV thành công bằng {result.provider}/{result.model} "
+                    f"({result.latency_seconds:.1f}s): {len(extracted.skills)} kỹ năng, "
                     f"{extracted.experience_years} năm kinh nghiệm (Application ID {application_id})."
                 )
-            except GeminiServiceError as ge:
-                logger.error(f"[BackgroundTasks] Lỗi Gemini khi bóc tách CV Application ID {application_id}: {ge}")
+            except AIProviderError as ae:
+                logger.error(f"[BackgroundTasks] Lỗi AI khi bóc tách CV Application ID {application_id}: {ae}")
         else:
             logger.info(f"[BackgroundTasks] Không có văn bản CV để bóc tách cho Application ID {application_id}.")
 

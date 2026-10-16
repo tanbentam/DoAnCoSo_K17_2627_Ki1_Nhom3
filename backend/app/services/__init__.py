@@ -1,8 +1,15 @@
 # app/services/__init__.py
+from app.services.ai_errors import AIProviderError, StructuredResult
+from app.services.ai_provider import (
+    generate_structured,
+    get_provider_mode,
+    get_provider_status,
+)
 from app.services.cv_extractor import (
     CV_EXTRACTION_SYSTEM_INSTRUCTION,
     build_cv_extraction_prompt,
     extract_cv_info,
+    extract_cv_info_detailed,
     normalize_cv_extraction,
 )
 from app.services.embedding_service import (
@@ -17,9 +24,9 @@ from app.services.embedding_service import (
 from app.services.gemini_service import (
     GeminiAPIError,
     GeminiConfigError,
+    GeminiQuotaExhaustedError,
     GeminiResponseError,
     GeminiServiceError,
-    generate_structured,
     get_gemini_client,
 )
 from app.services.hybrid_scoring import (
@@ -31,6 +38,13 @@ from app.services.hybrid_scoring import (
     compute_hybrid_score,
     match_skills,
     normalize_skill,
+)
+from app.services.ollama_service import (
+    OllamaConnectionError,
+    OllamaModelNotFoundError,
+    OllamaResponseError,
+    OllamaServiceError,
+    check_ollama_status,
 )
 from app.services.pdf_service import (
     PDFCorruptedError,
@@ -63,6 +77,18 @@ from app.services.text_cleaner import (
 )
 
 __all__ = [
+    # AI Provider (cloud | local | auto) — điểm vào chung cho mọi lời gọi AI sinh nội dung
+    "AIProviderError",
+    "StructuredResult",
+    "generate_structured",
+    "get_provider_mode",
+    "get_provider_status",
+    # Ollama Service
+    "OllamaServiceError",
+    "OllamaConnectionError",
+    "OllamaModelNotFoundError",
+    "OllamaResponseError",
+    "check_ollama_status",
     # Embedding Service
     "EmbeddingServiceError",
     "EmbeddingModelLoadError",
@@ -75,14 +101,15 @@ __all__ = [
     "CV_EXTRACTION_SYSTEM_INSTRUCTION",
     "build_cv_extraction_prompt",
     "extract_cv_info",
+    "extract_cv_info_detailed",
     "normalize_cv_extraction",
     # Gemini Service
     "GeminiServiceError",
     "GeminiConfigError",
     "GeminiAPIError",
+    "GeminiQuotaExhaustedError",
     "GeminiResponseError",
     "get_gemini_client",
-    "generate_structured",
     # PDF Service
     "PDFServiceError",
     "PDFFileNotFoundError",

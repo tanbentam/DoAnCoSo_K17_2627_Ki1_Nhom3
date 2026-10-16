@@ -63,8 +63,8 @@ Ký hiệu:
 * [x] Viết hàm tính độ tương đồng ngữ nghĩa Cosine Similarity giữa vector JD và vector CV
 * [x] Cài đặt thuật toán Hybrid Matching Score: $40\% \text{ Hard Filter} + 60\% \text{ Semantic Match}$
 * [ ] Viết prompt cho Gemini sinh 3 – 5 câu hỏi phỏng vấn khai thác lỗ hổng kỹ năng của ứng viên
-* [ ] Tạo service adapter dự phòng gọi mô hình cục bộ `qwen2.5:7b` qua Ollama trên máy RTX 4060
-* [ ] Cơ chế chuyển đổi linh hoạt qua biến môi trường `AI_PROVIDER=cloud|local`
+* [x] Tạo service adapter dự phòng gọi mô hình cục bộ `qwen2.5:7b` qua Ollama trên máy RTX 4060
+* [x] Cơ chế chuyển đổi linh hoạt qua biến môi trường `AI_PROVIDER=cloud|local|auto`
 
 ## 5. Candidate Portal (Frontend)
 

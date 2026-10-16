@@ -1,6 +1,7 @@
 # 01 – Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích
 
 **Mức độ:** 🔴 Cao (chặn việc test và demo)
+**Trạng thái:** ✅ Đã xử lý (16/10/2026)
 **Thành phần:** `backend/app/services/gemini_service.py`
 **Hồ sơ bị ảnh hưởng:** Application #12, #13
 
@@ -43,3 +44,14 @@ Chi tiết tại [plan-4.9.md](../Plans/plan-4.9.md):
    - Thêm danh sách model dự phòng `GEMINI_FALLBACK_MODELS`.
    - Ghi nhớ model đã hết lượt cho tới khi hạn mức được làm mới.
 2. **Giai đoạn B, C:** thêm Ollama chạy cục bộ trên GPU (Mục 4.9) và biến `AI_PROVIDER=cloud|local|auto` (Mục 4.10). Khi phát triển dùng `local`, nên không tốn lượt Gemini.
+
+## Kết quả xử lý (16/10/2026) — ✅ Đã xử lý
+
+Đã triển khai theo [plan-4.9.md](../Plans/plan-4.9.md), chi tiết tại [Phan 4.9 - 4.10.md](../Phan%204/Phan%204.9%20-%204.10.md).
+
+Kết quả kiểm thử thật (lúc gemini-3.8-flash đã hết lượt trong ngày):
+- Hết hạn mức theo ngày: chuyển ngay sang `gemini-3.7-flash`, không gọi lại vô ích. Model hết lượt được ghi nhớ 17.7 giờ, các hồ sơ sau bỏ qua mà không gọi API.
+- `AI_PROVIDER=auto` khi mọi model Gemini đều hết lượt: tự chuyển sang Ollama `qwen2.5:7b` cục bộ (16.7s).
+- `AI_PROVIDER=local`: 10/10 hồ sơ chạy offline qua Ollama, không tốn lượt Gemini.
+
+Hạn mức 20 lượt/ngày của từng model vẫn còn, nhưng không còn chặn việc test và demo.
