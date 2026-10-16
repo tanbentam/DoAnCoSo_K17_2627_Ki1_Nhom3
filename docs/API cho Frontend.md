@@ -1,6 +1,8 @@
 # API Backend cho Frontend
 
-Tài liệu dành cho thành viên làm frontend (Mục 5 – Cổng ứng viên, Mục 6 – Kanban HR). Mọi ví dụ lấy từ dữ liệu trả về thật của server.
+Tài liệu dành cho thành viên làm frontend (Mục 5 – Cổng ứng viên, Mục 6 – Kanban HR). Mọi ví dụ lấy từ dữ liệu trả về thật của server (đã rút gọn).
+
+Màn hình cần xây, quy ước code, việc cần sửa trong khung `frontend/` và cách tự kiểm thử: xem [Huong dan phat trien Frontend.md](Huong%20dan%20phat%20trien%20Frontend.md).
 
 - **Base URL (chạy local):** `http://127.0.0.1:8000`
 - **Tài liệu tương tác (thử API trực tiếp):** http://127.0.0.1:8000/docs
@@ -53,7 +55,7 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
 | Method | Endpoint | Mô tả |
 | --- | --- | --- |
 | GET | `/api/jobs/open` | Danh sách tin **đang mở**, mới nhất trước |
-| GET | `/api/jobs/{id}` | Chi tiết một tin (JD) |
+| GET | `/api/jobs/{id}` | Chi tiết một tin (JD). Trả cả tin đã đóng, nên kiểm tra `status === "open"` trước khi hiện nút nộp hồ sơ |
 | POST | `/api/applications/apply` | Nộp hồ sơ |
 
 **Một tin tuyển dụng (`Job`):**
@@ -75,6 +77,8 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
 ```
 
 `preferred_skills` có thể là `null`.
+
+**Ngày giờ** (`created_at`, `updated_at`) là **giờ UTC, không kèm múi giờ**, vì CSDL Aiven chạy UTC. Hiển thị: `new Date(value + "Z").toLocaleString("vi-VN")`.
 
 ### `POST /api/applications/apply` — `multipart/form-data`
 
@@ -113,13 +117,13 @@ Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giâ
 
 ---
 
-## 4. Bảng điều khiển HR (Mục 6) — cần token
+## 4. Bảng điều khiển HR (Mục 6) — cần token (trừ các API ghi chú "không cần token")
 
 ### Tin tuyển dụng
 
 | Method | Endpoint | Body / Ghi chú |
 | --- | --- | --- |
-| GET | `/api/jobs?status=open\|closed` | Mọi tin, có thể lọc theo trạng thái |
+| GET | `/api/jobs?status=open\|closed` | Mọi tin (gồm cả tin đã đóng), có thể lọc theo trạng thái. **Không cần token.** Cổng ứng viên dùng `/api/jobs/open` |
 | POST | `/api/jobs` | JSON: `title`, `description`, `requirements` (bắt buộc); `required_skills` (mảng), `preferred_skills`, `experience_years_min` → **201** |
 | PUT | `/api/jobs/{id}` | Chỉ gửi các trường cần đổi, trường không gửi được giữ nguyên |
 | PATCH | `/api/jobs/{id}/close` | Đóng tin: tin biến khỏi `/api/jobs/open`, không nhận hồ sơ mới |

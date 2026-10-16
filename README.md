@@ -131,6 +131,7 @@ cd D:\3\DoAnCoSo\backend
 - Mở trực tiếp các file HTML trong trình duyệt hoặc sử dụng extension **Live Server** trong VS Code:
   - **Cổng Ứng viên:** Mở file `frontend/index.html`
   - **Bảng Quản trị HR:** Mở file `frontend/admin.html`
+- Hướng dẫn phát triển frontend: [docs/Huong dan phat trien Frontend.md](docs/Huong%20dan%20phat%20trien%20Frontend.md); chi tiết API: [docs/API cho Frontend.md](docs/API%20cho%20Frontend.md)
 
 ### 5.3. Kiểm thử Backend
 Khi server đang chạy, mở một terminal khác tại `backend/` và chạy toàn bộ kiểm thử. Lệnh này kiểm tra môi trường, chạy unit test, smoke test API và End-to-End luồng AI, rồi tự ghi báo cáo có mốc thời gian vào `docs/Test-Reports/`:
