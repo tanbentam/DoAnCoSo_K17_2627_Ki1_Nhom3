@@ -49,7 +49,21 @@
         <i class="bi bi-cpu me-1"></i>Sàng lọc hồ sơ bằng AI
       </span>
       <h1 class="display-5 fw-bold mb-3">Tìm công việc phù hợp với bạn</h1>
-      <p class="lead mb-0 opacity-75">Nộp hồ sơ trực tuyến — AI sẽ đánh giá và phản hồi nhanh chóng.</p>
+      <p class="lead mb-4 opacity-75">Nộp hồ sơ trực tuyến — AI sẽ đánh giá và phản hồi nhanh chóng.</p>
+
+      <div class="hero-search d-flex align-items-center gap-2">
+        <i class="bi bi-search text-muted ps-2"></i>
+        <input
+          id="job-search"
+          type="search"
+          class="form-control"
+          placeholder="Tìm theo vị trí hoặc kỹ năng (VD: Python, FastAPI)"
+          aria-label="Tìm việc làm"
+        />
+      </div>
+      <div class="mt-3 small opacity-75">
+        <i class="bi bi-briefcase-fill me-1"></i><span id="job-count">Đang tải…</span>
+      </div>
     </div>
   </header>
 

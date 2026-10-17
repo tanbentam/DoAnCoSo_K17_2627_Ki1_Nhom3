@@ -69,7 +69,7 @@ Ký hiệu:
 
 ## 5. Candidate Portal (Frontend)
 
-* [ ] Thiết kế giao diện trang chủ (`index.html`) hiển thị danh sách tin tuyển dụng
+* [x] Thiết kế giao diện trang chủ (`index.html`) hiển thị danh sách tin tuyển dụng
 * [ ] Thiết kế trang/modal xem chi tiết bản mô tả công việc (JD)
 * [ ] Xây dựng biểu mẫu (Form) nộp CV trực tuyến (Họ tên, Email, Số điện thoại, Tải file PDF)
 * [ ] Viết JavaScript kiểm tra định dạng tệp (chỉ nhận `.pdf`, `.docx`) và giới hạn dung lượng (< 5MB)
