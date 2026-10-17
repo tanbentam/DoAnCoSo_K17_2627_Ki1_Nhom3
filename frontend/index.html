@@ -82,6 +82,33 @@
 
   <footer class="border-top bg-white py-4 text-center text-muted small">© 2026 SmartRecruit AI</footer>
 
+  <!-- Modal chi tiết JD (nội dung do index.js điền) -->
+  <div class="modal fade" id="job-modal" tabindex="-1" aria-labelledby="job-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <div>
+            <h2 class="modal-title h5 fw-bold" id="job-modal-title">Chi tiết công việc</h2>
+            <div class="small text-muted" id="job-modal-meta"></div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row" id="job-modal-body"></div>
+        </div>
+        <div class="modal-footer border-0">
+          <span class="badge text-bg-secondary me-auto d-none" id="job-closed-badge">
+            <i class="bi bi-lock me-1"></i>Tin đã đóng
+          </span>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary px-4 d-none" id="job-apply-btn">
+            <i class="bi bi-send me-1"></i>Ứng tuyển
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bootstrap 5 JS CDN -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
