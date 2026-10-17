@@ -95,6 +95,39 @@
         </div>
         <div class="modal-body">
           <div class="row" id="job-modal-body"></div>
+
+          <!-- 5.3 Form nộp CV (hiện khi bấm "Ứng tuyển") -->
+          <section class="apply-box d-none mt-2" id="apply-section" aria-labelledby="apply-title">
+            <h3 class="h6 fw-bold mb-3" id="apply-title"><i class="bi bi-send me-1 text-primary"></i>Ứng tuyển vị trí này</h3>
+            <form id="apply-form" novalidate>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="apply-name">Họ tên <span class="text-danger">*</span></label>
+                  <input class="form-control" id="apply-name" name="full_name" maxlength="150" autocomplete="name" />
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="apply-email">Email <span class="text-danger">*</span></label>
+                  <input class="form-control" id="apply-email" name="email" type="email" maxlength="255" autocomplete="email" />
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="apply-phone">Số điện thoại</label>
+                  <input class="form-control" id="apply-phone" name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="0901 234 567" />
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="apply-cv">CV (PDF, dưới 5MB) <span class="text-danger">*</span></label>
+                  <label class="dropzone" for="apply-cv" id="apply-dropzone">
+                    <i class="bi bi-cloud-arrow-up fs-3 text-primary"></i>
+                    <span class="d-block" id="apply-cv-label">Kéo thả tệp vào đây hoặc <u>chọn tệp</u></span>
+                  </label>
+                  <input class="visually-hidden" id="apply-cv" name="cv_file" type="file" accept=".pdf,application/pdf" />
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+            </form>
+          </section>
         </div>
         <div class="modal-footer border-0">
           <span class="badge text-bg-secondary me-auto d-none" id="job-closed-badge">
@@ -103,6 +136,9 @@
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
           <button type="button" class="btn btn-primary px-4 d-none" id="job-apply-btn">
             <i class="bi bi-send me-1"></i>Ứng tuyển
+          </button>
+          <button type="submit" form="apply-form" class="btn btn-primary px-4 d-none" id="apply-submit-btn">
+            <i class="bi bi-send me-1"></i>Gửi hồ sơ
           </button>
         </div>
       </div>

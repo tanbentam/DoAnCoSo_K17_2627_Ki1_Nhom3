@@ -109,6 +109,47 @@ body {
   font-size: 0.78rem;
 }
 
+/* Form nộp CV trong modal JD */
+.apply-box {
+  background: #f8f9fc;
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.dropzone {
+  display: block;
+  border: 2px dashed #c7cff0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1.25rem;
+  text-align: center;
+  color: #6b7280;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+  border-color: var(--sr-brand);
+  background: #f3f5ff;
+}
+
+.dropzone.has-file {
+  border-style: solid;
+  border-color: var(--sr-score-high);
+  color: #1f2937;
+}
+
+.dropzone.is-invalid {
+  border-color: var(--bs-form-invalid-border-color, #dc3545);
+}
+
+/* Ô chọn tệp bị ẩn: khi nhận focus bằng bàn phím (Tab) thì tô viền vùng kéo thả */
+.dropzone:has(+ #apply-cv:focus-visible) {
+  border-color: var(--sr-brand);
+  box-shadow: 0 0 0 0.25rem rgba(52, 89, 230, 0.25);
+}
+
 /* ===== Bảng HR (admin.html) ===== */
 .kanban-col {
   min-height: 420px;
