@@ -1,6 +1,6 @@
 /**
  * js/index.js — Candidate portal logic
- * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV)
+ * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV, 5.4 kiểm tra tệp)
  */
 
 const jobListEl = document.getElementById("job-list");
@@ -186,6 +186,30 @@ const cvLabelEl = document.getElementById("apply-cv-label");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-. ]+$/;
 
+// 5.4 Quy tắc tệp CV. Chỉ nhận PDF cho tới khi xử lý xong Issue 06 (AI chưa đọc được .docx).
+// Nếu nhóm chốt nhận .docx: thêm ".docx" vào đây và vào thuộc tính accept của #apply-cv.
+const CV_ALLOWED_EXTENSIONS = [".pdf"];
+const CV_MAX_BYTES = 5 * 1024 * 1024; // backend giới hạn 5MB
+
+function fileExtension(name) {
+  const dot = name.lastIndexOf(".");
+  return dot >= 0 ? name.slice(dot).toLowerCase() : "";
+}
+
+function formatFileSize(bytes) {
+  return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(2)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function validateCvFile(file) {
+  if (!file) return "Vui lòng chọn tệp CV";
+  if (!CV_ALLOWED_EXTENSIONS.includes(fileExtension(file.name))) {
+    return `Chỉ nhận tệp ${CV_ALLOWED_EXTENSIONS.join(", ")}. Tệp bạn chọn không đúng định dạng.`;
+  }
+  if (file.size === 0) return "Tệp rỗng, vui lòng chọn tệp khác";
+  if (file.size >= CV_MAX_BYTES) return `Tệp phải nhỏ hơn 5MB (tệp của bạn: ${formatFileSize(file.size)})`;
+  return "";
+}
+
 /** Quy tắc khớp với kiểm tra phía backend (tài liệu Hướng dẫn phát triển Frontend, Mục 4.1). Trả "" nếu hợp lệ. */
 const fieldValidators = {
   full_name: (v) => {
@@ -205,8 +229,7 @@ const fieldValidators = {
     if (!PHONE_PATTERN.test(v)) return "Số điện thoại chỉ gồm chữ số, khoảng trắng và các ký tự + - .";
     return "";
   },
-  // Kiểm tra định dạng và dung lượng tệp: mục 5.4
-  cv_file: (file) => (file ? "" : "Vui lòng chọn tệp CV"),
+  cv_file: validateCvFile,
 };
 
 let applyAttempted = false; // chỉ báo lỗi khi đang gõ sau lần bấm Gửi đầu tiên
@@ -222,7 +245,10 @@ function validateField(name) {
   const message = fieldValidators[name](fieldValue(name));
   input.classList.toggle("is-invalid", !!message);
   input.parentElement.querySelector(".invalid-feedback").textContent = message;
-  if (name === "cv_file") dropzoneEl.classList.toggle("is-invalid", !!message);
+  if (name === "cv_file") {
+    dropzoneEl.classList.toggle("is-invalid", !!message);
+    dropzoneEl.classList.toggle("has-file", !message); // viền xanh chỉ khi tệp hợp lệ
+  }
   return !message;
 }
 
@@ -239,10 +265,10 @@ function validateApplyForm() {
 
 function updateCvLabel() {
   const file = cvInputEl.files[0];
-  dropzoneEl.classList.toggle("has-file", !!file);
+  dropzoneEl.classList.remove("has-file");
   if (file) {
-    cvLabelEl.innerHTML = `<i class="bi bi-file-earmark-pdf me-1"></i><span class="fw-semibold"></span>`
-      + ` <span class="text-muted small">(${(file.size / 1024 / 1024).toFixed(2)} MB) · bấm để đổi tệp</span>`;
+    cvLabelEl.innerHTML = `<i class="bi bi-file-earmark-text me-1"></i><span class="fw-semibold"></span>`
+      + ` <span class="text-muted small">(${formatFileSize(file.size)}) · bấm để đổi tệp</span>`;
     cvLabelEl.querySelector(".fw-semibold").textContent = file.name;
   } else {
     cvLabelEl.innerHTML = "Kéo thả tệp vào đây hoặc <u>chọn tệp</u>";
@@ -282,7 +308,8 @@ applyFormEl.addEventListener("input", (e) => {
 
 cvInputEl.addEventListener("change", () => {
   updateCvLabel();
-  if (applyAttempted) validateField("cv_file");
+  // 5.4: chặn ngay khi chọn tệp sai định dạng / quá dung lượng, không đợi bấm Gửi
+  if (cvInputEl.files.length || applyAttempted) validateField("cv_file");
 });
 
 // Kéo thả tệp vào vùng dropzone
