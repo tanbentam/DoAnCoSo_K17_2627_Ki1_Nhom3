@@ -1,6 +1,7 @@
 /**
  * js/admin.js — Bảng điều khiển HR (admin.html)
  * Mục 6: 6.1 khung trang (đăng nhập, thanh điều hướng, chọn tin tuyển dụng, khung Kanban 5 cột)
+ *        6.2 form tạo / sửa tin (ô nhập kỹ năng dạng nhãn), đóng tin có xác nhận
  */
 
 // 5 cột khớp 5 trạng thái của backend (nhóm chốt 17/10/2026: tách offer và rejected)
@@ -49,6 +50,9 @@ function showLoginError(message) {
 
 /** Về màn hình đăng nhập; message hiện trong khung lỗi (VD hết phiên). */
 function showLogin(message = "") {
+  // Hết phiên khi đang mở form → đóng mọi modal (không mở lại form sửa)
+  returnToJobForm = false;
+  document.querySelectorAll(".modal.show").forEach((el) => bootstrap.Modal.getInstance(el)?.hide());
   dashboardViewEl.classList.add("d-none");
   loginViewEl.classList.remove("d-none");
   document.title = "Đăng nhập — SmartRecruit AI";
@@ -239,16 +243,277 @@ async function loadJobs() {
 jobSelectEl.addEventListener("change", onJobChanged);
 document.getElementById("reload-btn").addEventListener("click", loadJobs);
 
-// Tạo / sửa tin: làm ở mục 6.2
-document.getElementById("create-job-btn").addEventListener("click", () => {
-  showToast("Form tạo tin tuyển dụng sẽ có ở mục 6.2", "info");
-});
-editJobBtn.addEventListener("click", () => {
-  showToast("Form sửa tin tuyển dụng sẽ có ở mục 6.2", "info");
-});
+// Trang quản lý tin: làm ở mục 6.9
 document.getElementById("nav-jobs").addEventListener("click", (event) => {
   event.preventDefault();
-  showToast("Trang quản lý tin tuyển dụng sẽ có ở mục 6.2", "info");
+  showToast("Trang quản lý tin tuyển dụng sẽ có ở mục 6.9", "info");
+});
+
+// ===== A4: Ô nhập kỹ năng dạng nhãn =====
+const TAG_MAX_LENGTH = 60;
+
+/**
+ * Biến `.tag-input` thành ô nhập nhãn: Enter / dấu phẩy để thêm, × hoặc Backspace để xóa,
+ * bỏ nhãn trùng (không phân biệt hoa thường). Trả về { get, set, commit }.
+ */
+function createTagInput(boxEl) {
+  const input = boxEl.querySelector("input");
+  const kind = boxEl.dataset.kind;
+  let tags = [];
+
+  function render() {
+    boxEl.querySelectorAll(".tag-chip").forEach((chip) => chip.remove());
+    tags.forEach((tag, index) => {
+      const chip = document.createElement("span");
+      chip.className = `tag-chip ${kind}`;
+      chip.append(document.createTextNode(tag));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "×";
+      remove.dataset.index = index;
+      remove.setAttribute("aria-label", `Xóa ${tag}`);
+      chip.appendChild(remove);
+      boxEl.insertBefore(chip, input);
+    });
+    boxEl.classList.remove("is-invalid");
+  }
+
+  function addOne(raw) {
+    const tag = String(raw ?? "").replace(/\s+/g, " ").trim().slice(0, TAG_MAX_LENGTH);
+    if (!tag || tags.some((t) => t.toLowerCase() === tag.toLowerCase())) return;
+    tags.push(tag);
+  }
+
+  /** Thêm phần chữ đang gõ dở (có thể chứa nhiều kỹ năng cách nhau bằng dấu phẩy). */
+  function commit() {
+    if (!input.value.trim()) return;
+    input.value.split(/[,;\n]/).forEach(addOne);
+    input.value = "";
+    render();
+  }
+
+  input.addEventListener("keydown", (event) => {
+    if (event.isComposing) return; // đang gõ dấu tiếng Việt bằng bộ gõ
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      commit();
+    } else if (event.key === "Backspace" && !input.value && tags.length) {
+      tags.pop();
+      render();
+    }
+  });
+  // Dán "Python, FastAPI, MySQL" → tách thành 3 nhãn
+  input.addEventListener("input", () => {
+    if (/[,;\n]/.test(input.value)) commit();
+  });
+  input.addEventListener("blur", commit);
+
+  boxEl.addEventListener("click", (event) => {
+    const remove = event.target.closest("button[data-index]");
+    if (remove) {
+      tags.splice(Number(remove.dataset.index), 1);
+      render();
+    }
+    input.focus();
+  });
+
+  return {
+    get: () => [...tags],
+    set(list) {
+      tags = [];
+      input.value = "";
+      (Array.isArray(list) ? list : []).forEach(addOne);
+      render();
+    },
+    commit,
+  };
+}
+
+// ===== A4: Form tạo / sửa tin =====
+const jobModalEl = document.getElementById("job-modal");
+const jobModal = new bootstrap.Modal(jobModalEl);
+const jobFormEl = document.getElementById("job-form");
+const jobFieldsetEl = document.getElementById("job-fieldset");
+const jobFormErrorEl = document.getElementById("job-form-error");
+const jobTitleEl = document.getElementById("job-title");
+const jobExpEl = document.getElementById("job-exp");
+const jobDescriptionEl = document.getElementById("job-description");
+const jobRequirementsEl = document.getElementById("job-requirements");
+const requiredSkillsBoxEl = document.getElementById("job-required-skills");
+const jobSaveBtn = document.getElementById("job-save-btn");
+const jobCloseBtn = document.getElementById("job-close-btn");
+const requiredSkills = createTagInput(requiredSkillsBoxEl);
+const preferredSkills = createTagInput(document.getElementById("job-preferred-skills"));
+
+let editingJob = null; // null = đang tạo tin mới
+let jobSaving = false;
+
+function showJobFormError(message) {
+  jobFormErrorEl.querySelector("span").textContent = message;
+  jobFormErrorEl.classList.toggle("d-none", !message);
+}
+
+function saveButtonHtml() {
+  return editingJob
+    ? '<i class="bi bi-check-lg me-1"></i>Lưu thay đổi'
+    : '<i class="bi bi-check-lg me-1"></i>Đăng tin';
+}
+
+function setJobSaving(saving) {
+  jobSaving = saving;
+  jobFieldsetEl.disabled = saving;
+  jobSaveBtn.disabled = saving;
+  jobCloseBtn.disabled = saving;
+  jobSaveBtn.innerHTML = saving
+    ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang lưu…'
+    : saveButtonHtml();
+}
+
+/** Mở form: job = null → tạo mới; job = tin đang chọn → sửa. */
+function openJobForm(job = null) {
+  editingJob = job;
+  jobFormEl.querySelectorAll(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
+  showJobFormError("");
+
+  jobTitleEl.value = job?.title ?? "";
+  jobDescriptionEl.value = job?.description ?? "";
+  jobRequirementsEl.value = job?.requirements ?? "";
+  jobExpEl.value = job?.experience_years_min ?? 0;
+  requiredSkills.set(job?.required_skills ?? []);
+  preferredSkills.set(job?.preferred_skills ?? []);
+
+  document.getElementById("job-modal-title").textContent = job ? "Sửa tin tuyển dụng" : "Tạo tin tuyển dụng mới";
+  jobFormEl.querySelectorAll(".job-edit-only").forEach((el) => el.classList.toggle("d-none", !job));
+  jobCloseBtn.classList.toggle("d-none", !(job && job.status === "open"));
+  setJobSaving(false);
+  jobModal.show();
+}
+
+jobModalEl.addEventListener("shown.bs.modal", () => {
+  if (!jobFormErrorEl.classList.contains("d-none")) return;
+  jobTitleEl.focus();
+});
+
+/** Kiểm tra dữ liệu; trả về payload hoặc null (đã tô đỏ ô sai và đưa con trỏ tới ô đầu tiên). */
+function readJobForm() {
+  requiredSkills.commit();
+  preferredSkills.commit();
+
+  const title = jobTitleEl.value.trim();
+  const description = jobDescriptionEl.value.trim();
+  const requirements = jobRequirementsEl.value.trim();
+  const required = requiredSkills.get();
+  const expText = jobExpEl.value.trim();
+  const exp = expText === "" ? 0 : Number(expText);
+  const expValid = Number.isInteger(exp) && exp >= 0 && exp <= 50;
+
+  const checks = [
+    [jobTitleEl, title.length > 0],
+    [requiredSkillsBoxEl, required.length > 0],
+    [jobExpEl, expValid],
+    [jobDescriptionEl, description.length > 0],
+    [jobRequirementsEl, requirements.length > 0],
+  ];
+  checks.forEach(([el, ok]) => el.classList.toggle("is-invalid", !ok));
+  const firstInvalid = checks.find(([, ok]) => !ok)?.[0];
+  if (firstInvalid) {
+    (firstInvalid === requiredSkillsBoxEl ? requiredSkillsBoxEl.querySelector("input") : firstInvalid).focus();
+    return null;
+  }
+
+  return {
+    title,
+    description,
+    requirements,
+    required_skills: required,
+    preferred_skills: preferredSkills.get(),
+    experience_years_min: exp,
+  };
+}
+
+[jobTitleEl, jobExpEl, jobDescriptionEl, jobRequirementsEl].forEach((el) => {
+  el.addEventListener("input", () => el.classList.remove("is-invalid"));
+});
+
+jobFormEl.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (jobSaving) return;
+  showJobFormError("");
+  const payload = readJobForm();
+  if (!payload) return;
+
+  setJobSaving(true);
+  try {
+    const saved = editingJob
+      ? await JobAPI.update(editingJob.id, payload)
+      : await JobAPI.create(payload);
+    jobModal.hide();
+    showToast(editingJob ? `Đã lưu tin "${saved.title}"` : `Đã đăng tin "${saved.title}"`, "success");
+    saveJobId(saved.id);
+    loadJobs();
+  } catch (err) {
+    showJobFormError(err.message);
+    jobFormErrorEl.scrollIntoView({ block: "nearest" });
+  } finally {
+    setJobSaving(false);
+  }
+});
+
+document.getElementById("create-job-btn").addEventListener("click", () => openJobForm(null));
+editJobBtn.addEventListener("click", () => {
+  const job = selectedJob();
+  if (job) openJobForm(job);
+});
+
+// ===== Đóng tin (hỏi xác nhận) =====
+const closeJobModalEl = document.getElementById("close-job-modal");
+const closeJobModal = new bootstrap.Modal(closeJobModalEl);
+const closeJobErrorEl = document.getElementById("close-job-error");
+const closeJobConfirmBtn = document.getElementById("close-job-confirm");
+let returnToJobForm = false; // "Quay lại" / Esc → mở lại form sửa, giữ nguyên chữ đang gõ
+
+function setClosingJob(closing) {
+  closeJobConfirmBtn.disabled = closing;
+  document.getElementById("close-job-back").disabled = closing;
+  closeJobConfirmBtn.innerHTML = closing
+    ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang đóng…'
+    : "Đóng tin";
+}
+
+jobCloseBtn.addEventListener("click", () => {
+  if (!editingJob) return;
+  document.getElementById("close-job-name").textContent = editingJob.title;
+  closeJobErrorEl.classList.add("d-none");
+  setClosingJob(false);
+  returnToJobForm = true;
+  // Bootstrap không chồng 2 modal: ẩn form trước rồi mới hiện hộp xác nhận
+  jobModalEl.addEventListener("hidden.bs.modal", () => closeJobModal.show(), { once: true });
+  jobModal.hide();
+});
+
+document.getElementById("close-job-back").addEventListener("click", () => closeJobModal.hide());
+
+closeJobModalEl.addEventListener("hidden.bs.modal", () => {
+  if (returnToJobForm) jobModal.show();
+});
+
+closeJobConfirmBtn.addEventListener("click", async () => {
+  if (!editingJob) return;
+  setClosingJob(true);
+  closeJobErrorEl.classList.add("d-none");
+  try {
+    const closed = await JobAPI.close(editingJob.id);
+    returnToJobForm = false;
+    closeJobModal.hide();
+    showToast(`Đã đóng tin "${closed.title}"`, "success");
+    saveJobId(closed.id);
+    loadJobs();
+  } catch (err) {
+    closeJobErrorEl.textContent = err.message;
+    closeJobErrorEl.classList.remove("d-none");
+  } finally {
+    setClosingJob(false);
+  }
 });
 
 // ===== Khởi động =====

@@ -8,6 +8,7 @@ Mỗi mục trong `checklist.md` Mục 6 có một file log riêng: làm gì, fi
 
 | File | Mục checklist | Trạng thái | Commit |
 | --- | --- | --- | --- |
-| [Phan 6.1.md](Phan%206.1.md) | 6.1 Khung `admin.html`, thanh điều hướng, đăng nhập | Xong | |
+| [Phan 6.1.md](Phan%206.1.md) | 6.1 Khung `admin.html`, thanh điều hướng, đăng nhập | Xong | `baff12b` |
+| [Phan 6.2.md](Phan%206.2.md) | 6.2 Form tạo / sửa tin, đóng tin | Xong | |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý / việc còn lại.

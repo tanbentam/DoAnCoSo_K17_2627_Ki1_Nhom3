@@ -152,6 +152,106 @@
     </div>
   </div>
 
+  <!-- A4: Modal tạo / sửa tin tuyển dụng -->
+  <div class="modal fade" id="job-modal" tabindex="-1" aria-labelledby="job-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+      <form class="modal-content" id="job-form" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h4" id="job-modal-title">Tạo tin tuyển dụng mới</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="alert alert-info py-2 small job-edit-only d-none" role="note">
+            <i class="bi bi-info-circle me-1"></i>
+            Hồ sơ đã nộp <b>giữ nguyên điểm cũ</b>; tiêu chí mới chỉ áp dụng cho hồ sơ nộp sau khi lưu.
+          </div>
+          <div id="job-form-error" class="alert alert-danger py-2 small d-flex align-items-center gap-2 d-none" role="alert">
+            <i class="bi bi-x-circle-fill"></i><span></span>
+          </div>
+
+          <fieldset id="job-fieldset">
+            <div class="mb-3">
+              <label class="form-label required" for="job-title">Tiêu đề vị trí</label>
+              <input class="form-control" id="job-title" maxlength="255" placeholder="VD: Backend Developer (Python/FastAPI)" required />
+              <div class="invalid-feedback">Vui lòng nhập tiêu đề vị trí</div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-8">
+                <label class="form-label required" for="job-required-input">Kỹ năng bắt buộc <span class="text-secondary fw-normal">(tiêu chí lọc cứng)</span></label>
+                <div class="form-control tag-input" id="job-required-skills" data-kind="required">
+                  <input id="job-required-input" placeholder="Gõ kỹ năng rồi Enter…" maxlength="60" autocomplete="off" />
+                </div>
+                <div class="invalid-feedback">Cần ít nhất 1 kỹ năng bắt buộc</div>
+                <div class="form-hint">Mỗi kỹ năng một nhãn, viết tên chuẩn (VD "FastAPI", "MySQL"). Enter hoặc dấu phẩy để thêm. AI chấm theo từng nhãn.</div>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="job-exp">Kinh nghiệm tối thiểu</label>
+                <div class="input-group has-validation">
+                  <input type="number" class="form-control" id="job-exp" min="0" max="50" step="1" value="0" inputmode="numeric" />
+                  <span class="input-group-text">năm</span>
+                  <div class="invalid-feedback">Nhập số nguyên từ 0 đến 50</div>
+                </div>
+                <div class="form-hint">0 = không yêu cầu</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="job-preferred-input">Kỹ năng ưu tiên <span class="text-secondary fw-normal">(cộng điểm, không bắt buộc)</span></label>
+              <div class="form-control tag-input" id="job-preferred-skills" data-kind="preferred">
+                <input id="job-preferred-input" placeholder="Gõ kỹ năng rồi Enter…" maxlength="60" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label required" for="job-description">Mô tả công việc</label>
+              <textarea class="form-control" id="job-description" rows="4" placeholder="Công việc chính, môi trường làm việc…" required></textarea>
+              <div class="invalid-feedback">Vui lòng nhập mô tả công việc</div>
+            </div>
+
+            <div class="mb-1">
+              <label class="form-label required" for="job-requirements">Yêu cầu ứng viên</label>
+              <textarea class="form-control" id="job-requirements" rows="4" placeholder="Bằng cấp, kinh nghiệm, kỹ năng mềm…" required></textarea>
+              <div class="invalid-feedback">Vui lòng nhập yêu cầu ứng viên</div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger me-auto d-none" id="job-close-btn">
+            <i class="bi bi-lock me-1"></i>Đóng tin
+          </button>
+          <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="job-save-btn"></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hộp xác nhận đóng tin -->
+  <div class="modal fade" id="close-job-modal" tabindex="-1" aria-labelledby="close-job-title" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-status bg-danger"></div>
+        <div class="modal-body text-center py-4">
+          <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+          <h3 class="h4 mt-2" id="close-job-title">Đóng tin tuyển dụng?</h3>
+          <div class="text-secondary small">
+            "<span id="close-job-name"></span>" sẽ biến khỏi cổng ứng viên và không nhận hồ sơ mới. Hồ sơ đã nộp vẫn giữ trên bảng Kanban.
+          </div>
+          <div id="close-job-error" class="alert alert-danger py-2 small mt-3 mb-0 text-start d-none" role="alert"></div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100 d-flex gap-2">
+            <button type="button" class="btn w-100" id="close-job-back">Quay lại</button>
+            <button type="button" class="btn btn-danger w-100" id="close-job-confirm">Đóng tin</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Tabler JS (đã gói sẵn Bootstrap 5 JS: modal, dropdown, tab, toast) -->
   <script
     src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"

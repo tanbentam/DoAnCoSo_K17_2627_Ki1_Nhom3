@@ -272,3 +272,60 @@ body {
   color: #6b7280;
   margin: -6px 0 10px;
 }
+
+/* Ô nhập kỹ năng dạng nhãn (form tin tuyển dụng) */
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 42px;
+  cursor: text;
+}
+
+.tag-input:focus-within {
+  border-color: var(--sr-brand);
+  box-shadow: 0 0 0 0.25rem rgba(52, 89, 230, 0.2);
+}
+
+.tag-input.is-invalid {
+  background-image: none;
+}
+
+.tag-input input {
+  border: 0;
+  outline: 0;
+  flex: 1 1 140px;
+  min-width: 120px;
+  padding: 2px 0;
+  background: transparent;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 0.2em 0.35em 0.2em 0.7em;
+  font-size: 0.82rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.tag-chip.required  { background: #eef2ff; color: #3449b8; }
+.tag-chip.preferred { background: #fff7e6; color: #9a6400; }
+
+.tag-chip button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.tag-chip button:hover,
+.tag-chip button:focus-visible {
+  opacity: 1;
+}
