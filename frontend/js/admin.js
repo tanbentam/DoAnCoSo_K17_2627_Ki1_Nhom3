@@ -3,6 +3,7 @@
  * Mục 6: 6.1 khung trang (đăng nhập, thanh điều hướng, chọn tin tuyển dụng, khung Kanban 5 cột)
  *        6.2 form tạo / sửa tin (ô nhập kỹ năng dạng nhãn), đóng tin có xác nhận
  *        6.3–6.6 bảng Kanban 5 cột, thẻ ứng viên, kéo thả SortableJS + gọi API đổi trạng thái
+ *        6.7–6.8 modal hồ sơ chi tiết: kết quả AI (5 tab), kỹ năng, câu hỏi phỏng vấn, CV gốc
  */
 
 // 5 cột khớp 5 trạng thái của backend (nhóm chốt 17/10/2026: tách offer và rejected)
@@ -55,7 +56,15 @@ function showLogin(message = "") {
   returnToJobForm = false;
   stopPolling();
   appsRequestId++;
-  document.querySelectorAll(".modal.show").forEach((el) => bootstrap.Modal.getInstance(el)?.hide());
+  // Modal đang chạy hiệu ứng mở thì Bootstrap bỏ qua hide() → đóng lại ngay khi mở xong
+  document.querySelectorAll(".modal").forEach((el) => {
+    const modal = bootstrap.Modal.getInstance(el);
+    if (!modal) return;
+    modal.hide();
+    el.addEventListener("shown.bs.modal", () => {
+      if (!loginViewEl.classList.contains("d-none")) modal.hide();
+    }, { once: true });
+  });
   dashboardViewEl.classList.add("d-none");
   loginViewEl.classList.remove("d-none");
   document.title = "Đăng nhập — SmartRecruit AI";
@@ -363,6 +372,7 @@ async function moveApplication(id, newStatus) {
   app.status = newStatus;
   savingIds.add(id);
   renderBoard();
+  if (detailAppId === id) renderDetailHeader();
 
   try {
     const updated = await ApplicationAPI.updateStatus(id, newStatus);
@@ -378,6 +388,7 @@ async function moveApplication(id, newStatus) {
   } finally {
     savingIds.delete(id);
     if (!dashboardViewEl.classList.contains("d-none")) renderBoard();
+    if (detailAppId === id) renderDetailHeader();
   }
 }
 
@@ -401,10 +412,390 @@ boardEl.addEventListener("keydown", (event) => {
   }
 });
 
-/** Bấm vào thẻ: modal hồ sơ chi tiết làm ở mục 6.7. */
+// ===== A9, A10: Modal hồ sơ chi tiết + đánh giá AI (6.7, 6.8) =====
+const detailModalEl = document.getElementById("detail-modal");
+const detailModal = new bootstrap.Modal(detailModalEl);
+const detailAlertEl = document.getElementById("detail-alert");
+const detailPanes = {
+  overview: document.getElementById("pane-overview"),
+  skills: document.getElementById("pane-skills"),
+  exp: document.getElementById("pane-exp"),
+  questions: document.getElementById("pane-questions"),
+  cv: document.getElementById("pane-cv"),
+};
+
+const QUESTION_CATEGORIES = {
+  skill_gap:          { label: "Kỹ năng còn thiếu",  badge: "bg-red-lt" },
+  skill_verification: { label: "Kiểm chứng kỹ năng", badge: "bg-blue-lt" },
+  experience:         { label: "Kinh nghiệm",         badge: "bg-purple-lt" },
+  behavioral:         { label: "Tình huống",          badge: "bg-green-lt" },
+};
+const SCORE_COLORS = { "badge-high": "var(--sr-score-high)", "badge-medium": "var(--sr-score-medium)", "badge-low": "var(--sr-score-low)" };
+
+let detailAppId = null;
+let detailRequestId = 0;
+let detailCvUrl = null;   // object URL của CV đang xem, thu hồi khi đóng modal
+let detailCvLoaded = false;
+
+/** Số kiểu Việt Nam: 5.3 → "5,3". */
+function formatNumber(value, digits = 1) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toLocaleString("vi-VN", { maximumFractionDigits: digits }) : "";
+}
+
+/** Mốc thời gian trong CV: "2023-03" → "03/2023", "present" → "nay". */
+function formatPeriod(value) {
+  const s = String(value ?? "").trim();
+  if (!s) return "?";
+  if (/^(present|now|current|hiện tại|nay)$/i.test(s)) return "nay";
+  const m = s.match(/^(\d{4})-(\d{2})/);
+  return m ? `${m[2]}/${m[1]}` : s;
+}
+
+/** Danh sách nhãn; rỗng thì hiện câu thay thế. */
+function chipsHtml(list, className, emptyText) {
+  const items = (Array.isArray(list) ? list : []).filter((x) => x !== null && x !== undefined && x !== "");
+  if (!items.length) return `<p class="text-secondary small mb-0">${emptyText}</p>`;
+  return `<div class="d-flex flex-wrap gap-2">${items.map((x) => `<span class="${className}">${escapeHtml(x)}</span>`).join("")}</div>`;
+}
+
+function detailApp() {
+  return applications.find((a) => a.id === detailAppId) ?? null;
+}
+
+/** Đầu modal: tên, vị trí, ngày nộp, cột hiện tại, menu chuyển cột. */
+function renderDetailHeader(analysis = null) {
+  const app = detailApp();
+  const name = app?.candidate?.full_name ?? analysis?.candidate_name ?? `Hồ sơ #${detailAppId}`;
+  const jobTitle = analysis?.job_title ?? selectedJob()?.title ?? "";
+  document.getElementById("detail-name").textContent = name;
+  document.getElementById("detail-avatar").textContent = (String(name).match(/\p{L}/u)?.[0] ?? "?").toUpperCase(); // bỏ qua ký tự như "[" trong "[TEST]"
+  document.getElementById("detail-sub").innerHTML =
+    `Ứng tuyển: <b>${escapeHtml(jobTitle)}</b>${app?.created_at ? ` · Nộp ${escapeHtml(formatDate(app.created_at))}` : ""}`;
+
+  const status = app?.status ?? analysis?.status;
+  const col = columnOf(status);
+  const statusEl = document.getElementById("detail-status");
+  statusEl.className = `badge ${col.badge}`;
+  statusEl.innerHTML = `<span class="col-dot ${col.dot} d-inline-block me-1"></span>${col.label}${savingIds.has(detailAppId) ? '<span class="spinner-border spinner-border-sm ms-2 card-spinner" role="status"></span>' : ""}`;
+
+  document.getElementById("detail-move-btn").disabled = !app || savingIds.has(detailAppId);
+  document.getElementById("detail-move-menu").innerHTML = '<span class="dropdown-header">Chuyển sang</span>'
+    + KANBAN_COLUMNS.filter((c) => c.status !== col.status)
+      .map((c) => `<button type="button" class="dropdown-item" data-detail-move="${c.status}"><span class="col-dot ${c.dot} me-2"></span>${c.label}</button>`)
+      .join("");
+}
+
+document.getElementById("detail-move-menu").addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-detail-move]");
+  if (btn && detailAppId !== null) moveApplication(detailAppId, btn.dataset.detailMove);
+});
+
+function setTabCount(tabId, text, badgeClass) {
+  const el = document.querySelector(`#${tabId} .tab-count`);
+  el.className = text ? `tab-count badge ${badgeClass} ms-1` : "tab-count";
+  el.textContent = text;
+}
+
+/** Thông báo đầu modal theo `ai_status`. */
+function renderDetailAlert(d) {
+  const error = d.ai_error ? escapeHtml(d.ai_error) : "";
+  const map = {
+    pending:    `<div class="alert alert-info d-flex align-items-center gap-2 mt-3 mb-0" role="status"><span class="spinner-border spinner-border-sm"></span>Hồ sơ đang chờ AI chấm. Kết quả sẽ tự hiện khi chấm xong.</div>`,
+    processing: `<div class="alert alert-info d-flex align-items-center gap-2 mt-3 mb-0" role="status"><span class="spinner-border spinner-border-sm"></span>AI đang chấm hồ sơ này (khoảng 30–40 giây). Kết quả sẽ tự hiện khi chấm xong.</div>`,
+    partial:    `<div class="alert alert-warning d-flex align-items-center gap-2 mt-3 mb-0" role="status"><i class="bi bi-exclamation-triangle-fill"></i>Kết quả AI chưa đầy đủ${error ? `: ${error}` : "."}</div>`,
+    failed:     `<div class="alert alert-danger d-flex align-items-center gap-2 mt-3 mb-0" role="alert"><i class="bi bi-x-circle-fill"></i>AI không chấm được hồ sơ này${error ? `: ${error}` : "."} Vẫn xem được CV gốc.</div>`,
+  };
+  detailAlertEl.innerHTML = map[d.ai_status] ?? "";
+}
+
+/** Tab 1 – Tổng quan: điểm tổng, 2 điểm thành phần, tóm tắt AI, liên hệ, nguồn AI. */
+function overviewHtml(d, app) {
+  const info = d.ai_extracted_info ?? {};
+  const score = formatScore(d.matching_score);
+  const color = score === null ? "#c5ccd6" : SCORE_COLORS[scoreClass(d.matching_score)];
+  const bar = (label, value, cls) => {
+    const v = formatScore(value);
+    return `
+      <div class="d-flex justify-content-between metric-label"><span>${label}</span><b class="text-body">${v ?? "—"}</b></div>
+      <div class="progress progress-sm mb-2"><div class="progress-bar ${cls}" style="width:${v ?? 0}%"></div></div>`;
+  };
+  const contact = [
+    ["bi-envelope", info.email ?? app?.candidate?.email],
+    ["bi-telephone", info.phone ?? app?.candidate?.phone],
+    ["bi-geo-alt", info.location],
+    ["bi-person-badge", info.current_title],
+  ].filter(([, v]) => v);
+  const meta = info.ai_meta;
+
+  return `
+    <div class="row g-4">
+      <div class="col-12 col-md-4 text-center">
+        <div class="score-ring mx-auto" style="--v:${score ?? 0};--c:${color}">
+          <div><div><div class="ring-value">${score === null ? "—" : `${score}%`}</div><div class="metric-label">Matching Score</div></div></div>
+        </div>
+        <div class="text-start mt-3">
+          ${bar("Lọc cứng (40%)", d.hard_filter_score, "bg-green")}
+          ${bar("Ngữ nghĩa (60%)", d.semantic_score, "bg-blue")}
+          <div class="metric-label mt-2">Công thức: ${escapeHtml(info.scoring_details?.formula ?? "0.4 × lọc cứng + 0.6 × ngữ nghĩa")}</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-8">
+        <h3 class="h4"><i class="bi bi-stars text-primary me-1"></i>Tóm tắt của AI</h3>
+        <p class="text-secondary jd-text">${d.ai_summary ? escapeHtml(d.ai_summary) : "Chưa có tóm tắt."}</p>
+        <h3 class="h4 mt-4">Liên hệ</h3>
+        ${contact.length
+          ? `<div class="row g-2 small">${contact.map(([icon, v]) => `<div class="col-12 col-sm-6 text-break"><i class="bi ${icon} me-2 text-secondary"></i>${escapeHtml(v)}</div>`).join("")}</div>`
+          : '<p class="text-secondary small mb-0">Chưa có thông tin</p>'}
+        ${meta?.provider
+          ? `<div class="metric-label mt-4"><i class="bi bi-cpu me-1"></i>Chấm bởi: ${escapeHtml(meta.provider)}${meta.model ? ` · ${escapeHtml(meta.model)}` : ""}${meta.latency_seconds ? ` · ${escapeHtml(formatNumber(meta.latency_seconds))} giây` : ""}</div>`
+          : ""}
+      </div>
+    </div>`;
+}
+
+/** Tab 2 – Kỹ năng (6.8): đáp ứng / bắt buộc còn thiếu / ưu tiên còn thiếu. */
+function skillsHtml(d) {
+  const sd = d.ai_extracted_info?.scoring_details ?? {};
+  const matches = new Map((sd.skill_matches ?? []).map((m) => [String(m.skill).toLowerCase(), m]));
+  const matched = d.matched_skills ?? [];
+  const missing = d.missing_skills ?? [];
+  const missingPref = sd.missing_preferred_skills ?? [];
+
+  const matchedHtml = matched.length
+    ? `<div class="d-flex flex-wrap gap-2">${matched.map((skill) => {
+        const m = matches.get(String(skill).toLowerCase());
+        const indirect = m && ["semantic", "alias"].includes(m.match_type) && m.matched_with
+          && String(m.matched_with).toLowerCase() !== String(skill).toLowerCase();
+        return `<span class="skill-chip skill-ok">${escapeHtml(skill)}${indirect ? `<span class="skill-note">· tương đương: ${escapeHtml(m.matched_with)}</span>` : ""}</span>`;
+      }).join("")}</div>`
+    : '<p class="text-secondary small mb-0">Chưa có kỹ năng nào khớp.</p>';
+
+  return `
+    <h3 class="h4 mb-2"><i class="bi bi-check-circle-fill text-green me-1"></i>Kỹ năng đáp ứng <span class="text-secondary fw-normal">(${matched.length})</span></h3>
+    <div class="mb-4">${matchedHtml}</div>
+    <h3 class="h4 mb-2"><i class="bi bi-x-circle-fill text-red me-1"></i>Kỹ năng bắt buộc còn thiếu <span class="text-secondary fw-normal">(${missing.length})</span></h3>
+    <div class="mb-4">${chipsHtml(missing, "skill-chip skill-missing", "Không thiếu kỹ năng bắt buộc nào.")}</div>
+    <h3 class="h4 mb-2"><i class="bi bi-dash-circle-fill text-yellow me-1"></i>Kỹ năng ưu tiên còn thiếu <span class="text-secondary fw-normal">(${missingPref.length})</span></h3>
+    ${chipsHtml(missingPref, "skill-chip skill-pref", "Không thiếu kỹ năng ưu tiên nào.")}`;
+}
+
+/** Tab 3 – Kinh nghiệm & học vấn. */
+function experienceHtml(d) {
+  const info = d.ai_extracted_info ?? {};
+  const years = info.experience_years ?? info.experience_details?.final;
+  const required = Number(info.scoring_details?.required_experience_years ?? selectedJob()?.experience_years_min ?? 0);
+  const details = info.experience_details ?? {};
+  const works = Array.isArray(info.work_experience) ? info.work_experience : [];
+  const edus = Array.isArray(info.education) ? info.education : [];
+
+  const yearsHtml = years === null || years === undefined
+    ? '<span class="h3 mb-0 text-secondary">Chưa rõ số năm kinh nghiệm</span>'
+    : `<span class="h3 mb-0">${escapeHtml(formatNumber(years))} năm kinh nghiệm</span>
+       ${required > 0
+         ? `<span class="badge ${Number(years) >= required ? "bg-green-lt" : "bg-red-lt"}">${Number(years) >= required ? "Đạt" : "Chưa đạt"} yêu cầu ≥ ${escapeHtml(required)} năm</span>`
+         : '<span class="badge bg-secondary-lt">Tin không yêu cầu kinh nghiệm</span>'}`;
+
+  const hasBothYears = Number.isFinite(Number(details.stated)) && details.stated !== null
+    && Number.isFinite(Number(details.calculated)) && details.calculated !== null;
+  const discrepancy = details.discrepancy && hasBothYears
+    ?`<div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle me-1"></i>CV ghi <b>${escapeHtml(formatNumber(details.stated))} năm</b>, mốc thời gian các công việc cho <b>${escapeHtml(formatNumber(details.calculated))} năm</b> — cần xác minh khi phỏng vấn.</div>`
+    : "";
+
+  const worksHtml = works.length
+    ? works.map((w) => `
+        <div class="timeline-item">
+          <div class="fw-semibold text-break">${escapeHtml(w.position ?? "Không rõ vị trí")}${w.company ? ` · ${escapeHtml(w.company)}` : ""}</div>
+          <div class="metric-label">${escapeHtml(formatPeriod(w.start_date))} – ${escapeHtml(formatPeriod(w.end_date))}</div>
+          ${w.description ? `<div class="small text-secondary mt-1 jd-text">${escapeHtml(w.description)}</div>` : ""}
+        </div>`).join("")
+    : '<p class="text-secondary small mb-0">Chưa có thông tin</p>';
+
+  const edusHtml = edus.length
+    ? edus.map((e) => `
+        <div class="mb-3">
+          <div class="fw-semibold text-break">${escapeHtml([e.degree, e.major].filter(Boolean).join(" · ") || "Không rõ bằng cấp")}</div>
+          <div class="small text-secondary">${escapeHtml([e.institution, e.graduation_year, e.gpa ? `GPA ${e.gpa}` : ""].filter(Boolean).join(" · "))}</div>
+        </div>`).join("")
+    : '<p class="text-secondary small">Chưa có thông tin</p>';
+
+  return `
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">${yearsHtml}</div>
+    ${discrepancy}
+    <div class="row g-4 mt-1">
+      <div class="col-12 col-lg-7">
+        <h3 class="h4">Quá trình làm việc</h3>
+        ${worksHtml}
+      </div>
+      <div class="col-12 col-lg-5">
+        <h3 class="h4">Học vấn</h3>
+        ${edusHtml}
+        <h3 class="h4">Chứng chỉ</h3>
+        <div class="mb-3">${chipsHtml(info.certifications, "skill-tag", "Chưa có thông tin")}</div>
+        <h3 class="h4">Ngoại ngữ</h3>
+        <div class="mb-3">${chipsHtml(info.languages, "skill-tag", "Chưa có thông tin")}</div>
+        <h3 class="h4">Kỹ năng mềm</h3>
+        ${chipsHtml(info.soft_skills, "skill-tag-outline", "Chưa có thông tin")}
+      </div>
+    </div>`;
+}
+
+/** Danh sách câu hỏi: ưu tiên bản chi tiết (interview_details), không có thì dùng mảng chuỗi cũ. */
+function interviewQuestions(d) {
+  const detailed = d.ai_extracted_info?.interview_details?.questions;
+  if (Array.isArray(detailed) && detailed.length) return detailed.filter((q) => q?.question);
+  return (d.interview_questions ?? []).filter(Boolean).map((q) => (typeof q === "string" ? { question: q } : q));
+}
+
+/** Tab 4 – Câu hỏi phỏng vấn (6.8): nhãn loại, kỹ năng; mở rộng xem mục đích và gợi ý câu trả lời. */
+function questionsHtml(questions) {
+  if (!questions.length) {
+    return '<p class="text-secondary small mb-0">Chưa có câu hỏi phỏng vấn gợi ý cho hồ sơ này.</p>';
+  }
+  const items = questions.map((q, i) => {
+    const cat = QUESTION_CATEGORIES[q.category];
+    const hasMore = q.target_skill || q.purpose || q.good_answer_hints;
+    const head = `${cat ? `<span class="badge ${cat.badge} flex-shrink-0">${cat.label}</span>` : ""}<span>${i + 1}. ${escapeHtml(q.question)}</span>`;
+    if (!hasMore) {
+      return `<div class="accordion-item question-item"><div class="accordion-header"><div class="accordion-button collapsed no-toggle">${head}</div></div></div>`;
+    }
+    return `
+      <div class="accordion-item question-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#question-${i}" aria-expanded="false" aria-controls="question-${i}">${head}</button>
+        </h3>
+        <div id="question-${i}" class="accordion-collapse collapse" data-bs-parent="#question-list">
+          <div class="accordion-body small">
+            ${q.target_skill ? `<div class="mb-1"><b>Kỹ năng:</b> <span class="skill-tag">${escapeHtml(q.target_skill)}</span></div>` : ""}
+            ${q.purpose ? `<div class="mb-1"><b>Mục đích:</b> ${escapeHtml(q.purpose)}</div>` : ""}
+            ${q.good_answer_hints ? `<div><b>Câu trả lời tốt:</b> ${escapeHtml(q.good_answer_hints)}</div>` : ""}
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+  return `
+    <p class="text-secondary small">AI gợi ý dựa trên kỹ năng còn thiếu và các điểm cần kiểm chứng. Bấm vào câu hỏi để xem mục đích và gợi ý câu trả lời tốt.</p>
+    <div class="accordion" id="question-list">${items}</div>`;
+}
+
+function renderDetail(d) {
+  const app = detailApp();
+  renderDetailHeader(d);
+  renderDetailAlert(d);
+  const missingCount = (d.missing_skills ?? []).length;
+  const questions = interviewQuestions(d);
+  setTabCount("tab-skills", missingCount ? `${missingCount} thiếu` : "", "bg-red-lt");
+  setTabCount("tab-questions", questions.length ? String(questions.length) : "", "bg-blue-lt");
+  detailPanes.overview.innerHTML = overviewHtml(d, app);
+  detailPanes.skills.innerHTML = skillsHtml(d);
+  detailPanes.exp.innerHTML = experienceHtml(d);
+  detailPanes.questions.innerHTML = questionsHtml(questions);
+}
+
+/** Tải kết quả AI của hồ sơ. keepTab = true khi tự làm mới (giữ tab đang xem). */
+async function loadDetail({ keepTab = false } = {}) {
+  const id = detailAppId;
+  const requestId = ++detailRequestId;
+  if (!keepTab) {
+    detailAlertEl.innerHTML = "";
+    setTabCount("tab-skills", "", "");
+    setTabCount("tab-questions", "", "");
+    ["overview", "skills", "exp", "questions"].forEach((k) => renderState(detailPanes[k], "loading", { message: "Đang tải kết quả AI…" }));
+  }
+  try {
+    const d = await ApplicationAPI.getAiAnalysis(id);
+    if (requestId !== detailRequestId || id !== detailAppId) return;
+    renderDetail(d ?? {});
+  } catch (err) {
+    if (requestId !== detailRequestId || err.status === 401) return;
+    if (keepTab) return; // tự làm mới lỗi: giữ nội dung cũ
+    detailAlertEl.innerHTML = "";
+    ["overview", "skills", "exp", "questions"].forEach((k) => renderState(detailPanes[k], "error", {
+      message: "Không tải được kết quả AI",
+      hint: err.message,
+      onRetry: () => loadDetail(),
+    }));
+  }
+}
+
+// ===== A10: CV gốc (cần token → fetch blob → object URL → iframe) =====
+function revokeCvUrl() {
+  if (detailCvUrl) URL.revokeObjectURL(detailCvUrl);
+  detailCvUrl = null;
+}
+
+async function loadCv() {
+  const id = detailAppId;
+  detailCvLoaded = true;
+  revokeCvUrl();
+  renderState(detailPanes.cv, "loading", { message: "Đang tải CV gốc…" });
+  try {
+    const blob = await ApplicationAPI.getCvBlob(id);
+    if (id !== detailAppId) return;
+    detailCvUrl = URL.createObjectURL(blob);
+    const isPdf = (blob.type || "").includes("pdf");
+    const name = detailApp()?.candidate?.full_name ?? `ho-so-${id}`;
+    detailPanes.cv.innerHTML = `
+      <div class="d-flex flex-wrap justify-content-end gap-2 mb-2">
+        <a class="btn btn-sm btn-outline-primary cv-open" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1"></i>Mở trong tab mới</a>
+        <a class="btn btn-sm btn-outline-secondary cv-download"><i class="bi bi-download me-1"></i>Tải về</a>
+      </div>
+      ${isPdf
+        ? '<iframe class="cv-frame" title="CV gốc"></iframe>'
+        : '<div class="alert alert-info small mb-0"><i class="bi bi-info-circle me-1"></i>Tệp CV không phải PDF nên không xem trực tiếp được. Bấm "Tải về" để mở bằng phần mềm trên máy.</div>'}`;
+    detailPanes.cv.querySelector(".cv-open").href = detailCvUrl;
+    const download = detailPanes.cv.querySelector(".cv-download");
+    download.href = detailCvUrl;
+    const ext = isPdf ? ".pdf" : (blob.type || "").includes("wordprocessingml") ? ".docx" : "";
+    download.download = `CV - ${name}${ext}`;
+    if (isPdf) detailPanes.cv.querySelector("iframe").src = detailCvUrl;
+    if (!isPdf) detailPanes.cv.querySelector(".cv-open").classList.add("d-none");
+  } catch (err) {
+    if (id !== detailAppId || err.status === 401) return;
+    detailCvLoaded = false;
+    renderState(detailPanes.cv, "error", {
+      message: err.status === 404 ? "Không tìm thấy tệp CV của hồ sơ này" : "Không tải được CV gốc",
+      hint: err.message,
+      onRetry: loadCv,
+    });
+  }
+}
+
+// CV chỉ tải khi mở tab (tệp có thể lớn)
+document.getElementById("tab-cv").addEventListener("shown.bs.tab", () => {
+  if (!detailCvLoaded && detailAppId !== null) loadCv();
+});
+
+detailModalEl.addEventListener("hidden.bs.modal", () => {
+  detailAppId = null;
+  detailRequestId++;
+  revokeCvUrl();
+  detailPanes.cv.innerHTML = "";
+});
+
+/** Bấm vào thẻ: mở modal hồ sơ chi tiết, luôn bắt đầu ở tab Tổng quan. */
 function openApplicationDetail(id) {
-  const app = applications.find((a) => a.id === id);
-  showToast(`Chi tiết hồ sơ "${app?.candidate?.full_name ?? id}" sẽ có ở mục 6.7`, "info");
+  if (!applications.some((a) => a.id === id)) return;
+  detailAppId = id;
+  detailCvLoaded = false;
+  revokeCvUrl();
+  detailPanes.cv.innerHTML = "";
+  bootstrap.Tab.getOrCreateInstance(document.getElementById("tab-overview")).show();
+  renderDetailHeader();
+  loadDetail();
+  detailModal.show();
+}
+
+/** Bảng tự làm mới (A8): hồ sơ đang mở vừa chấm xong / đổi trạng thái → cập nhật modal. */
+function syncDetailWithBoard(previous) {
+  if (detailAppId === null) return;
+  const before = previous.find((a) => a.id === detailAppId);
+  const after = detailApp();
+  if (!after) return;
+  renderDetailHeader();
+  if (before && (before.ai_status !== after.ai_status || before.matching_score !== after.matching_score)) {
+    loadDetail({ keepTab: true });
+  }
 }
 
 /** Chuỗi so sánh để biết dữ liệu mới có khác dữ liệu đang hiện không (tránh vẽ lại khi không đổi). */
@@ -440,8 +831,10 @@ async function loadApplications({ silent = false } = {}) {
     if (requestId !== appsRequestId) return;
     const next = Array.isArray(data) ? data : [];
     const changed = !silent || boardSignature(next) !== boardSignature(applications);
+    const previous = applications;
     applications = next;
     if (changed && !isDragging && !savingIds.size) renderBoard();
+    syncDetailWithBoard(previous);
   } catch (err) {
     if (requestId !== appsRequestId || err.status === 401) return;
     if (silent) {

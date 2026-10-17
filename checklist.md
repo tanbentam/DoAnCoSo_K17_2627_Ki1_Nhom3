@@ -84,8 +84,8 @@ Ký hiệu:
 * [x] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
 * [x] Thiết kế thẻ ứng viên (Candidate Card): Tên, vị trí, huy hiệu điểm Matching Score tô màu trực quan ($\ge 80\%$ xanh, $50-79\%$ vàng, $< 50\%$ đỏ)
 * [x] Bắt sự kiện kéo thả thẻ (`onEnd`) để gọi API cập nhật trạng thái về Backend tức thì
-* [ ] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
-* [ ] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
+* [x] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
+* [x] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
 * [ ] Xây dựng trang quản lý tin tuyển dụng (mục "Tin tuyển dụng" trên thanh điều hướng): bảng tiêu đề, trạng thái, ngày đăng, số kỹ năng bắt buộc; nút Sửa / Đóng tin / Xem Kanban (bổ sung 17/10/2026, dùng API sẵn có)
 
 ## 7. Supporting Services & Notifications

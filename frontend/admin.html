@@ -252,6 +252,61 @@
     </div>
   </div>
 
+  <!-- A9: Modal hồ sơ chi tiết + đánh giá AI (6.7, 6.8) -->
+  <div class="modal fade" id="detail-modal" tabindex="-1" aria-labelledby="detail-name" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down">
+      <div class="modal-content">
+        <div class="modal-header align-items-start">
+          <div class="d-flex gap-3 align-items-center min-w-0">
+            <span class="avatar detail-avatar rounded-circle bg-primary-lt flex-shrink-0" id="detail-avatar"></span>
+            <div class="min-w-0">
+              <h2 class="modal-title h3 mb-1 text-break" id="detail-name"></h2>
+              <div class="text-secondary small" id="detail-sub"></div>
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                <span class="badge" id="detail-status"></span>
+                <div class="dropdown">
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-0" data-bs-toggle="dropdown" aria-expanded="false" id="detail-move-btn">
+                    <i class="bi bi-arrow-left-right me-1"></i>Chuyển cột
+                  </button>
+                  <div class="dropdown-menu" id="detail-move-menu"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+
+        <div class="modal-body pt-0">
+          <div id="detail-alert"></div>
+          <ul class="nav nav-tabs detail-tabs mt-2" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-overview" data-bs-toggle="tab" data-bs-target="#pane-overview" type="button" role="tab" aria-controls="pane-overview" aria-selected="true"><i class="bi bi-speedometer2 me-1"></i>Tổng quan</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-skills" data-bs-toggle="tab" data-bs-target="#pane-skills" type="button" role="tab" aria-controls="pane-skills" aria-selected="false"><i class="bi bi-check2-square me-1"></i>Kỹ năng <span class="tab-count"></span></button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-exp" data-bs-toggle="tab" data-bs-target="#pane-exp" type="button" role="tab" aria-controls="pane-exp" aria-selected="false"><i class="bi bi-briefcase me-1"></i>Kinh nghiệm & học vấn</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-questions" data-bs-toggle="tab" data-bs-target="#pane-questions" type="button" role="tab" aria-controls="pane-questions" aria-selected="false"><i class="bi bi-chat-square-text me-1"></i>Câu hỏi phỏng vấn <span class="tab-count"></span></button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-cv" data-bs-toggle="tab" data-bs-target="#pane-cv" type="button" role="tab" aria-controls="pane-cv" aria-selected="false"><i class="bi bi-file-earmark-pdf me-1"></i>CV gốc</button>
+            </li>
+          </ul>
+          <div class="tab-content pt-3">
+            <div class="tab-pane fade show active" id="pane-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0"></div>
+            <div class="tab-pane fade" id="pane-skills" role="tabpanel" aria-labelledby="tab-skills" tabindex="0"></div>
+            <div class="tab-pane fade" id="pane-exp" role="tabpanel" aria-labelledby="tab-exp" tabindex="0"></div>
+            <div class="tab-pane fade" id="pane-questions" role="tabpanel" aria-labelledby="tab-questions" tabindex="0"></div>
+            <div class="tab-pane fade" id="pane-cv" role="tabpanel" aria-labelledby="tab-cv" tabindex="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Tabler JS (đã gói sẵn Bootstrap 5 JS: modal, dropdown, tab, toast) -->
   <script
     src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"
