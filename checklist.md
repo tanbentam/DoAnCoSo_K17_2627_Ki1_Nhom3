@@ -78,7 +78,7 @@ Ký hiệu:
 
 ## 6. HR ATS & Kanban Dashboard (Frontend)
 
-* [ ] Thiết kế giao diện bảng điều khiển nhân sự (`admin.html`) với thanh điều hướng Bootstrap 5
+* [x] Thiết kế giao diện bảng điều khiển nhân sự (`admin.html`) với thanh điều hướng Bootstrap 5
 * [ ] Xây dựng giao diện tạo tin tuyển dụng mới kèm ô nhập tiêu chí bắt buộc
 * [ ] Xây dựng bảng Kanban với 4 cột trạng thái: *Applied*, *Screening*, *Interview*, *Offer/Reject*
 * [ ] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
@@ -119,7 +119,7 @@ Chi tiết từng vấn đề: `docs/Issues/`. Lịch sử test: `docs/Test-Repo
 * [ ] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt giữ hay bỏ `.docx`)
 * [ ] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (cần thảo luận nhóm)
 * [ ] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp
-* [ ] Chốt cách hiển thị Kanban: checklist 4 cột, backend 5 trạng thái (`offer` và `rejected` tách riêng)
+* [x] Chốt cách hiển thị Kanban: 5 cột theo 5 trạng thái backend (`offer` và `rejected` tách riêng), chốt 17/10/2026
 * [ ] Tải CA certificate Aiven và đặt `DB_SSL_CA` để bật xác minh chứng chỉ máy chủ
 * [x] Viết tài liệu API cho frontend (`docs/API cho Frontend.md`)
 

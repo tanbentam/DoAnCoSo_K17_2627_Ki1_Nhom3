@@ -13,7 +13,7 @@ Mỗi mục trong `checklist.md` Mục 5 có một file log riêng: làm gì, fi
 | [Phan 5.3.md](Phan%205.3.md) | 5.3 Form nộp CV | Xong | `c47275a` |
 | [Phan 5.4.md](Phan%205.4.md) | 5.4 Kiểm tra tệp | Xong | `a415ff9` |
 | [Phan 5.5.md](Phan%205.5.md) | 5.5 Gửi `FormData` | Xong | `cb5641f` |
-| [Phan 5.6.md](Phan%205.6.md) | 5.6 Trạng thái nộp hồ sơ | Xong | |
+| [Phan 5.6.md](Phan%205.6.md) | 5.6 Trạng thái nộp hồ sơ | Xong | `84b3510` |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý / việc còn lại.
 
