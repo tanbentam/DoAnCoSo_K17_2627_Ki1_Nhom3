@@ -99,7 +99,24 @@
           <!-- 5.3 Form nộp CV (hiện khi bấm "Ứng tuyển") -->
           <section class="apply-box d-none mt-2" id="apply-section" aria-labelledby="apply-title">
             <h3 class="h6 fw-bold mb-3" id="apply-title"><i class="bi bi-send me-1 text-primary"></i>Ứng tuyển vị trí này</h3>
+
+            <!-- 5.6 Thông báo thành công (thay cho form sau khi gửi xong) -->
+            <div class="text-center py-4 d-none" id="apply-success" tabindex="-1">
+              <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem"></i>
+              <p class="fw-bold fs-5 mt-2 mb-1">Hồ sơ đã được gửi</p>
+              <p class="text-muted mb-3">Bộ phận tuyển dụng sẽ liên hệ với bạn qua email <b id="apply-success-email"></b>.</p>
+              <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                <i class="bi bi-grid me-1"></i>Xem các việc làm khác
+              </button>
+            </div>
+
             <form id="apply-form" novalidate>
+              <!-- 5.6 Lỗi khi gửi (nguyên văn từ backend) -->
+              <div class="alert alert-danger d-flex align-items-start gap-2 d-none" id="apply-error" role="alert" tabindex="-1">
+                <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                <div><div class="fw-semibold">Chưa gửi được hồ sơ</div><div id="apply-error-text"></div></div>
+              </div>
+              <fieldset id="apply-fieldset">
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label" for="apply-name">Họ tên <span class="text-danger">*</span></label>
@@ -126,6 +143,7 @@
                   <div class="invalid-feedback"></div>
                 </div>
               </div>
+              </fieldset>
             </form>
           </section>
         </div>

@@ -12,7 +12,15 @@ Mỗi mục trong `checklist.md` Mục 5 có một file log riêng: làm gì, fi
 | [Phan 5.2.md](Phan%205.2.md) | 5.2 Modal chi tiết JD | Xong | `746392a` |
 | [Phan 5.3.md](Phan%205.3.md) | 5.3 Form nộp CV | Xong | `c47275a` |
 | [Phan 5.4.md](Phan%205.4.md) | 5.4 Kiểm tra tệp | Xong | `a415ff9` |
-| [Phan 5.5.md](Phan%205.5.md) | 5.5 Gửi `FormData` | Xong | |
-| Phan 5.6.md | 5.6 Trạng thái nộp hồ sơ | Chưa làm | |
+| [Phan 5.5.md](Phan%205.5.md) | 5.5 Gửi `FormData` | Xong | `cb5641f` |
+| [Phan 5.6.md](Phan%205.6.md) | 5.6 Trạng thái nộp hồ sơ | Xong | |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý / việc còn lại.
+
+## Tổng kết Phần 5 (17/10/2026)
+Cổng ứng viên chạy trọn luồng với backend thật: xem danh sách việc → mở JD → điền form → kiểm tra dữ liệu và tệp → gửi → báo thành công hoặc lỗi. Code nằm ở `frontend/index.html` và `frontend/js/index.js`; phần dùng chung ở `api.js`, `utils.js`, `css/style.css`.
+
+**Việc còn mở:**
+- Nhóm chốt có nhận CV `.docx` hay không (hiện chỉ nhận PDF, xem [Phan 5.4.md](Phan%205.4.md)).
+- Dọn dữ liệu thử: hồ sơ #55 (`test.tan@example.com`) bằng `python scripts/e2e_test_pipeline.py --cleanup` tại `backend/`.
+- Tin #3 có `preferred_skills = ["string"]` (dữ liệu tạo từ Swagger): báo backend sửa hoặc đóng tin trước khi demo.

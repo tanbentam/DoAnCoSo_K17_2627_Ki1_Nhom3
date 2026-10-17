@@ -1,6 +1,6 @@
 /**
  * js/index.js — Candidate portal logic
- * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV, 5.4 kiểm tra tệp, 5.5 gửi FormData)
+ * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV, 5.4 kiểm tra tệp, 5.5 gửi FormData, 5.6 trạng thái nộp)
  */
 
 const jobListEl = document.getElementById("job-list");
@@ -277,6 +277,7 @@ function updateCvLabel() {
 
 function resetApplyForm() {
   applyFormEl.reset();
+  resetApplyStatus();
   applyAttempted = false;
   applyFormEl.querySelectorAll(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
   dropzoneEl.classList.remove("is-invalid", "is-dragover");
@@ -322,7 +323,7 @@ cvInputEl.addEventListener("change", () => {
 }));
 dropzoneEl.addEventListener("drop", (e) => {
   e.preventDefault();
-  if (!e.dataTransfer.files.length) return;
+  if (isSubmitting || !e.dataTransfer.files.length) return;
   const dt = new DataTransfer();
   dt.items.add(e.dataTransfer.files[0]); // chỉ nhận 1 tệp
   cvInputEl.files = dt.files;
@@ -344,18 +345,73 @@ function buildApplyFormData() {
   return formData;
 }
 
+// ===== 5.6 Trạng thái nộp hồ sơ =====
+const applyFieldsetEl = document.getElementById("apply-fieldset");
+const applyErrorEl = document.getElementById("apply-error");
+const applyErrorTextEl = document.getElementById("apply-error-text");
+const applySuccessEl = document.getElementById("apply-success");
+const applySubmitHtml = applySubmitBtn.innerHTML;
+
+/** Đang gửi: khóa các ô nhập và nút Gửi, hiện spinner trên nút. */
+function setSubmitting(on) {
+  isSubmitting = on;
+  applyFieldsetEl.disabled = on;
+  applySubmitBtn.disabled = on;
+  applySubmitBtn.innerHTML = on
+    ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Đang gửi…'
+    : applySubmitHtml;
+}
+
+function showApplyError(message) {
+  applyErrorTextEl.textContent = message;
+  applyErrorEl.classList.remove("d-none");
+  applyErrorEl.focus();
+}
+
+function clearApplyError() {
+  applyErrorEl.classList.add("d-none");
+  applyErrorTextEl.textContent = "";
+}
+
+/** Thành công: thay form bằng lời cảm ơn, ẩn nút Gửi. Không hiển thị điểm AI cho ứng viên. */
+function showApplySuccess(email) {
+  applyFormEl.classList.add("d-none");
+  applySubmitBtn.classList.add("d-none");
+  document.getElementById("apply-success-email").textContent = email;
+  applySuccessEl.classList.remove("d-none");
+  applySuccessEl.focus();
+}
+
+function resetApplyStatus() {
+  clearApplyError();
+  applySuccessEl.classList.add("d-none");
+  applyFormEl.classList.remove("d-none");
+}
+
 async function submitApplication() {
   if (isSubmitting || currentJob?.status !== "open") return;
-  isSubmitting = true;
+  const forRequest = detailRequestId; // người dùng có thể đóng modal / mở tin khác khi đang gửi
+  const job = currentJob;
+  const email = fieldValue("email");
+
+  clearApplyError();
+  setSubmitting(true);
   try {
     await ApplicationAPI.apply(buildApplyFormData());
-    // Không hiển thị điểm AI cho ứng viên (AI chấm ngầm sau đó 30–40 giây)
-    showToast("Hồ sơ đã được gửi, bộ phận tuyển dụng sẽ liên hệ với bạn", "success");
+    if (forRequest === detailRequestId && jobModalEl.classList.contains("show")) {
+      showApplySuccess(email);
+    } else {
+      showToast(`Hồ sơ ứng tuyển "${job.title}" đã được gửi`, "success");
+    }
   } catch (err) {
-    // 400/404: hiển thị nguyên văn `detail` của backend (VD: nộp trùng, tin đã đóng)
-    showToast(err.message, "danger");
+    // 400/404: nguyên văn `detail` của backend (VD: nộp trùng, tin đã đóng); 0: mất kết nối
+    if (forRequest === detailRequestId && jobModalEl.classList.contains("show")) {
+      showApplyError(err.message);
+    } else {
+      showToast(`Chưa gửi được hồ sơ "${job.title}": ${err.message}`, "danger");
+    }
   } finally {
-    isSubmitting = false;
+    setSubmitting(false);
   }
 }
 

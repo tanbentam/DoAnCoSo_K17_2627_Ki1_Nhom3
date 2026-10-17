@@ -74,7 +74,7 @@ Ký hiệu:
 * [x] Xây dựng biểu mẫu (Form) nộp CV trực tuyến (Họ tên, Email, Số điện thoại, Tải file PDF)
 * [x] Viết JavaScript kiểm tra định dạng tệp (chỉ nhận `.pdf`, `.docx`) và giới hạn dung lượng (< 5MB)
 * [x] Kết nối hàm `fetch()` gửi `FormData` lên API nộp hồ sơ của Backend
-* [ ] Hiển thị thông báo trạng thái nộp hồ sơ (Loading spinner, thông báo thành công / lỗi)
+* [x] Hiển thị thông báo trạng thái nộp hồ sơ (Loading spinner, thông báo thành công / lỗi)
 
 ## 6. HR ATS & Kanban Dashboard (Frontend)
 
