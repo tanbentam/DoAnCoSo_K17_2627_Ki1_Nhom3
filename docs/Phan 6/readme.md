@@ -9,6 +9,10 @@ Mỗi mục trong `checklist.md` Mục 6 có một file log riêng: làm gì, fi
 | File | Mục checklist | Trạng thái | Commit |
 | --- | --- | --- | --- |
 | [Phan 6.1.md](Phan%206.1.md) | 6.1 Khung `admin.html`, thanh điều hướng, đăng nhập | Xong | `baff12b` |
-| [Phan 6.2.md](Phan%206.2.md) | 6.2 Form tạo / sửa tin, đóng tin | Xong | |
+| [Phan 6.2.md](Phan%206.2.md) | 6.2 Form tạo / sửa tin, đóng tin | Xong | `c4e4ee2` |
+| [Phan 6.3.md](Phan%206.3.md) | 6.3 Bảng Kanban 5 cột, tự cập nhật thẻ AI | Xong | |
+| [Phan 6.4.md](Phan%206.4.md) | 6.4 Kéo thả SortableJS, menu chuyển cột | Xong | |
+| [Phan 6.5.md](Phan%206.5.md) | 6.5 Thẻ ứng viên, huy hiệu điểm | Xong | |
+| [Phan 6.6.md](Phan%206.6.md) | 6.6 Gọi API khi thả thẻ, lỗi thì trả về cột cũ | Xong | |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý / việc còn lại.

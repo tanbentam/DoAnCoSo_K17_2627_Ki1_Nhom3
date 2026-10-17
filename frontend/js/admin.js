@@ -2,6 +2,7 @@
  * js/admin.js — Bảng điều khiển HR (admin.html)
  * Mục 6: 6.1 khung trang (đăng nhập, thanh điều hướng, chọn tin tuyển dụng, khung Kanban 5 cột)
  *        6.2 form tạo / sửa tin (ô nhập kỹ năng dạng nhãn), đóng tin có xác nhận
+ *        6.3–6.6 bảng Kanban 5 cột, thẻ ứng viên, kéo thả SortableJS + gọi API đổi trạng thái
  */
 
 // 5 cột khớp 5 trạng thái của backend (nhóm chốt 17/10/2026: tách offer và rejected)
@@ -52,6 +53,8 @@ function showLoginError(message) {
 function showLogin(message = "") {
   // Hết phiên khi đang mở form → đóng mọi modal (không mở lại form sửa)
   returnToJobForm = false;
+  stopPolling();
+  appsRequestId++;
   document.querySelectorAll(".modal.show").forEach((el) => bootstrap.Modal.getInstance(el)?.hide());
   dashboardViewEl.classList.add("d-none");
   loginViewEl.classList.remove("d-none");
@@ -171,37 +174,295 @@ function renderJobMeta(job) {
     <span class="stat-pill"><i class="bi bi-award me-1"></i>${exp}</span>`;
 }
 
-/** Khung 5 cột rỗng; mục 6.3 sẽ đổ thẻ ứng viên vào `.kanban-list`. */
-function renderBoard() {
-  boardEl.innerHTML = `
-    <div class="kanban-board">
-      ${KANBAN_COLUMNS.map((col) => `
-        <section class="kanban-col" data-status="${col.status}" aria-label="${col.label}">
-          <div class="col-title">
-            <span class="col-dot ${col.dot}"></span>${col.label}
-            <span class="badge ${col.badge} col-count">0</span>
-          </div>
-          ${col.hint ? `<p class="col-hint">${col.hint}</p>` : ""}
-          <div class="kanban-list" data-status="${col.status}">
-            <div class="text-center text-secondary small py-4 kanban-empty">
-              <i class="bi bi-inbox d-block fs-3 mb-1"></i>Chưa có hồ sơ
-            </div>
-          </div>
-        </section>`).join("")}
-    </div>`;
-}
-
 function onJobChanged() {
   const job = selectedJob();
   if (!job) return;
   saveJobId(job.id);
   renderJobMeta(job);
   editJobBtn.disabled = false;
+  loadApplications();
+}
+
+// ===== A5–A8: Bảng Kanban (6.3), thẻ ứng viên (6.5), kéo thả (6.4, 6.6) =====
+const POLL_INTERVAL_MS = 7000;             // A8: gọi lại khi còn thẻ AI đang chấm
+const AI_RUNNING = ["pending", "processing"];
+
+let applications = [];
+let appsRequestId = 0;
+let pollTimer = null;
+let sortables = [];
+let isDragging = false;
+const savingIds = new Set(); // hồ sơ đang chờ API đổi trạng thái
+
+function columnOf(status) {
+  return KANBAN_COLUMNS.find((c) => c.status === status) ?? KANBAN_COLUMNS[0];
+}
+
+function stopPolling() {
+  clearTimeout(pollTimer);
+  pollTimer = null;
+}
+
+function schedulePoll() {
+  stopPolling();
+  if (applications.some((a) => AI_RUNNING.includes(a.ai_status))) {
+    pollTimer = setTimeout(() => loadApplications({ silent: true }), POLL_INTERVAL_MS);
+  }
+}
+
+/** Dòng thống kê dưới ô chọn tin: tổng hồ sơ, số hồ sơ AI đang chấm. */
+function renderAppStats() {
+  jobMetaEl.querySelector(".app-stats")?.remove();
+  const running = applications.filter((a) => AI_RUNNING.includes(a.ai_status)).length;
+  const wrap = document.createElement("span");
+  wrap.className = "app-stats";
+  wrap.innerHTML = `
+    <span class="stat-pill"><i class="bi bi-people me-1"></i>${applications.length} hồ sơ</span>
+    ${running ? `<span class="stat-pill"><i class="bi bi-hourglass-split me-1"></i>${running} đang chấm AI</span>` : ""}`;
+  jobMetaEl.appendChild(wrap);
+}
+
+/** Huy hiệu góc thẻ theo `ai_status` (bảng gợi ý trong API cho Frontend.md). */
+function cardBadge(app) {
+  const error = escapeHtml(app.ai_error ?? "");
+  switch (app.ai_status) {
+    case "pending":
+    case "processing":
+      return `<span class="badge bg-azure-lt text-nowrap"><span class="spinner-border spinner-border-sm me-1 card-spinner" role="status"></span>${app.ai_status === "pending" ? "Chờ AI" : "Đang chấm"}</span>`;
+    case "failed":
+      return `<span class="badge bg-red-lt text-nowrap" title="${error}"><i class="bi bi-x-circle me-1"></i>Không chấm được</span>`;
+    default: {
+      const score = formatScore(app.matching_score);
+      if (score === null) return '<span class="badge bg-secondary-lt" title="Chưa có điểm">—</span>';
+      const warn = app.ai_status === "partial"
+        ? `<i class="bi bi-exclamation-triangle-fill text-warning ms-1" title="${error || "Thiếu một phần kết quả AI"}"></i>`
+        : "";
+      return `<span class="d-inline-flex align-items-center"><span class="badge ${scoreClass(app.matching_score)}" title="Matching Score">${score}%</span>${warn}</span>`;
+    }
+  }
+}
+
+/** Thẻ ứng viên (6.5): tên, chức danh hiện tại (AI bóc tách), huy hiệu điểm, ngày nộp, menu chuyển cột. */
+function cardHtml(app) {
+  const name = escapeHtml(app.candidate?.full_name ?? "(Không tên)");
+  const title = app.ai_extracted_info?.current_title;
+  const moveItems = KANBAN_COLUMNS
+    .filter((c) => c.status !== app.status)
+    .map((c) => `<button type="button" class="dropdown-item" data-move="${c.status}"><span class="col-dot ${c.dot} me-2"></span>${c.label}</button>`)
+    .join("");
+  return `
+    <article class="candidate-card${savingIds.has(app.id) ? " is-saving" : ""}" data-id="${Number(app.id)}" tabindex="0" aria-label="Hồ sơ ${name}">
+      <div class="d-flex justify-content-between align-items-start gap-2">
+        <div class="fw-semibold text-break card-name">${name}</div>
+        <div class="flex-shrink-0">
+          <div class="dropdown card-menu" data-bs-popper-config='{"strategy":"fixed"}'>
+            <button type="button" class="btn btn-sm btn-ghost-secondary btn-icon card-menu-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Chuyển cột hồ sơ ${name}">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+              <span class="dropdown-header">Chuyển sang</span>
+              ${moveItems}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="small text-truncate ${title ? "text-secondary" : "text-muted fst-italic"}">${title ? escapeHtml(title) : "Chưa có chức danh"}</div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mt-2">
+        ${cardBadge(app)}
+        <span class="small text-muted text-nowrap" title="Ngày nộp">${escapeHtml(formatDate(app.created_at, false))}</span>
+      </div>
+    </article>`;
+}
+
+/** Vẽ 5 cột; thẻ trong mỗi cột giữ thứ tự API trả về (điểm cao → thấp, chưa có điểm xếp cuối). */
+function renderBoard() {
+  sortables.forEach((s) => s.destroy());
+  sortables = [];
+
+  const emptyNote = applications.length
+    ? ""
+    : `<div class="alert alert-info py-2 small d-flex align-items-center gap-2 mb-3" role="status">
+         <i class="bi bi-inbox"></i>Tin này chưa có hồ sơ nào. Hồ sơ nộp từ cổng ứng viên sẽ tự hiện ở cột "Mới nộp".
+       </div>`;
+
+  boardEl.innerHTML = `${emptyNote}
+    <div class="kanban-board">
+      ${KANBAN_COLUMNS.map((col) => {
+        const cards = applications.filter((a) => columnOf(a.status).status === col.status);
+        return `
+        <section class="kanban-col" data-status="${col.status}" aria-label="${col.label}">
+          <div class="col-title">
+            <span class="col-dot ${col.dot}"></span>${col.label}
+            <span class="badge ${col.badge} col-count">${cards.length}</span>
+          </div>
+          ${col.hint ? `<p class="col-hint">${col.hint}</p>` : ""}
+          <div class="kanban-list" data-status="${col.status}">
+            ${cards.map(cardHtml).join("")}
+            <div class="text-center text-secondary small py-4 kanban-empty${cards.length ? " d-none" : ""}">
+              <i class="bi bi-inbox d-block fs-3 mb-1"></i>Kéo thẻ vào đây
+            </div>
+          </div>
+        </section>`;
+      }).join("")}
+    </div>`;
+
+  initSortable();
+  renderAppStats();
+}
+
+/** 6.4: kéo thả giữa các cột. `sort: false` → không đổi thứ tự trong cùng cột (luôn xếp theo điểm). */
+function initSortable() {
+  if (typeof Sortable === "undefined") {
+    showToast("Không tải được thư viện kéo thả. Dùng menu ⋮ trên thẻ để chuyển cột.", "warning");
+    return;
+  }
+  boardEl.querySelectorAll(".kanban-list").forEach((list) => {
+    sortables.push(new Sortable(list, {
+      group: "kanban",
+      sort: false,
+      animation: 150,
+      draggable: ".candidate-card",
+      filter: ".is-saving, .card-menu",
+      preventOnFilter: false,
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+      delay: 150,              // trên điện thoại: giữ tay một chút mới kéo, để vẫn cuộn ngang được
+      delayOnTouchOnly: true,
+      onStart: () => {
+        isDragging = true;
+        boardEl.querySelectorAll(".kanban-empty").forEach((el) => el.classList.add("d-none"));
+      },
+      onEnd: (evt) => {
+        isDragging = false;
+        const id = Number(evt.item.dataset.id);
+        const to = evt.to.dataset.status;
+        if (evt.from === evt.to) {
+          renderBoard(); // thả lại cột cũ: hiện lại ô "Kéo thẻ vào đây"
+          return;
+        }
+        moveApplication(id, to);
+      },
+    }));
+  });
+}
+
+/**
+ * 6.6: đổi trạng thái hồ sơ. Cập nhật giao diện ngay (thẻ sang cột mới, xếp lại theo điểm),
+ * rồi gọi API; lỗi thì trả thẻ về cột cũ và báo lỗi.
+ */
+async function moveApplication(id, newStatus) {
+  const app = applications.find((a) => a.id === id);
+  if (!app || savingIds.has(id)) return;
+  const oldStatus = app.status;
+  if (oldStatus === newStatus) {
+    renderBoard();
+    return;
+  }
+
+  const name = app.candidate?.full_name ?? `#${id}`;
+  app.status = newStatus;
+  savingIds.add(id);
   renderBoard();
+
+  try {
+    const updated = await ApplicationAPI.updateStatus(id, newStatus);
+    const index = applications.findIndex((a) => a.id === id);
+    if (index !== -1 && updated && typeof updated === "object") applications[index] = updated;
+    showToast(`Đã chuyển "${name}" sang ${columnOf(newStatus).label}`, "success");
+  } catch (err) {
+    const current = applications.find((a) => a.id === id);
+    if (current) current.status = oldStatus;
+    if (err.status !== 401) {
+      showToast(`Chưa chuyển được "${name}": ${err.message.replace(/[.\s]+$/, "")}. Thẻ đã về cột ${columnOf(oldStatus).label}.`, "danger");
+    }
+  } finally {
+    savingIds.delete(id);
+    if (!dashboardViewEl.classList.contains("d-none")) renderBoard();
+  }
+}
+
+// Menu ⋮ trên thẻ (cách chuyển cột không cần kéo: bàn phím, điện thoại)
+boardEl.addEventListener("click", (event) => {
+  const moveBtn = event.target.closest("[data-move]");
+  if (moveBtn) {
+    const card = moveBtn.closest(".candidate-card");
+    moveApplication(Number(card.dataset.id), moveBtn.dataset.move);
+    return;
+  }
+  if (event.target.closest(".card-menu")) return;
+  const card = event.target.closest(".candidate-card");
+  if (card) openApplicationDetail(Number(card.dataset.id));
+});
+
+boardEl.addEventListener("keydown", (event) => {
+  if (event.target.matches?.(".candidate-card") && (event.key === "Enter" || event.key === " ")) {
+    event.preventDefault();
+    openApplicationDetail(Number(event.target.dataset.id));
+  }
+});
+
+/** Bấm vào thẻ: modal hồ sơ chi tiết làm ở mục 6.7. */
+function openApplicationDetail(id) {
+  const app = applications.find((a) => a.id === id);
+  showToast(`Chi tiết hồ sơ "${app?.candidate?.full_name ?? id}" sẽ có ở mục 6.7`, "info");
+}
+
+/** Chuỗi so sánh để biết dữ liệu mới có khác dữ liệu đang hiện không (tránh vẽ lại khi không đổi). */
+function boardSignature(list) {
+  return list.map((a) => `${a.id}:${a.status}:${a.ai_status}:${a.matching_score}`).join("|");
+}
+
+/**
+ * A5: tải toàn bộ hồ sơ của tin đang chọn (1 lần, điểm cao → thấp), tự chia vào cột theo `status`.
+ * silent = true (gọi lại định kỳ): không hiện spinner; lỗi thì giữ bảng cũ và thử lại lần sau.
+ */
+async function loadApplications({ silent = false } = {}) {
+  const job = selectedJob();
+  if (!job) return;
+  stopPolling();
+
+  // Đang kéo thẻ hoặc chờ API đổi trạng thái: để lần sau mới vẽ lại
+  if (silent && (isDragging || savingIds.size)) {
+    pollTimer = setTimeout(() => loadApplications({ silent: true }), POLL_INTERVAL_MS);
+    return;
+  }
+
+  const requestId = ++appsRequestId;
+  if (!silent) {
+    sortables.forEach((s) => s.destroy());
+    sortables = [];
+    jobMetaEl.querySelector(".app-stats")?.remove();
+    renderState(boardEl, "loading", { message: "Đang tải hồ sơ ứng viên…" });
+  }
+
+  try {
+    const data = await ApplicationAPI.list({ job_id: job.id, sort_by: "score_desc", limit: 500 });
+    if (requestId !== appsRequestId) return;
+    const next = Array.isArray(data) ? data : [];
+    const changed = !silent || boardSignature(next) !== boardSignature(applications);
+    applications = next;
+    if (changed && !isDragging && !savingIds.size) renderBoard();
+  } catch (err) {
+    if (requestId !== appsRequestId || err.status === 401) return;
+    if (silent) {
+      pollTimer = setTimeout(() => loadApplications({ silent: true }), POLL_INTERVAL_MS);
+      return;
+    }
+    applications = [];
+    renderState(boardEl, "error", {
+      message: "Không tải được hồ sơ ứng viên",
+      hint: err.message,
+      onRetry: () => loadApplications(),
+    });
+    return;
+  }
+  schedulePoll();
 }
 
 async function loadJobs() {
   const requestId = ++jobsRequestId;
+  stopPolling();
+  appsRequestId++; // bỏ kết quả hồ sơ của lần tải trước
   jobSelectEl.disabled = true;
   editJobBtn.disabled = true;
   jobSelectEl.innerHTML = "<option>Đang tải tin tuyển dụng…</option>";

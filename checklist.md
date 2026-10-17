@@ -80,10 +80,10 @@ Ký hiệu:
 
 * [x] Thiết kế giao diện bảng điều khiển nhân sự (`admin.html`) với thanh điều hướng Bootstrap 5
 * [x] Xây dựng giao diện tạo tin tuyển dụng mới kèm ô nhập tiêu chí bắt buộc
-* [ ] Xây dựng bảng Kanban với 5 cột trạng thái: *Applied*, *Screening*, *Interview*, *Offer*, *Rejected* (chốt 17/10/2026, khớp 5 trạng thái backend)
-* [ ] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
-* [ ] Thiết kế thẻ ứng viên (Candidate Card): Tên, vị trí, huy hiệu điểm Matching Score tô màu trực quan ($\ge 80\%$ xanh, $50-79\%$ vàng, $< 50\%$ đỏ)
-* [ ] Bắt sự kiện kéo thả thẻ (`onEnd`) để gọi API cập nhật trạng thái về Backend tức thì
+* [x] Xây dựng bảng Kanban với 5 cột trạng thái: *Applied*, *Screening*, *Interview*, *Offer*, *Rejected* (chốt 17/10/2026, khớp 5 trạng thái backend)
+* [x] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
+* [x] Thiết kế thẻ ứng viên (Candidate Card): Tên, vị trí, huy hiệu điểm Matching Score tô màu trực quan ($\ge 80\%$ xanh, $50-79\%$ vàng, $< 50\%$ đỏ)
+* [x] Bắt sự kiện kéo thả thẻ (`onEnd`) để gọi API cập nhật trạng thái về Backend tức thì
 * [ ] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
 * [ ] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
 * [ ] Xây dựng trang quản lý tin tuyển dụng (mục "Tin tuyển dụng" trên thanh điều hướng): bảng tiêu đề, trạng thái, ngày đăng, số kỹ năng bắt buộc; nút Sửa / Đóng tin / Xem Kanban (bổ sung 17/10/2026, dùng API sẵn có)

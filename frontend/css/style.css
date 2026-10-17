@@ -329,3 +329,38 @@ body {
 .tag-chip button:focus-visible {
   opacity: 1;
 }
+
+/* Kanban: vùng thả, thẻ đang lưu, menu chuyển cột */
+.app-stats {
+  display: contents;
+}
+
+.kanban-list {
+  min-height: 120px; /* cột rỗng vẫn thả thẻ vào được */
+}
+
+.candidate-card:focus-visible {
+  outline: 2px solid var(--sr-brand);
+  outline-offset: 2px;
+}
+
+.candidate-card.is-saving {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.card-spinner {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-width: 0.15em;
+}
+
+.card-menu-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.card-name {
+  min-width: 0;
+}
