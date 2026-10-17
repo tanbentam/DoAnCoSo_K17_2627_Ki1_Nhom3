@@ -59,7 +59,11 @@ Khung đã có từ Mục 1.9: `index.html`, `admin.html`, `css/style.css` (đã
 
 Các lỗi 1 và 2 đã được kiểm tra: lỗi 1 bằng `node --check`, lỗi 2 bằng cách so mã hash của file CDN thật.
 
-> **Cập nhật 16/10/2026:** lỗi 1 và 2 **đã sửa** khi đổi giao diện sang Bootswatch / Tabler. Còn lại lỗi 3 và 4 trong `api.js`.
+> **Cập nhật 16/10/2026:** lỗi 1 và 2 **đã sửa** khi đổi giao diện sang Bootswatch / Tabler.
+>
+> **Cập nhật 17/10/2026:** lỗi 3 và 4 **đã sửa** (nhánh `feature/frontend-tan`). Cách dùng nhanh:
+> - `api.js`: `JobAPI` (`listOpen`, `list`, `get`, `create`, `update`, `close`), `ApplicationAPI` (`list(params)`, `getDetail`, `getAiAnalysis`, `getCvBlob`, `updateStatus`, `apply(formData)`), `AuthAPI.login/logout`, `Auth` (token, email; gán `Auth.onUnauthorized` để hiện màn đăng nhập khi gặp 401). Lỗi ném ra là `ApiError` có `message` hiển thị được ngay (đã ghép lỗi 422) và `status` (`0` = mất kết nối).
+> - `utils.js` (nạp trước `api.js`): `escapeHtml`, `formatDate(value, withTime)`, `formatScore`, `scoreClass`, `showToast(message, type)`, `renderState(container, "loading" | "empty" | "error", { message, hint, onRetry })`.
 
 ---
 
