@@ -99,11 +99,11 @@
 
         <div class="collapse navbar-collapse" id="admin-nav">
           <ul class="navbar-nav">
-            <li class="nav-item active">
-              <a class="nav-link" href="#" aria-current="page"><i class="bi bi-kanban me-2"></i>Bảng Kanban</a>
+            <li class="nav-item active" data-view-nav="kanban">
+              <a class="nav-link" href="#kanban" aria-current="page"><i class="bi bi-kanban me-2"></i>Bảng Kanban</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" id="nav-jobs"><i class="bi bi-briefcase me-2"></i>Tin tuyển dụng</a>
+            <li class="nav-item" data-view-nav="jobs">
+              <a class="nav-link" href="#tin-tuyen-dung"><i class="bi bi-briefcase me-2"></i>Tin tuyển dụng</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="index.html" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Cổng ứng viên</a>
@@ -113,7 +113,8 @@
       </div>
     </header>
 
-    <div class="page-wrapper">
+    <!-- Màn hình 1: Bảng Kanban -->
+    <div class="page-wrapper" id="view-kanban">
       <!-- A3: Chọn tin tuyển dụng + nút tạo / sửa tin -->
       <div class="page-header d-print-none">
         <div class="container-xl">
@@ -146,6 +147,53 @@
         <div class="container-xl">
           <div id="kanban-board">
             <!-- admin.js vẽ trạng thái đang tải / rỗng / lỗi hoặc các cột -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Màn hình 2: Quản lý tin tuyển dụng (6.9) -->
+    <div class="page-wrapper d-none" id="view-jobs">
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md">
+              <div class="page-pretitle">Quản lý</div>
+              <h2 class="page-title">Tin tuyển dụng</h2>
+              <div class="d-flex flex-wrap gap-2 mt-2" id="jobs-stats"></div>
+            </div>
+            <div class="col-12 col-md-auto d-flex gap-2">
+              <button type="button" class="btn btn-outline-secondary" id="jobs-reload-btn" aria-label="Tải lại" title="Tải lại">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+              <button type="button" class="btn btn-primary" id="jobs-create-btn">
+                <i class="bi bi-plus-lg me-1"></i>Tạo tin mới
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="card">
+            <div class="card-header flex-wrap gap-2">
+              <ul class="nav nav-pills" id="jobs-filter" role="tablist" aria-label="Lọc theo trạng thái">
+                <li class="nav-item"><button type="button" class="nav-link active" data-filter="all" aria-pressed="true">Tất cả <span class="badge bg-secondary-lt ms-1" data-count="all">0</span></button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-filter="open" aria-pressed="false">Đang mở <span class="badge bg-green-lt ms-1" data-count="open">0</span></button></li>
+                <li class="nav-item"><button type="button" class="nav-link" data-filter="closed" aria-pressed="false">Đã đóng <span class="badge bg-secondary-lt ms-1" data-count="closed">0</span></button></li>
+              </ul>
+              <div class="ms-md-auto jobs-search">
+                <label class="visually-hidden" for="jobs-search">Tìm tin tuyển dụng</label>
+                <div class="input-icon">
+                  <span class="input-icon-addon"><i class="bi bi-search"></i></span>
+                  <input type="search" class="form-control" id="jobs-search" placeholder="Tìm theo tiêu đề, kỹ năng…" autocomplete="off" />
+                </div>
+              </div>
+            </div>
+            <div id="jobs-list">
+              <!-- admin.js vẽ bảng (máy tính) / danh sách thẻ (điện thoại) hoặc trạng thái tải / rỗng / lỗi -->
+            </div>
           </div>
         </div>
       </div>

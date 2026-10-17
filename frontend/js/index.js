@@ -9,16 +9,6 @@ const jobCountEl = document.getElementById("job-count");
 
 let allJobs = [];
 
-/** Bỏ dấu tiếng Việt + chữ thường, để tìm "lap trinh" vẫn ra "Lập trình". */
-function normalizeText(text) {
-  return String(text ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase();
-}
-
 function experienceLabel(years) {
   return years > 0 ? `Từ ${years} năm kinh nghiệm` : "Không yêu cầu kinh nghiệm";
 }

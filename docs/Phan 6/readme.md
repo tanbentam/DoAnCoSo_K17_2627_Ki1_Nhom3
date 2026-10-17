@@ -14,7 +14,8 @@ Mỗi mục trong `checklist.md` Mục 6 có một file log riêng: làm gì, fi
 | [Phan 6.4.md](Phan%206.4.md) | 6.4 Kéo thả SortableJS, menu chuyển cột | Xong | `f6170af` |
 | [Phan 6.5.md](Phan%206.5.md) | 6.5 Thẻ ứng viên, huy hiệu điểm | Xong | `f6170af` |
 | [Phan 6.6.md](Phan%206.6.md) | 6.6 Gọi API khi thả thẻ, lỗi thì trả về cột cũ | Xong | `f6170af` |
-| [Phan 6.7.md](Phan%206.7.md) | 6.7 Modal hồ sơ chi tiết, đánh giá AI, CV gốc | Xong | |
-| [Phan 6.8.md](Phan%206.8.md) | 6.8 Kỹ năng khớp / thiếu, câu hỏi phỏng vấn | Xong | |
+| [Phan 6.7.md](Phan%206.7.md) | 6.7 Modal hồ sơ chi tiết, đánh giá AI, CV gốc | Xong | `253c0b4` |
+| [Phan 6.8.md](Phan%206.8.md) | 6.8 Kỹ năng khớp / thiếu, câu hỏi phỏng vấn | Xong | `253c0b4` |
+| [Phan 6.9.md](Phan%206.9.md) | 6.9 Trang quản lý tin tuyển dụng (bổ sung) | Xong | |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý / việc còn lại.

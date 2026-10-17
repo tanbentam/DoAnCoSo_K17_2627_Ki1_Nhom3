@@ -456,3 +456,42 @@ body {
 .question-item .accordion-button {
   font-size: 0.92rem;
 }
+
+/* Trang quản lý tin tuyển dụng (6.9) */
+.jobs-search {
+  width: 100%;
+  max-width: 280px;
+}
+
+.jobs-table .job-title-cell {
+  min-width: 240px;
+}
+
+.skill-mini {
+  background: #eef2ff;
+  color: #3449b8;
+  border-radius: 999px;
+  padding: 0.1em 0.55em;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.job-title-link {
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.job-title-link:hover,
+.job-title-link:focus-visible {
+  color: var(--sr-brand);
+}
+
+.job-row-closed,
+.job-row-closed .job-title-link {
+  color: #6b7280;
+}

@@ -4,6 +4,7 @@
  *        6.2 form tạo / sửa tin (ô nhập kỹ năng dạng nhãn), đóng tin có xác nhận
  *        6.3–6.6 bảng Kanban 5 cột, thẻ ứng viên, kéo thả SortableJS + gọi API đổi trạng thái
  *        6.7–6.8 modal hồ sơ chi tiết: kết quả AI (5 tab), kỹ năng, câu hỏi phỏng vấn, CV gốc
+ *        6.9 trang quản lý tin tuyển dụng (#tin-tuyen-dung): bảng tin, lọc / tìm, Kanban / sửa / đóng tin
  */
 
 // 5 cột khớp 5 trạng thái của backend (nhóm chốt 17/10/2026: tách offer và rejected)
@@ -86,6 +87,7 @@ function showDashboard() {
   document.getElementById("user-avatar").textContent = (email.trim()[0] ?? "H").toUpperCase();
 
   loadJobs();
+  showView(viewFromHash(), { initial: true });
 }
 
 function setLoginLoading(loading) {
@@ -214,7 +216,7 @@ function stopPolling() {
 
 function schedulePoll() {
   stopPolling();
-  if (applications.some((a) => AI_RUNNING.includes(a.ai_status))) {
+  if (currentView === "kanban" && applications.some((a) => AI_RUNNING.includes(a.ai_status))) {
     pollTimer = setTimeout(() => loadApplications({ silent: true }), POLL_INTERVAL_MS);
   }
 }
@@ -897,11 +899,6 @@ async function loadJobs() {
 jobSelectEl.addEventListener("change", onJobChanged);
 document.getElementById("reload-btn").addEventListener("click", loadJobs);
 
-// Trang quản lý tin: làm ở mục 6.9
-document.getElementById("nav-jobs").addEventListener("click", (event) => {
-  event.preventDefault();
-  showToast("Trang quản lý tin tuyển dụng sẽ có ở mục 6.9", "info");
-});
 
 // ===== A4: Ô nhập kỹ năng dạng nhãn =====
 const TAG_MAX_LENGTH = 60;
@@ -1103,8 +1100,7 @@ jobFormEl.addEventListener("submit", async (event) => {
       : await JobAPI.create(payload);
     jobModal.hide();
     showToast(editingJob ? `Đã lưu tin "${saved.title}"` : `Đã đăng tin "${saved.title}"`, "success");
-    saveJobId(saved.id);
-    loadJobs();
+    refreshAfterJobChange(saved.id);
   } catch (err) {
     showJobFormError(err.message);
     jobFormErrorEl.scrollIntoView({ block: "nearest" });
@@ -1160,14 +1156,266 @@ closeJobConfirmBtn.addEventListener("click", async () => {
     returnToJobForm = false;
     closeJobModal.hide();
     showToast(`Đã đóng tin "${closed.title}"`, "success");
-    saveJobId(closed.id);
-    loadJobs();
+    refreshAfterJobChange(closed.id);
   } catch (err) {
     closeJobErrorEl.textContent = err.message;
     closeJobErrorEl.classList.remove("d-none");
   } finally {
     setClosingJob(false);
   }
+});
+
+/** Sau khi tạo / sửa / đóng tin: tải lại danh sách ở màn hình đang xem. */
+function refreshAfterJobChange(jobId) {
+  if (currentView === "kanban") saveJobId(jobId); // Kanban tự chọn tin vừa lưu
+  loadJobs();
+  if (currentView === "jobs") loadJobsPage();
+}
+
+/** Mở hộp xác nhận đóng tin trực tiếp (không qua form sửa), dùng ở trang quản lý tin. */
+function confirmCloseJob(job) {
+  editingJob = job;
+  returnToJobForm = false;
+  document.getElementById("close-job-name").textContent = job.title;
+  closeJobErrorEl.classList.add("d-none");
+  setClosingJob(false);
+  closeJobModal.show();
+}
+
+// ===== 6.9: Trang quản lý tin tuyển dụng =====
+const viewKanbanEl = document.getElementById("view-kanban");
+const viewJobsEl = document.getElementById("view-jobs");
+const jobsListEl = document.getElementById("jobs-list");
+const jobsStatsEl = document.getElementById("jobs-stats");
+const jobsSearchEl = document.getElementById("jobs-search");
+const APP_LIMIT = 500; // tối đa của API; vượt thì số hồ sơ có thể thiếu
+
+let currentView = "kanban";
+let jobsPageJobs = [];
+let appCounts = new Map(); // job_id → { total, fresh } (fresh = hồ sơ còn ở cột "Mới nộp")
+let appsTruncated = false;
+let jobsFilter = "all";
+let jobsPageRequestId = 0;
+
+async function loadJobsPage() {
+  const requestId = ++jobsPageRequestId;
+  jobsStatsEl.innerHTML = "";
+  renderState(jobsListEl, "loading", { message: "Đang tải tin tuyển dụng…" });
+  try {
+    // 2 lời gọi: mọi tin + mọi hồ sơ (để đếm theo tin), không gọi riêng từng tin
+    const [jobList, apps] = await Promise.all([
+      JobAPI.list(),
+      ApplicationAPI.list({ limit: APP_LIMIT }),
+    ]);
+    if (requestId !== jobsPageRequestId) return;
+    jobsPageJobs = sortJobs(Array.isArray(jobList) ? jobList : []);
+    const appList = Array.isArray(apps) ? apps : [];
+    appsTruncated = appList.length >= APP_LIMIT;
+    appCounts = new Map();
+    appList.forEach((a) => {
+      const c = appCounts.get(a.job_id) ?? { total: 0, fresh: 0 };
+      c.total += 1;
+      if (a.status === "applied") c.fresh += 1;
+      appCounts.set(a.job_id, c);
+    });
+  } catch (err) {
+    if (requestId !== jobsPageRequestId || err.status === 401) return;
+    renderState(jobsListEl, "error", {
+      message: "Không tải được danh sách tin tuyển dụng",
+      hint: err.message,
+      onRetry: loadJobsPage,
+    });
+    return;
+  }
+  renderJobsPage();
+}
+
+function filteredJobs() {
+  const keyword = normalizeText(jobsSearchEl.value.trim());
+  return jobsPageJobs.filter((job) =>
+    (jobsFilter === "all" || job.status === jobsFilter)
+    && (!keyword || normalizeText([job.title, ...(job.required_skills ?? []), ...(job.preferred_skills ?? [])].join(" ")).includes(keyword)));
+}
+
+function jobStatusBadge(job) {
+  return job.status === "open"
+    ? '<span class="badge bg-green-lt">Đang mở</span>'
+    : '<span class="badge bg-secondary-lt"><i class="bi bi-lock me-1"></i>Đã đóng</span>';
+}
+
+function jobExpText(job) {
+  return Number(job.experience_years_min) > 0
+    ? `Từ ${escapeHtml(job.experience_years_min)} năm kinh nghiệm`
+    : "Không yêu cầu kinh nghiệm";
+}
+
+/** 3 kỹ năng bắt buộc đầu tiên, còn lại ghi "+N". */
+function jobSkillsHtml(job) {
+  const skills = Array.isArray(job.required_skills) ? job.required_skills : [];
+  if (!skills.length) return '<span class="small text-secondary">—</span>';
+  const more = skills.length > 3 ? `<span class="small text-secondary">+${skills.length - 3}</span>` : "";
+  return `<div class="d-flex flex-wrap gap-1">${skills.slice(0, 3).map((s) => `<span class="skill-mini">${escapeHtml(s)}</span>`).join("")}${more}</div>`;
+}
+
+function jobCountText(job) {
+  const c = appCounts.get(job.id);
+  if (!c?.total) return '<span class="text-secondary">0</span>';
+  return `<b>${c.total}</b>${c.fresh ? ` <span class="text-secondary">(${c.fresh} mới)</span>` : ""}`;
+}
+
+/** Menu ⋮: sửa tin, xem trên cổng ứng viên, đóng tin (2 mục sau chỉ với tin đang mở). */
+function jobMenuHtml(job) {
+  const id = Number(job.id);
+  const isOpen = job.status === "open";
+  return `
+    <div class="dropdown d-inline-block">
+      <button type="button" class="btn btn-sm btn-ghost-secondary btn-icon" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thao tác với tin ${escapeHtml(job.title)}">
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end">
+        <button type="button" class="dropdown-item" data-job-action="edit" data-job-id="${id}"><i class="bi bi-pencil me-2"></i>Sửa tin</button>
+        ${isOpen ? `
+          <a class="dropdown-item" href="index.html" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Xem trên cổng ứng viên</a>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item text-danger" data-job-action="close" data-job-id="${id}"><i class="bi bi-lock me-2"></i>Đóng tin</button>` : ""}
+      </div>
+    </div>`;
+}
+
+function renderJobsPage() {
+  const total = jobsPageJobs.length;
+  const open = jobsPageJobs.filter((j) => j.status === "open").length;
+  const apps = [...appCounts.values()].reduce((n, c) => n + c.total, 0);
+  jobsStatsEl.innerHTML = `
+    <span class="stat-pill"><i class="bi bi-briefcase me-1"></i>${total} tin</span>
+    <span class="stat-pill"><i class="bi bi-broadcast me-1"></i>${open} đang mở</span>
+    <span class="stat-pill"><i class="bi bi-people me-1"></i>${apps}${appsTruncated ? "+" : ""} hồ sơ</span>`;
+  const counts = { all: total, open, closed: total - open };
+  Object.entries(counts).forEach(([k, v]) => { document.querySelector(`#jobs-filter [data-count="${k}"]`).textContent = v; });
+
+  if (!total) {
+    renderState(jobsListEl, "empty", { message: "Chưa có tin tuyển dụng nào", hint: "Bấm \"Tạo tin mới\" để đăng tin đầu tiên." });
+    return;
+  }
+  const list = filteredJobs();
+  if (!list.length) {
+    renderState(jobsListEl, "empty", { message: "Không tìm thấy tin phù hợp", hint: "Thử đổi bộ lọc hoặc từ khóa tìm kiếm." });
+    return;
+  }
+
+  const rows = list.map((job) => {
+    const id = Number(job.id);
+    const isOpen = job.status === "open";
+    return `
+      <tr class="${isOpen ? "" : "job-row-closed"}">
+        <td class="job-title-cell">
+          <button type="button" class="job-title-link text-break" data-job-action="kanban" data-job-id="${id}">${escapeHtml(job.title)}</button>
+          <div class="small text-secondary">${jobExpText(job)}</div>
+        </td>
+        <td>${jobStatusBadge(job)}</td>
+        <td>${jobSkillsHtml(job)}</td>
+        <td class="text-center text-nowrap">${jobCountText(job)}</td>
+        <td class="text-nowrap small">${escapeHtml(formatDate(job.created_at, false))}</td>
+        <td class="text-nowrap text-end">
+          <button type="button" class="btn btn-sm ${isOpen ? "btn-outline-primary" : "btn-outline-secondary"}" data-job-action="kanban" data-job-id="${id}"><i class="bi bi-kanban me-1"></i>Kanban</button>
+          ${jobMenuHtml(job)}
+        </td>
+      </tr>`;
+  }).join("");
+
+  const cards = list.map((job) => {
+    const id = Number(job.id);
+    const isOpen = job.status === "open";
+    return `
+      <div class="list-group-item ${isOpen ? "" : "job-row-closed"}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <button type="button" class="job-title-link text-break" data-job-action="kanban" data-job-id="${id}">${escapeHtml(job.title)}</button>
+          <span class="flex-shrink-0">${jobStatusBadge(job)}</span>
+        </div>
+        <div class="small text-secondary mt-1">${jobCountText(job)} hồ sơ · Đăng ${escapeHtml(formatDate(job.created_at, false))}</div>
+        <div class="mt-2">${jobSkillsHtml(job)}</div>
+        <div class="d-flex gap-2 mt-2">
+          <button type="button" class="btn btn-sm ${isOpen ? "btn-outline-primary" : "btn-outline-secondary"} flex-fill" data-job-action="kanban" data-job-id="${id}"><i class="bi bi-kanban me-1"></i>Kanban</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-job-action="edit" data-job-id="${id}" aria-label="Sửa tin ${escapeHtml(job.title)}"><i class="bi bi-pencil"></i></button>
+          ${isOpen ? `<button type="button" class="btn btn-sm btn-outline-danger" data-job-action="close" data-job-id="${id}" aria-label="Đóng tin ${escapeHtml(job.title)}"><i class="bi bi-lock"></i></button>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  jobsListEl.innerHTML = `
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-vcenter card-table jobs-table">
+        <thead>
+          <tr><th>Vị trí</th><th>Trạng thái</th><th>Kỹ năng bắt buộc</th><th class="text-center">Hồ sơ</th><th>Ngày đăng</th><th class="w-1"><span class="visually-hidden">Thao tác</span></th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="list-group list-group-flush d-md-none">${cards}</div>
+    ${appsTruncated ? `<div class="card-footer small text-secondary">Số hồ sơ chỉ đếm ${APP_LIMIT} hồ sơ mới nhất (giới hạn của API).</div>` : ""}`;
+}
+
+jobsListEl.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-job-action]");
+  if (!btn) return;
+  const job = jobsPageJobs.find((j) => j.id === Number(btn.dataset.jobId));
+  if (!job) return;
+  if (btn.dataset.jobAction === "kanban") {
+    saveJobId(job.id);
+    location.hash = "#kanban";
+  } else if (btn.dataset.jobAction === "edit") {
+    openJobForm(job);
+  } else if (btn.dataset.jobAction === "close") {
+    confirmCloseJob(job);
+  }
+});
+
+document.getElementById("jobs-filter").addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-filter]");
+  if (!btn) return;
+  jobsFilter = btn.dataset.filter;
+  document.querySelectorAll("#jobs-filter [data-filter]").forEach((b) => {
+    b.classList.toggle("active", b === btn);
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
+  renderJobsPage();
+});
+jobsSearchEl.addEventListener("input", () => { if (jobsPageJobs.length) renderJobsPage(); });
+document.getElementById("jobs-reload-btn").addEventListener("click", loadJobsPage);
+document.getElementById("jobs-create-btn").addEventListener("click", () => openJobForm(null));
+
+// ===== Chuyển màn hình: #kanban (mặc định) / #tin-tuyen-dung =====
+function viewFromHash() {
+  return location.hash === "#tin-tuyen-dung" ? "jobs" : "kanban";
+}
+
+function showView(view, { initial = false } = {}) {
+  const previous = currentView;
+  currentView = view;
+  viewKanbanEl.classList.toggle("d-none", view !== "kanban");
+  viewJobsEl.classList.toggle("d-none", view !== "jobs");
+  document.querySelectorAll("[data-view-nav]").forEach((li) => {
+    const active = li.dataset.viewNav === view;
+    li.classList.toggle("active", active);
+    const link = li.querySelector(".nav-link");
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+  // Điện thoại: chọn xong thì thu menu lại
+  bootstrap.Collapse.getInstance(document.getElementById("admin-nav"))?.hide();
+  document.title = view === "jobs" ? "Tin tuyển dụng — SmartRecruit AI" : "SmartRecruit AI — HR Dashboard";
+
+  if (view === "jobs") {
+    stopPolling(); // Kanban đang ẩn thì không cần tự gọi lại
+    loadJobsPage();
+  } else if (!initial && previous !== "kanban") {
+    loadJobs(); // dữ liệu có thể đã đổi ở trang quản lý tin; giữ tin đã chọn (sr_admin_job)
+  }
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener("hashchange", () => {
+  if (!dashboardViewEl.classList.contains("d-none")) showView(viewFromHash());
 });
 
 // ===== Khởi động =====

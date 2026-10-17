@@ -13,6 +13,16 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+/** Bỏ dấu tiếng Việt + chữ thường, để tìm "lap trinh" vẫn ra "Lập trình". */
+function normalizeText(text) {
+  return String(text ?? "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
 /**
  * Định dạng ngày giờ từ API (giờ UTC, không kèm múi giờ) sang giờ Việt Nam.
  * withTime = false → chỉ hiện ngày.
