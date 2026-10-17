@@ -1,6 +1,6 @@
 /**
  * js/index.js — Candidate portal logic
- * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV, 5.4 kiểm tra tệp)
+ * Mục 5: Candidate Portal (5.1 danh sách việc làm, 5.2 modal chi tiết JD, 5.3 form nộp CV, 5.4 kiểm tra tệp, 5.5 gửi FormData)
  */
 
 const jobListEl = document.getElementById("job-list");
@@ -329,12 +329,41 @@ dropzoneEl.addEventListener("drop", (e) => {
   cvInputEl.dispatchEvent(new Event("change"));
 });
 
+// ===== 5.5 Gửi hồ sơ =====
+let isSubmitting = false; // chặn bấm Gửi nhiều lần khi request trước chưa xong
+
+/** Tạo multipart FormData đúng tên trường backend yêu cầu (KHÔNG tự đặt Content-Type). */
+function buildApplyFormData() {
+  const formData = new FormData();
+  formData.append("job_id", currentJob.id);
+  formData.append("full_name", fieldValue("full_name"));
+  formData.append("email", fieldValue("email"));
+  const phone = fieldValue("phone");
+  if (phone) formData.append("phone", phone);
+  formData.append("cv_file", cvInputEl.files[0]);
+  return formData;
+}
+
+async function submitApplication() {
+  if (isSubmitting || currentJob?.status !== "open") return;
+  isSubmitting = true;
+  try {
+    await ApplicationAPI.apply(buildApplyFormData());
+    // Không hiển thị điểm AI cho ứng viên (AI chấm ngầm sau đó 30–40 giây)
+    showToast("Hồ sơ đã được gửi, bộ phận tuyển dụng sẽ liên hệ với bạn", "success");
+  } catch (err) {
+    // 400/404: hiển thị nguyên văn `detail` của backend (VD: nộp trùng, tin đã đóng)
+    showToast(err.message, "danger");
+  } finally {
+    isSubmitting = false;
+  }
+}
+
 applyFormEl.addEventListener("submit", (e) => {
   e.preventDefault();
   applyAttempted = true;
   if (!validateApplyForm()) return;
-  // Gửi hồ sơ lên server: mục 5.5
-  showToast("Thông tin hợp lệ. Chức năng gửi hồ sơ sẽ có ở mục 5.5", "info");
+  submitApplication();
 });
 
 jobListEl.addEventListener("click", (e) => {
