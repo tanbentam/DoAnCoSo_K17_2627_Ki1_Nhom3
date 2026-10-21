@@ -1,14 +1,18 @@
 /**
- * api.js — API client dùng chung cho SmartRecruit AI.
- * Tải file này trước index.js và admin.js.
+ * SmartRecruit AI — API client dùng chung.
+ * Giữ dạng script thông thường để tương thích code hiện tại.
+ * Tải trước user/index.js và admin/admin.js.
  */
+
+"use strict";
 
 const API_BASE = "http://127.0.0.1:8000";
 
 const AUTH_TOKEN_KEY = "smartrecruit_token";
 const AUTH_EMAIL_KEY = "smartrecruit_email";
 
-// --- Quản lý phiên đăng nhập ---
+// --- Phiên đăng nhập ---
+
 const AuthSession = {
   getToken() {
     return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -19,34 +23,62 @@ const AuthSession = {
   },
 
   save(token, email) {
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
     localStorage.setItem(AUTH_EMAIL_KEY, email);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
   },
 
   clear() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_EMAIL_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   },
 };
 
-// --- Chuẩn hóa lỗi từ backend ---
+// --- Xử lý lỗi ---
+
 function getErrorMessage(data, status) {
   const detail = data?.detail;
 
-  if (typeof detail === "string") {
+  if (typeof detail === "string" && detail.trim()) {
     return detail;
   }
 
   if (Array.isArray(detail)) {
-    return detail
-      .map((item) => item.msg || "Dữ liệu không hợp lệ")
-      .join("; ");
+    const messages = detail
+      .map((item) => item?.msg)
+      .filter(Boolean);
+
+    if (messages.length) {
+      return messages.join("; ");
+    }
   }
 
-  return `Yêu cầu thất bại (HTTP ${status}).`;
+  switch (status) {
+    case 401:
+      return "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.";
+    case 403:
+      return "Bạn không có quyền thực hiện thao tác này.";
+    case 404:
+      return "Không tìm thấy dữ liệu yêu cầu.";
+    case 413:
+      return "Tệp tải lên vượt quá dung lượng cho phép.";
+    case 422:
+      return "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại.";
+    case 429:
+      return "Có quá nhiều yêu cầu. Vui lòng chờ rồi thử lại.";
+    default:
+      if (status >= 500) {
+        return (
+          "Máy chủ đang gặp sự cố. Vui lòng thử lại sau " +
+          "hoặc liên hệ người quản trị."
+        );
+      }
+
+      return `Yêu cầu thất bại (HTTP ${status}).`;
+  }
 }
 
-// --- Gọi API dùng chung ---
+// --- Request dùng chung ---
+
 async function apiFetch(path, options = {}) {
   const {
     auth = false,
@@ -56,20 +88,21 @@ async function apiFetch(path, options = {}) {
 
   const headers = new Headers(fetchOptions.headers);
   const body = fetchOptions.body;
+  const requestToken = auth ? AuthSession.getToken() : null;
 
-  // Trình duyệt tự đặt Content-Type cho FormData và URLSearchParams.
   if (body instanceof FormData || body instanceof URLSearchParams) {
+    // Trình duyệt tự tạo Content-Type và multipart boundary.
     headers.delete("Content-Type");
   } else if (body != null && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  if (auth) {
-    const token = AuthSession.getToken();
+  if (responseType === "json" && !headers.has("Accept")) {
+    headers.set("Accept", "application/json");
+  }
 
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
+  if (auth && requestToken) {
+    headers.set("Authorization", `Bearer ${requestToken}`);
   }
 
   let response;
@@ -79,19 +112,29 @@ async function apiFetch(path, options = {}) {
       ...fetchOptions,
       headers,
     });
-  } catch {
-    throw new Error(
+  } catch (cause) {
+    if (cause?.name === "AbortError") {
+      throw cause;
+    }
+
+    const error = new Error(
       "Không thể kết nối máy chủ. Hãy kiểm tra mạng và backend."
     );
+
+    error.status = 0;
+    throw error;
   }
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
+    // Backend có thể trả HTML/text khi gặp lỗi nội bộ.
+    const data = await response.json().catch(() => null);
 
-    if (response.status === 401 && auth) {
+    if (
+      response.status === 401 &&
+      auth &&
+      AuthSession.getToken() === requestToken
+    ) {
       AuthSession.clear();
-
-      // admin.js sẽ lắng nghe sự kiện này để hiện lại form đăng nhập.
       window.dispatchEvent(new Event("auth:required"));
     }
 
@@ -100,11 +143,11 @@ async function apiFetch(path, options = {}) {
     );
 
     error.status = response.status;
-    error.detail = data.detail;
+    error.detail = data?.detail;
     throw error;
   }
 
-  if (response.status === 204) {
+  if (response.status === 204 || response.status === 205) {
     return null;
   }
 
@@ -112,14 +155,32 @@ async function apiFetch(path, options = {}) {
     return response.blob();
   }
 
-  return response.json();
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    const error = new Error(
+      "Máy chủ trả về dữ liệu không hợp lệ. Vui lòng thử lại."
+    );
+
+    error.status = response.status;
+    throw error;
+  }
 }
 
 // --- Đăng nhập / đăng xuất ---
+
 const AuthAPI = {
   async login(email, password) {
+    const cleanEmail = email.trim();
+
     const body = new URLSearchParams({
-      username: email,
+      username: cleanEmail,
       password,
     });
 
@@ -128,11 +189,14 @@ const AuthAPI = {
       body,
     });
 
-    if (!result.access_token) {
-      throw new Error("Máy chủ không trả về token đăng nhập.");
+    if (
+      typeof result?.access_token !== "string" ||
+      !result.access_token
+    ) {
+      throw new Error("Máy chủ không trả về token đăng nhập hợp lệ.");
     }
 
-    AuthSession.save(result.access_token, email);
+    AuthSession.save(result.access_token, cleanEmail);
     return result;
   },
 
@@ -143,6 +207,7 @@ const AuthAPI = {
 };
 
 // --- Tin tuyển dụng ---
+
 const JobAPI = {
   list() {
     return apiFetch("/api/jobs");
@@ -173,14 +238,18 @@ const JobAPI = {
   },
 
   close(id) {
-    return apiFetch(`/api/jobs/${encodeURIComponent(id)}/close`, {
-      method: "PATCH",
-      auth: true,
-    });
+    return apiFetch(
+      `/api/jobs/${encodeURIComponent(id)}/close`,
+      {
+        method: "PATCH",
+        auth: true,
+      }
+    );
   },
 };
 
 // --- Hồ sơ ứng tuyển ---
+
 const ApplicationAPI = {
   listByJob(jobId) {
     const query = new URLSearchParams({
