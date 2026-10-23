@@ -69,23 +69,25 @@ Ký hiệu:
 
 ## 5. Candidate Portal (Frontend)
 
-* [ ] Thiết kế giao diện trang chủ (`index.html`) hiển thị danh sách tin tuyển dụng
-* [ ] Thiết kế trang/modal xem chi tiết bản mô tả công việc (JD)
-* [ ] Xây dựng biểu mẫu (Form) nộp CV trực tuyến (Họ tên, Email, Số điện thoại, Tải file PDF)
-* [ ] Viết JavaScript kiểm tra định dạng tệp (chỉ nhận `.pdf`, `.docx`) và giới hạn dung lượng (< 5MB)
-* [ ] Kết nối hàm `fetch()` gửi `FormData` lên API nộp hồ sơ của Backend
-* [ ] Hiển thị thông báo trạng thái nộp hồ sơ (Loading spinner, thông báo thành công / lỗi)
+* [x] Thiết kế giao diện trang chủ (`index.html`) hiển thị danh sách tin tuyển dụng
+* [x] Thiết kế trang/modal xem chi tiết bản mô tả công việc (JD)
+* [x] Xây dựng biểu mẫu (Form) nộp CV trực tuyến (Họ tên, Email, Số điện thoại, Tải file PDF)
+* [x] Viết JavaScript kiểm tra định dạng tệp (chỉ nhận `.pdf`, `.docx`) và giới hạn dung lượng (< 5MB)
+* [x] Kết nối hàm `fetch()` gửi `FormData` lên API nộp hồ sơ của Backend
+* [x] Hiển thị thông báo trạng thái nộp hồ sơ (Loading spinner, thông báo thành công / lỗi)
 
 ## 6. HR ATS & Kanban Dashboard (Frontend)
 
-* [ ] Thiết kế giao diện bảng điều khiển nhân sự (`admin.html`) với thanh điều hướng Bootstrap 5
-* [ ] Xây dựng giao diện tạo tin tuyển dụng mới kèm ô nhập tiêu chí bắt buộc
-* [ ] Xây dựng bảng Kanban với 4 cột trạng thái: *Applied*, *Screening*, *Interview*, *Offer/Reject*
-* [ ] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
-* [ ] Thiết kế thẻ ứng viên (Candidate Card): Tên, vị trí, huy hiệu điểm Matching Score tô màu trực quan ($\ge 80\%$ xanh, $50-79\%$ vàng, $< 50\%$ đỏ)
-* [ ] Bắt sự kiện kéo thả thẻ (`onEnd`) để gọi API cập nhật trạng thái về Backend tức thì
-* [ ] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
-* [ ] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
+* [x] Thiết kế giao diện bảng điều khiển nhân sự (`admin.html`) với thanh điều hướng Bootstrap 5
+* [x] Xây dựng giao diện tạo tin tuyển dụng mới kèm ô nhập tiêu chí bắt buộc
+* [x] Xây dựng bảng Kanban với 5 cột trạng thái: *Applied*, *Screening*, *Interview*, *Offer*, *Rejected* (chốt 17/10/2026, khớp 5 trạng thái backend)
+* [x] Tích hợp thư viện `SortableJS` cho phép kéo thả các thẻ ứng viên qua lại giữa các cột
+* [x] Thiết kế thẻ ứng viên (Candidate Card): Tên, vị trí, huy hiệu điểm Matching Score tô màu trực quan ($\ge 80\%$ xanh, $50-79\%$ vàng, $< 50\%$ đỏ)
+* [x] Bắt sự kiện kéo thả thẻ (`onEnd`) để gọi API cập nhật trạng thái về Backend tức thì
+* [x] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
+* [x] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
+* [x] Xây dựng trang quản lý tin tuyển dụng (mục "Tin tuyển dụng" trên thanh điều hướng): bảng tiêu đề, trạng thái, ngày đăng, số kỹ năng bắt buộc; nút Sửa / Đóng tin / Xem Kanban (bổ sung 17/10/2026, dùng API sẵn có)
+* [x] Gộp nhánh `frontend-hai` vào `frontend-tan`: giữ JS của `frontend-tan`, áp giao diện (HTML/CSS, menu dọc) của Hải lên `index.html` và `admin.html` (bổ sung 23/10/2026)
 
 ## 7. Supporting Services & Notifications
 
@@ -93,7 +95,7 @@ Ký hiệu:
 * [ ] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
 * [ ] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview*
 * [ ] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
-* [~] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (backend xong `sort_by=score_desc`, chờ frontend)
+* [x] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (frontend xong 23/10/2026: ô *Sắp xếp* điểm cao → thấp / mới nộp trước, ô *Điểm tối thiểu* tất cả / từ 50 / từ 80)
 
 ## 8. Quality, Testing & Defense Preparation
 
@@ -119,7 +121,7 @@ Chi tiết từng vấn đề: `docs/Issues/`. Lịch sử test: `docs/Test-Repo
 * [ ] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt giữ hay bỏ `.docx`)
 * [ ] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (cần thảo luận nhóm)
 * [ ] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp
-* [ ] Chốt cách hiển thị Kanban: checklist 4 cột, backend 5 trạng thái (`offer` và `rejected` tách riêng)
+* [x] Chốt cách hiển thị Kanban: 5 cột theo 5 trạng thái backend (`offer` và `rejected` tách riêng), chốt 17/10/2026
 * [ ] Tải CA certificate Aiven và đặt `DB_SSL_CA` để bật xác minh chứng chỉ máy chủ
 * [x] Viết tài liệu API cho frontend (`docs/API cho Frontend.md`)
 
@@ -155,5 +157,7 @@ ai-recruitment-system/
 ---
 
 ## Current Milestone
+
+**Cập nhật 17/10/2026:** Đã xong frontend Mục 5 (Cổng ứng viên) và Mục 6 (Bảng điều khiển HR, gồm 6.9 trang quản lý tin) trên nhánh `feature/frontend-tan`; nhật ký ở `docs/Phan 5/`, `docs/Phan 6/`. Cách chạy cả hệ thống: `README.md` mục 4–5. Việc tiếp theo phía frontend: 8.2 (kiểm thử trọn luồng), 8.5 (dọn code, chuẩn hóa thông báo lỗi).
 
 **Cập nhật 16/10/2026:** Đã xong backend lõi (Mục 1–4): CSDL Aiven (TLS), REST API, AI Pipeline Hybrid (Gemini + Ollama dự phòng, Sentence-Transformers), chấm điểm và sinh câu hỏi phỏng vấn. Lần test toàn bộ backend gần nhất đạt hết (unit 184, smoke API 35/35, E2E). Giai đoạn tiếp theo: frontend (Mục 5, 6) theo `docs/API cho Frontend.md`; song song backend làm Mục 7 (email) và các việc ở Mục 9.

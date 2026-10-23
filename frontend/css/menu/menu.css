@@ -1,0 +1,253 @@
+/* SmartRecruit AI — Menu dọc dùng chung cho HR và ứng viên */
+
+.app-menu {
+  --menu-bg: #24396d;
+  --menu-active: #354f8e;
+  --menu-text: #edf2ff;
+  --menu-muted: #bdcbed;
+  --menu-line: rgb(255 255 255 / 12%);
+
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 120px);
+  padding: 12px 10px;
+  overflow: hidden;
+  border: 1px solid #263d76;
+  border-radius: 14px;
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  box-shadow: 0 8px 24px rgb(28 47 96 / 10%);
+}
+
+.app-menu-disclosure {
+  flex: 1;
+}
+
+.app-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 10px 20px;
+  border-bottom: 1px solid var(--menu-line);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-menu-header::-webkit-details-marker {
+  display: none;
+}
+
+.app-menu-toggle-icon,
+.app-menu-icon {
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.app-menu-toggle-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.app-menu-role {
+  margin-left: auto;
+  padding: 4px 7px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 7%);
+  color: #d5def6;
+  font-size: .58rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.app-menu-content {
+  padding-top: 20px;
+}
+
+.app-menu-label {
+  margin: 0 12px 12px;
+  color: #aebfe8;
+  font-size: .59rem;
+  font-weight: 650;
+  letter-spacing: 1px;
+}
+
+.app-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.app-menu-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 57px;
+  padding: 13px 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--menu-text);
+  font-size: .83rem;
+  font-weight: 550;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+.app-menu-link:hover {
+  background: rgb(255 255 255 / 9%);
+  color: white;
+}
+
+.app-menu-link[aria-current] {
+  background: var(--menu-active);
+  color: white;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+
+.app-menu-link[aria-current]::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: #a8d9cf;
+}
+
+.app-menu-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.app-menu-link > span:not(.app-menu-arrow) {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-menu-arrow {
+  margin-left: auto;
+  color: var(--menu-muted);
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.app-menu-help {
+  margin: 24px 12px 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--menu-line);
+}
+
+.app-menu-help strong {
+  color: #dce5fa;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.app-menu-help p {
+  margin: 7px 0 0;
+  color: var(--menu-muted);
+  font-size: .68rem;
+  line-height: 1.9;
+}
+
+.app-menu-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 24px;
+  padding: 16px 10px 5px;
+  border-top: 1px solid var(--menu-line);
+  color: var(--menu-muted);
+  font-size: .62rem;
+  line-height: 1.7;
+}
+
+.app-menu-status {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #a3d2bb;
+}
+
+.app-menu-header:focus-visible,
+.app-menu-link:focus-visible {
+  outline: 2px solid #bfd1ff;
+  outline-offset: 2px;
+}
+
+/* Giữ vị trí menu trong các bố cục hiện tại */
+.home-sidebar,
+.career-sidebar,
+.role-workspace-sidebar {
+  position: sticky;
+  top: 98px;
+  min-width: 0;
+}
+
+.home-sidebar {
+  padding-top: 20px;
+}
+
+.home-sidebar-note,
+.career-sidebar-caption {
+  display: none;
+}
+
+.role-workspace {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
+  gap: 26px;
+}
+
+.role-workspace[hidden] {
+  display: none !important;
+}
+
+.role-workspace-content {
+  min-width: 0;
+}
+
+@media (max-width: 991.98px) {
+  .role-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .home-sidebar,
+  .career-sidebar,
+  .role-workspace-sidebar {
+    position: static;
+    padding-top: 14px;
+  }
+
+  .app-menu {
+    min-height: auto;
+  }
+
+  .app-menu-header {
+    padding-bottom: 13px;
+  }
+
+  .app-menu-help,
+  .app-menu-footer {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-menu-link {
+    transition: none;
+  }
+}
