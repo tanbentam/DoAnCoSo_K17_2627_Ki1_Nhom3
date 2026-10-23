@@ -17,6 +17,8 @@ const KANBAN_COLUMNS = [
 ];
 
 const SELECTED_JOB_KEY = "sr_admin_job";
+const BOARD_SORT_KEY = "sr_admin_sort";
+const BOARD_MIN_SCORE_KEY = "sr_admin_min_score";
 
 const loginViewEl = document.getElementById("view-login");
 const dashboardViewEl = document.getElementById("view-dashboard");
@@ -31,6 +33,8 @@ const jobSelectEl = document.getElementById("job-select");
 const jobMetaEl = document.getElementById("job-meta");
 const boardEl = document.getElementById("kanban-board");
 const editJobBtn = document.getElementById("edit-job-btn");
+const boardSortEl = document.getElementById("board-sort");
+const boardMinScoreEl = document.getElementById("board-min-score");
 
 let jobs = [];
 let lastEmail = "";
@@ -221,17 +225,62 @@ function schedulePoll() {
   }
 }
 
-/** Dòng thống kê dưới ô chọn tin: tổng hồ sơ, số hồ sơ AI đang chấm. */
-function renderAppStats() {
+/** Dòng thống kê dưới ô chọn tin: tổng hồ sơ, số hồ sơ AI đang chấm, số hồ sơ đang hiện khi lọc điểm. */
+function renderAppStats(visibleCount) {
   jobMetaEl.querySelector(".app-stats")?.remove();
   const running = applications.filter((a) => AI_RUNNING.includes(a.ai_status)).length;
+  const minScore = Number(boardMinScoreEl.value) || 0;
   const wrap = document.createElement("span");
   wrap.className = "app-stats";
   wrap.innerHTML = `
     <span class="stat-pill"><i class="bi bi-people me-1"></i>${applications.length} hồ sơ</span>
-    ${running ? `<span class="stat-pill"><i class="bi bi-hourglass-split me-1"></i>${running} đang chấm AI</span>` : ""}`;
+    ${running ? `<span class="stat-pill"><i class="bi bi-hourglass-split me-1"></i>${running} đang chấm AI</span>` : ""}
+    ${minScore ? `<span class="stat-pill"><i class="bi bi-funnel me-1"></i>Đang hiện ${visibleCount} hồ sơ từ ${minScore} điểm</span>` : ""}`;
   jobMetaEl.appendChild(wrap);
 }
+
+// ===== 7.5: Sắp xếp / lọc theo điểm (trên dữ liệu đã tải, không gọi lại API) =====
+function loadBoardFilters() {
+  try {
+    const sort = localStorage.getItem(BOARD_SORT_KEY);
+    const min = localStorage.getItem(BOARD_MIN_SCORE_KEY);
+    if ([...boardSortEl.options].some((o) => o.value === sort)) boardSortEl.value = sort;
+    if ([...boardMinScoreEl.options].some((o) => o.value === min)) boardMinScoreEl.value = min;
+  } catch { /* không đọc được thì dùng mặc định */ }
+}
+
+function saveBoardFilters() {
+  try {
+    localStorage.setItem(BOARD_SORT_KEY, boardSortEl.value);
+    localStorage.setItem(BOARD_MIN_SCORE_KEY, boardMinScoreEl.value);
+  } catch { /* không lưu được thì thôi */ }
+}
+
+/**
+ * Hồ sơ hiện trên bảng theo 2 ô "Sắp xếp" và "Điểm tối thiểu".
+ * - Lọc điểm so với điểm đã làm tròn (giống huy hiệu); hồ sơ chưa có điểm bị ẩn khi đang lọc.
+ * - "Điểm cao → thấp": hồ sơ chưa có điểm xếp cuối; bằng điểm thì giữ thứ tự API (mới nộp trước).
+ */
+function visibleApplications() {
+  const minScore = Number(boardMinScoreEl.value) || 0;
+  const list = minScore
+    ? applications.filter((a) => (formatScore(a.matching_score) ?? -1) >= minScore)
+    : [...applications];
+  if (boardSortEl.value === "newest") {
+    return list.sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+  }
+  return list.sort((a, b) => (b.matching_score ?? -1) - (a.matching_score ?? -1));
+}
+
+function onBoardFilterChanged() {
+  saveBoardFilters();
+  // Đang tải / lỗi thì chưa có bảng: lần tải xong sẽ tự áp lựa chọn mới
+  if (boardEl.querySelector(".kanban-board")) renderBoard();
+}
+
+loadBoardFilters();
+boardSortEl.addEventListener("change", onBoardFilterChanged);
+boardMinScoreEl.addEventListener("change", onBoardFilterChanged);
 
 /** Huy hiệu góc thẻ theo `ai_status` (bảng gợi ý trong API cho Frontend.md). */
 function cardBadge(app) {
@@ -285,21 +334,28 @@ function cardHtml(app) {
     </article>`;
 }
 
-/** Vẽ 5 cột; thẻ trong mỗi cột giữ thứ tự API trả về (điểm cao → thấp, chưa có điểm xếp cuối). */
+/** Vẽ 5 cột; thẻ trong mỗi cột theo ô "Sắp xếp" / "Điểm tối thiểu" (7.5, xem visibleApplications). */
 function renderBoard() {
   sortables.forEach((s) => s.destroy());
   sortables = [];
 
-  const emptyNote = applications.length
-    ? ""
-    : `<div class="alert alert-info py-2 small d-flex align-items-center gap-2 mb-3" role="status">
+  const visible = visibleApplications();
+  let emptyNote = "";
+  if (!applications.length) {
+    emptyNote = `<div class="alert alert-info py-2 small d-flex align-items-center gap-2 mb-3" role="status">
          <i class="bi bi-inbox"></i>Tin này chưa có hồ sơ nào. Hồ sơ nộp từ cổng ứng viên sẽ tự hiện ở cột "Mới nộp".
        </div>`;
+  } else if (!visible.length) {
+    emptyNote = `<div class="alert alert-info py-2 small d-flex flex-wrap align-items-center gap-2 mb-3" role="status">
+         <i class="bi bi-funnel"></i>Không có hồ sơ nào từ ${Number(boardMinScoreEl.value)} điểm trở lên.
+         <button type="button" class="btn btn-sm btn-outline-primary py-0" data-clear-score-filter>Hiện tất cả hồ sơ</button>
+       </div>`;
+  }
 
   boardEl.innerHTML = `${emptyNote}
     <div class="kanban-board">
       ${KANBAN_COLUMNS.map((col) => {
-        const cards = applications.filter((a) => columnOf(a.status).status === col.status);
+        const cards = visible.filter((a) => columnOf(a.status).status === col.status);
         return `
         <section class="kanban-col" data-status="${col.status}" aria-label="${col.label}">
           <div class="col-title">
@@ -317,11 +373,15 @@ function renderBoard() {
       }).join("")}
     </div>`;
 
+  boardEl.querySelector("[data-clear-score-filter]")?.addEventListener("click", () => {
+    boardMinScoreEl.value = "0";
+    onBoardFilterChanged();
+  });
   initSortable();
-  renderAppStats();
+  renderAppStats(visible.length);
 }
 
-/** 6.4: kéo thả giữa các cột. `sort: false` → không đổi thứ tự trong cùng cột (luôn xếp theo điểm). */
+/** 6.4: kéo thả giữa các cột. `sort: false` → không đổi thứ tự trong cùng cột (luôn theo ô "Sắp xếp"). */
 function initSortable() {
   if (typeof Sortable === "undefined") {
     showToast("Không tải được thư viện kéo thả. Dùng menu ⋮ trên thẻ để chuyển cột.", "warning");

@@ -95,7 +95,7 @@ Ký hiệu:
 * [ ] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
 * [ ] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview*
 * [ ] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
-* [~] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (backend xong `sort_by=score_desc`, chờ frontend)
+* [x] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (frontend xong 23/10/2026: ô *Sắp xếp* điểm cao → thấp / mới nộp trước, ô *Điểm tối thiểu* tất cả / từ 50 / từ 80)
 
 ## 8. Quality, Testing & Defense Preparation
 

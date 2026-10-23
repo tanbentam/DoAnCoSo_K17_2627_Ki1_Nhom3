@@ -138,8 +138,9 @@ a { text-underline-offset: 4px; }
 .dashboard-heading h1 { margin-bottom: 8px; font-size: 2rem; font-weight: 750; letter-spacing: -.8px; }
 .dashboard-heading p { margin: 0; color: #6b7c98; font-size: .88rem; }
 .workspace-card > .card-body { padding: 22px 24px; }
-.job-toolbar { display: flex; align-items: flex-end; gap: 16px; }
-.job-selector { flex: 1; min-width: 0; max-width: 560px; }
+.job-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; }
+.job-selector { flex: 1 1 260px; min-width: 0; max-width: 560px; }
+.board-filter { flex: 0 1 190px; min-width: 175px; }
 .job-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-left: auto; }
 .stat-pill { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: .35rem .75rem; font-size: .85rem; }
 
@@ -257,7 +258,7 @@ a { text-underline-offset: 4px; }
   .login-card h1 { font-size: 1.6rem; }
   .dashboard-heading h1 { font-size: 1.6rem; }
   .job-toolbar { flex-direction: column; align-items: stretch; }
-  .job-selector { max-width: none; }
+  .job-selector, .board-filter { flex: none; min-width: 0; max-width: none; }
   .job-actions { margin-left: 0; }
   .job-actions .btn { flex: 1; }
   .workspace-card > .card-body { padding: 16px; }
