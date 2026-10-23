@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#203c91" />
   <title>SmartRecruit AI — HR Dashboard</title>
 
-  <!-- Font Be Vietnam Pro -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Tabler 1.6.1 (dựng trên Bootstrap 5, dùng thay bootstrap.min.css) -->
+  <!-- Tabler 1.6.1 (dựng trên Bootstrap 5, dùng thay bootstrap.min.css). admin.js dùng các thành phần
+       riêng của Tabler (avatar, nhãn bg-*-lt, btn-ghost, card-table, empty) nên giữ Tabler làm nền,
+       phần màu sắc và bố cục theo giao diện chung trong style.css + menu.css -->
   <link
     href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css"
     rel="stylesheet"
@@ -27,177 +25,255 @@
   />
 
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/menu/menu.css" />
 </head>
 <body class="admin-body">
+  <a class="skip-link" href="#admin-main">Đến nội dung chính</a>
+
   <!-- A1: Đăng nhập (hiện khi chưa có token) -->
   <section id="view-login" class="login-page d-none" aria-labelledby="login-title">
-    <div class="card login-card shadow-sm">
-      <div class="card-body p-4">
-        <div class="text-center mb-4">
-          <span class="brand-logo mb-2"><i class="bi bi-stars"></i></span>
-          <h1 class="h3 mb-1" id="login-title">SmartRecruit AI</h1>
-          <p class="text-secondary mb-0">Đăng nhập dành cho nhân sự (HR)</p>
-        </div>
-        <form id="login-form" novalidate>
-          <div class="mb-3">
-            <label class="form-label" for="login-email">Email</label>
-            <input type="email" class="form-control" id="login-email" placeholder="hr@congty.com" autocomplete="username" required />
-            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="login-password">Mật khẩu</label>
-            <div class="input-group has-validation">
-              <input type="password" class="form-control" id="login-password" autocomplete="current-password" required />
-              <button type="button" class="btn btn-outline-secondary" id="login-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false">
-                <i class="bi bi-eye"></i>
-              </button>
-              <div class="invalid-feedback">Vui lòng nhập mật khẩu</div>
+    <header class="site-navbar">
+      <div class="admin-nav-container">
+        <a class="brand" href="admin.html">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span>SmartRecruit<span class="brand-ai"> AI</span></span>
+        </a>
+        <a class="nav-context" href="index.html">Cổng ứng viên ↗</a>
+      </div>
+    </header>
+
+    <div class="admin-main">
+      <div class="login-layout">
+        <aside class="login-introduction">
+          <span class="eyebrow">SMARTRECRUIT WORKSPACE</span>
+          <h2>Tuyển đúng người.<br />Xây đội ngũ tốt hơn.</h2>
+          <p>Quản lý tin tuyển dụng và theo dõi hồ sơ ứng viên trong một không gian tập trung.</p>
+
+          <div class="login-feature">
+            <span class="feature-number">01</span>
+            <div>
+              <strong>Quản lý tin tuyển dụng</strong>
+              <p>Xây dựng tiêu chí kỹ năng, kinh nghiệm rõ ràng cho từng vị trí.</p>
             </div>
           </div>
-          <div id="login-error" class="alert alert-danger py-2 small d-flex align-items-center gap-2 d-none" role="alert">
-            <i class="bi bi-x-circle-fill"></i><span></span>
+          <div class="login-feature">
+            <span class="feature-number">02</span>
+            <div>
+              <strong>AI hỗ trợ đánh giá hồ sơ</strong>
+              <p>Điểm phù hợp, kỹ năng khớp / thiếu và câu hỏi phỏng vấn gợi ý.</p>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary w-100" id="login-submit">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
-          </button>
-        </form>
+          <div class="login-feature">
+            <span class="feature-number">03</span>
+            <div>
+              <strong>Bảng Kanban kéo thả</strong>
+              <p>Theo dõi ứng viên qua 5 bước tuyển dụng.</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="login-card">
+          <span class="eyebrow">CHÀO MỪNG TRỞ LẠI</span>
+          <h1 id="login-title">Đăng nhập HR</h1>
+          <p class="mb-4">Sử dụng tài khoản được cấp để tiếp tục.</p>
+
+          <form id="login-form" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="login-email">Email</label>
+              <input type="email" class="form-control" id="login-email" placeholder="hr@congty.com" autocomplete="username" required />
+              <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="login-password">Mật khẩu</label>
+              <div class="input-group has-validation">
+                <input type="password" class="form-control" id="login-password" autocomplete="current-password" required />
+                <button type="button" class="btn btn-outline-secondary" id="login-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <div class="invalid-feedback">Vui lòng nhập mật khẩu</div>
+              </div>
+            </div>
+            <div id="login-error" class="alert alert-danger py-2 small d-flex align-items-center gap-2 d-none" role="alert">
+              <i class="bi bi-x-circle-fill"></i><span></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="login-submit">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+            </button>
+          </form>
+
+          <p class="login-footnote">
+            Khu vực dành cho bộ phận tuyển dụng. Liên hệ quản trị viên nếu chưa có tài khoản.
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Bảng điều khiển (hiện khi đã đăng nhập) -->
-  <div id="view-dashboard" class="page d-none">
-    <!-- A2: Thanh điều hướng -->
-    <header class="navbar navbar-expand-md d-print-none border-bottom bg-white">
-      <div class="container-xl">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#admin-nav" aria-controls="admin-nav" aria-expanded="false" aria-label="Mở menu">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a href="admin.html" class="navbar-brand d-flex align-items-center gap-2 fw-bold me-md-4">
-          <span class="brand-logo"><i class="bi bi-stars"></i></span>
-          <span>SmartRecruit AI</span>
-          <span class="badge bg-blue-lt">HR</span>
+  <div id="view-dashboard" class="d-none">
+    <!-- A2: Đầu trang + tài khoản -->
+    <header class="site-navbar">
+      <div class="admin-nav-container">
+        <a class="brand" href="admin.html">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span>SmartRecruit<span class="brand-ai"> AI</span></span>
         </a>
 
-        <!-- Tài khoản: luôn hiện, kể cả trên điện thoại -->
-        <div class="navbar-nav flex-row order-md-last">
-          <div class="nav-item dropdown">
-            <a href="#" class="nav-link d-flex align-items-center gap-2 px-0" data-bs-toggle="dropdown" aria-label="Tài khoản" aria-expanded="false">
-              <span class="avatar avatar-sm rounded-circle bg-primary-lt" id="user-avatar"></span>
-              <span class="d-none d-lg-inline small user-email"></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end">
-              <span class="dropdown-header">Đang đăng nhập</span>
-              <span class="dropdown-item-text small text-truncate user-email user-email-menu"></span>
-              <div class="dropdown-divider"></div>
-              <button type="button" class="dropdown-item text-danger" id="logout-btn">
-                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="collapse navbar-collapse" id="admin-nav">
-          <ul class="navbar-nav">
-            <li class="nav-item active" data-view-nav="kanban">
-              <a class="nav-link" href="#kanban" aria-current="page"><i class="bi bi-kanban me-2"></i>Bảng Kanban</a>
-            </li>
-            <li class="nav-item" data-view-nav="jobs">
-              <a class="nav-link" href="#tin-tuyen-dung"><i class="bi bi-briefcase me-2"></i>Tin tuyển dụng</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="index.html" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Cổng ứng viên</a>
-            </li>
-          </ul>
+        <div class="session-bar">
+          <span class="session-label">Không gian HR</span>
+          <span class="avatar avatar-sm rounded-circle bg-primary-lt" id="user-avatar" aria-hidden="true"></span>
+          <span class="session-email user-email"></span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="logout-btn">
+            <i class="bi bi-box-arrow-right me-1"></i>Đăng xuất
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- Màn hình 1: Bảng Kanban -->
-    <div class="page-wrapper" id="view-kanban">
-      <!-- A3: Chọn tin tuyển dụng + nút tạo / sửa tin -->
-      <div class="page-header d-print-none">
-        <div class="container-xl">
-          <div class="row g-3 align-items-end">
-            <div class="col-12 col-md">
-              <div class="page-pretitle">Bảng Kanban tuyển dụng</div>
-              <label class="visually-hidden" for="job-select">Chọn tin tuyển dụng</label>
-              <select id="job-select" class="form-select job-switch mt-1 fw-semibold" disabled>
-                <option>Đang tải tin tuyển dụng…</option>
-              </select>
-              <div class="d-flex flex-wrap gap-2 mt-2" id="job-meta"></div>
-            </div>
-            <div class="col-12 col-md-auto d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary" id="reload-btn" aria-label="Tải lại" title="Tải lại">
-                <i class="bi bi-arrow-clockwise"></i>
-              </button>
-              <button type="button" class="btn btn-outline-primary" id="edit-job-btn" disabled>
-                <i class="bi bi-pencil me-1"></i>Sửa tin
-              </button>
-              <button type="button" class="btn btn-primary" id="create-job-btn">
-                <i class="bi bi-plus-lg me-1"></i>Tạo tin mới
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <main id="admin-main" class="admin-main">
+      <div class="role-workspace">
+        <!-- Menu dọc HR: mục có data-view-nav do admin.js đánh dấu đang chọn -->
+        <aside class="role-workspace-sidebar" aria-label="Menu HR">
+          <nav class="app-menu" id="admin-nav" aria-label="Menu quản lý tuyển dụng">
+            <details class="app-menu-disclosure" open>
+              <summary class="app-menu-header">
+                <svg class="app-menu-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6h16M4 12h12M4 18h8"></path>
+                </svg>
+                <span>Menu</span>
+                <span class="app-menu-role">Nhân sự</span>
+              </summary>
 
-      <!-- Bảng Kanban 5 cột -->
-      <div class="page-body">
-        <div class="container-xl">
-          <div id="kanban-board">
-            <!-- admin.js vẽ trạng thái đang tải / rỗng / lỗi hoặc các cột -->
-          </div>
-        </div>
-      </div>
-    </div>
+              <div class="app-menu-content">
+                <p class="app-menu-label">QUẢN LÝ TUYỂN DỤNG</p>
+                <div class="app-menu-links">
+                  <div data-view-nav="kanban">
+                    <a class="app-menu-link nav-link" href="#kanban" aria-current="page">
+                      <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                        <path d="M9 4v16M15 4v16M5.5 8h1M11.5 8h1M17.5 8h1"></path>
+                      </svg>
+                      <span>Hồ sơ &amp; Kanban</span>
+                      <span class="app-menu-arrow" aria-hidden="true">›</span>
+                    </a>
+                  </div>
+                  <div data-view-nav="jobs">
+                    <a class="app-menu-link nav-link" href="#tin-tuyen-dung">
+                      <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+                        <path d="M8 8h8M8 12h8M8 16h5"></path>
+                      </svg>
+                      <span>Tin tuyển dụng</span>
+                      <span class="app-menu-arrow" aria-hidden="true">›</span>
+                    </a>
+                  </div>
+                  <a class="app-menu-link" href="index.html" target="_blank" rel="noopener">
+                    <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path>
+                    </svg>
+                    <span>Cổng ứng viên</span>
+                    <span class="app-menu-arrow" aria-hidden="true">›</span>
+                  </a>
+                </div>
 
-    <!-- Màn hình 2: Quản lý tin tuyển dụng (6.9) -->
-    <div class="page-wrapper d-none" id="view-jobs">
-      <div class="page-header d-print-none">
-        <div class="container-xl">
-          <div class="row g-3 align-items-end">
-            <div class="col-12 col-md">
-              <div class="page-pretitle">Quản lý</div>
-              <h2 class="page-title">Tin tuyển dụng</h2>
-              <div class="d-flex flex-wrap gap-2 mt-2" id="jobs-stats"></div>
-            </div>
-            <div class="col-12 col-md-auto d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary" id="jobs-reload-btn" aria-label="Tải lại" title="Tải lại">
-                <i class="bi bi-arrow-clockwise"></i>
-              </button>
-              <button type="button" class="btn btn-primary" id="jobs-create-btn">
-                <i class="bi bi-plus-lg me-1"></i>Tạo tin mới
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page-body">
-        <div class="container-xl">
-          <div class="card">
-            <div class="card-header flex-wrap gap-2">
-              <ul class="nav nav-pills" id="jobs-filter" role="tablist" aria-label="Lọc theo trạng thái">
-                <li class="nav-item"><button type="button" class="nav-link active" data-filter="all" aria-pressed="true">Tất cả <span class="badge bg-secondary-lt ms-1" data-count="all">0</span></button></li>
-                <li class="nav-item"><button type="button" class="nav-link" data-filter="open" aria-pressed="false">Đang mở <span class="badge bg-green-lt ms-1" data-count="open">0</span></button></li>
-                <li class="nav-item"><button type="button" class="nav-link" data-filter="closed" aria-pressed="false">Đã đóng <span class="badge bg-secondary-lt ms-1" data-count="closed">0</span></button></li>
-              </ul>
-              <div class="ms-md-auto jobs-search">
-                <label class="visually-hidden" for="jobs-search">Tìm tin tuyển dụng</label>
-                <div class="input-icon">
-                  <span class="input-icon-addon"><i class="bi bi-search"></i></span>
-                  <input type="search" class="form-control" id="jobs-search" placeholder="Tìm theo tiêu đề, kỹ năng…" autocomplete="off" />
+                <div class="app-menu-help">
+                  <strong>Quy trình tuyển dụng</strong>
+                  <p>Đăng tin, tiếp nhận hồ sơ, AI chấm điểm và theo dõi từng bước tuyển chọn.</p>
                 </div>
               </div>
+            </details>
+
+            <footer class="app-menu-footer">
+              <span class="app-menu-status" aria-hidden="true"></span>
+              <span>SmartRecruit AI · Không gian HR</span>
+            </footer>
+          </nav>
+        </aside>
+
+        <div class="role-workspace-content">
+          <!-- Màn hình 1: Bảng Kanban -->
+          <section id="view-kanban" aria-labelledby="kanban-heading">
+            <header class="dashboard-heading">
+              <div>
+                <span class="eyebrow">KHÔNG GIAN LÀM VIỆC</span>
+                <h1 id="kanban-heading">Hồ sơ &amp; Kanban</h1>
+                <p>Chọn tin tuyển dụng, kéo thẻ ứng viên giữa các cột để cập nhật trạng thái.</p>
+              </div>
+            </header>
+
+            <!-- A3: Chọn tin tuyển dụng + nút tạo / sửa tin -->
+            <div class="card workspace-card mb-4">
+              <div class="card-body">
+                <div class="job-toolbar">
+                  <div class="job-selector">
+                    <label class="form-label" for="job-select">Tin tuyển dụng</label>
+                    <select id="job-select" class="form-select fw-semibold" disabled>
+                      <option>Đang tải tin tuyển dụng…</option>
+                    </select>
+                  </div>
+                  <div class="job-actions">
+                    <button type="button" class="btn btn-outline-secondary" id="reload-btn" aria-label="Tải lại" title="Tải lại">
+                      <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="edit-job-btn" disabled>
+                      <i class="bi bi-pencil me-1"></i>Sửa tin
+                    </button>
+                    <button type="button" class="btn btn-primary" id="create-job-btn">
+                      <i class="bi bi-plus-lg me-1"></i>Tạo tin mới
+                    </button>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3" id="job-meta"></div>
+              </div>
             </div>
-            <div id="jobs-list">
-              <!-- admin.js vẽ bảng (máy tính) / danh sách thẻ (điện thoại) hoặc trạng thái tải / rỗng / lỗi -->
+
+            <!-- Bảng Kanban 5 cột -->
+            <div id="kanban-board">
+              <!-- admin.js vẽ trạng thái đang tải / rỗng / lỗi hoặc các cột -->
             </div>
-          </div>
+          </section>
+
+          <!-- Màn hình 2: Quản lý tin tuyển dụng (6.9) -->
+          <section class="d-none" id="view-jobs" aria-labelledby="jobs-heading">
+            <header class="dashboard-heading">
+              <div>
+                <span class="eyebrow">QUẢN LÝ</span>
+                <h1 id="jobs-heading">Tin tuyển dụng</h1>
+                <div class="d-flex flex-wrap gap-2 mt-2" id="jobs-stats"></div>
+              </div>
+              <div class="job-actions">
+                <button type="button" class="btn btn-outline-secondary" id="jobs-reload-btn" aria-label="Tải lại" title="Tải lại">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <button type="button" class="btn btn-primary" id="jobs-create-btn">
+                  <i class="bi bi-plus-lg me-1"></i>Tạo tin mới
+                </button>
+              </div>
+            </header>
+
+            <div class="card workspace-card">
+              <div class="card-header flex-wrap gap-2">
+                <ul class="nav nav-pills" id="jobs-filter" role="tablist" aria-label="Lọc theo trạng thái">
+                  <li class="nav-item"><button type="button" class="nav-link active" data-filter="all" aria-pressed="true">Tất cả <span class="badge bg-secondary-lt ms-1" data-count="all">0</span></button></li>
+                  <li class="nav-item"><button type="button" class="nav-link" data-filter="open" aria-pressed="false">Đang mở <span class="badge bg-green-lt ms-1" data-count="open">0</span></button></li>
+                  <li class="nav-item"><button type="button" class="nav-link" data-filter="closed" aria-pressed="false">Đã đóng <span class="badge bg-secondary-lt ms-1" data-count="closed">0</span></button></li>
+                </ul>
+                <div class="ms-md-auto jobs-search">
+                  <label class="visually-hidden" for="jobs-search">Tìm tin tuyển dụng</label>
+                  <div class="input-icon">
+                    <span class="input-icon-addon"><i class="bi bi-search"></i></span>
+                    <input type="search" class="form-control" id="jobs-search" placeholder="Tìm theo tiêu đề, kỹ năng…" autocomplete="off" />
+                  </div>
+                </div>
+              </div>
+              <div id="jobs-list">
+                <!-- admin.js vẽ bảng (máy tính) / danh sách thẻ (điện thoại) hoặc trạng thái tải / rỗng / lỗi -->
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <!-- A4: Modal tạo / sửa tin tuyển dụng -->
@@ -205,7 +281,10 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
       <form class="modal-content" id="job-form" novalidate>
         <div class="modal-header">
-          <h2 class="modal-title h4" id="job-modal-title">Tạo tin tuyển dụng mới</h2>
+          <div>
+            <span class="eyebrow">TIN TUYỂN DỤNG</span>
+            <h2 class="modal-title" id="job-modal-title">Tạo tin tuyển dụng mới</h2>
+          </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
 
@@ -270,7 +349,7 @@
           <button type="button" class="btn btn-outline-danger me-auto d-none" id="job-close-btn">
             <i class="bi bi-lock me-1"></i>Đóng tin
           </button>
-          <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
           <button type="submit" class="btn btn-primary" id="job-save-btn"></button>
         </div>
       </form>
@@ -292,7 +371,7 @@
         </div>
         <div class="modal-footer">
           <div class="w-100 d-flex gap-2">
-            <button type="button" class="btn w-100" id="close-job-back">Quay lại</button>
+            <button type="button" class="btn btn-outline-secondary w-100" id="close-job-back">Quay lại</button>
             <button type="button" class="btn btn-danger w-100" id="close-job-confirm">Đóng tin</button>
           </div>
         </div>
@@ -308,7 +387,8 @@
           <div class="d-flex gap-3 align-items-center min-w-0">
             <span class="avatar detail-avatar rounded-circle bg-primary-lt flex-shrink-0" id="detail-avatar"></span>
             <div class="min-w-0">
-              <h2 class="modal-title h3 mb-1 text-break" id="detail-name"></h2>
+              <span class="eyebrow">HỒ SƠ ỨNG VIÊN</span>
+              <h2 class="modal-title mb-1 text-break" id="detail-name"></h2>
               <div class="text-secondary small" id="detail-sub"></div>
               <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
                 <span class="badge" id="detail-status"></span>

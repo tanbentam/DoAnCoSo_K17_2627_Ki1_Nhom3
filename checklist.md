@@ -87,6 +87,7 @@ Ký hiệu:
 * [x] Xây dựng Modal hiển thị hồ sơ chi tiết và bảng đánh giá của AI khi HR bấm vào ứng viên
 * [x] Hiển thị danh sách kỹ năng trùng khớp, kỹ năng còn thiếu và các câu hỏi phỏng vấn gợi ý
 * [x] Xây dựng trang quản lý tin tuyển dụng (mục "Tin tuyển dụng" trên thanh điều hướng): bảng tiêu đề, trạng thái, ngày đăng, số kỹ năng bắt buộc; nút Sửa / Đóng tin / Xem Kanban (bổ sung 17/10/2026, dùng API sẵn có)
+* [x] Gộp nhánh `frontend-hai` vào `frontend-tan`: giữ JS của `frontend-tan`, áp giao diện (HTML/CSS, menu dọc) của Hải lên `index.html` và `admin.html` (bổ sung 23/10/2026)
 
 ## 7. Supporting Services & Notifications
 

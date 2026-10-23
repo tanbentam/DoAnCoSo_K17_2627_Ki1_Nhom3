@@ -21,10 +21,11 @@ Tài liệu cho người làm frontend SmartRecruit AI (Mục 5 – Cổng ứng
 - **Công nghệ** (đã chốt trong đề xuất dự án):
   - HTML5, CSS3, **JavaScript thuần ES6+**.
   - **Bootstrap 5.3.3** và **SortableJS 1.15.2** qua CDN.
-  - Giao diện (16/10/2026):
-    - `index.html`: theme **Bootswatch Zephyr 5.3.3** (thay `bootstrap.min.css`) và Bootstrap JS 5.3.3.
-    - `admin.html`: **Tabler 1.6.1** (dựng trên Bootstrap 5, thay cả CSS lẫn JS của Bootstrap). Tabler đặt Bootstrap ở `window.tabler`; `admin.html` đã gán `window.bootstrap = window.tabler` nên vẫn gọi được `bootstrap.Modal`, `bootstrap.Toast`… Class Bootstrap dùng như bình thường; thành phần riêng của Tabler xem https://preview.tabler.io.
-    - Chung: icon **Bootstrap Icons 1.13.1** (`<i class="bi bi-..."></i>`), font **Be Vietnam Pro** (Google Fonts). Màu và font khai báo bằng biến CSS ở đầu `css/style.css` (`--sr-*`).
+  - Giao diện (23/10/2026, theo thiết kế của nhánh `frontend-hai`, xem [Phan 6.10](Phan%206/Phan%206.10.md)):
+    - `index.html`: **Bootstrap 5.3.3** (CSS + JS).
+    - `admin.html`: **Tabler 1.6.1** (dựng trên Bootstrap 5, thay cả CSS lẫn JS của Bootstrap). Tabler đặt Bootstrap ở `window.tabler`; `admin.html` đã gán `window.bootstrap = window.tabler` nên vẫn gọi được `bootstrap.Modal`, `bootstrap.Toast`… Class Bootstrap dùng như bình thường; thành phần riêng của Tabler xem https://preview.tabler.io. `admin.js` dùng nhiều thành phần riêng của Tabler, nên **không bỏ Tabler**.
+    - Chung: icon **Bootstrap Icons 1.13.1** (`<i class="bi bi-..."></i>`), font hệ thống **Segoe UI**. Màu khai báo bằng biến CSS ở đầu `css/style.css` (`--primary`, `--line`…, cùng `--bs-*` cho Bootstrap và `--tblr-*` cho Tabler).
+    - CSS: `css/style.css` (chung), `css/menu/menu.css` (menu dọc), `css/user/candidate-home.css` (riêng cổng ứng viên).
     - Mọi thẻ CDN đều có `integrity` (SRI) tính từ file thật. Đổi phiên bản thì phải tính lại mã: `curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
   - Không dùng framework, không có bước build. Mở file HTML là chạy.
 - **Không làm ở frontend:** chấm điểm, phân tích CV, gửi email. Backend lo hết, frontend chỉ hiển thị kết quả.
@@ -254,7 +255,7 @@ Chỉ cần **giữ nguyên tên** các móc nối mà JS dùng để tìm phầ
 **Class và thuộc tính JS dựa vào:**
 - Chung (`utils.js`): `#toast-container`, `.state-message`, `.state-hint`, `.state-retry`; class huy hiệu điểm `badge-high` / `badge-medium` / `badge-low` (đổi màu ở `style.css` thì được, đổi tên thì phải sửa `scoreClass`).
 - Kanban: `.kanban-list[data-status]` (vùng thả của SortableJS), `.candidate-card[data-id]`, `.kanban-empty`, `.card-menu`, `[data-move]`, `.is-saving`, `.app-stats`.
-- Điều hướng: `[data-view-nav]` trên mục menu; địa chỉ `#kanban` / `#tin-tuyen-dung`.
+- Điều hướng: `[data-view-nav]` bọc mỗi mục menu, bên trong có một `.nav-link` (admin.js đặt `aria-current` lên link này, `menu.css` tô màu theo `aria-current`); địa chỉ `#kanban` / `#tin-tuyen-dung`.
 - Trang quản lý tin: `[data-job-action]` + `[data-job-id]`, `#jobs-filter [data-filter]`, `[data-count]`.
 - Form tin: `.tag-input[data-kind]` (bên trong có một `<input>`), `.tag-chip`, `.job-edit-only`, `.invalid-feedback` đứng ngay sau ô nhập.
 - Modal hồ sơ: `.tab-count` trong nút tab, `[data-detail-move]`, `.cv-open`, `.cv-download`.

@@ -121,6 +121,8 @@
 @media (max-width: 991.98px) {
   .home-layout { grid-template-columns: 1fr; }
   .home-sidebar { position: static; padding-top: 14px; }
+  /* Menu dọc trùng với thanh điều hướng trên đầu trang, ẩn để nội dung chính lên đầu */
+  .candidate-home .home-sidebar { display: none; }
   .home-sidebar-note, .home-sidebar .role-menu-heading, .home-sidebar .role-menu-note { display: none; }
   .home-sidebar .role-menu { padding: 0 0 12px; }
   .home-sidebar .role-menu-link { min-height: 52px; }

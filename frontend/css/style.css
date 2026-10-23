@@ -1,497 +1,270 @@
-/* SmartRecruit AI — Custom styles (dùng chung cho index.html và admin.html) */
+/* SmartRecruit AI — Giao diện chung cho index.html (Bootstrap) và admin.html (Tabler).
+   Màu sắc, kiểu chữ, đầu trang, đăng nhập theo thiết kế của nhánh frontend-hai;
+   các phần chức năng (Kanban, thẻ ứng viên, modal AI, form tin) giữ từ frontend-tan.
+   Menu dọc: css/menu/menu.css. Riêng cổng ứng viên: css/user/candidate-home.css. */
 
+/* 1. Nền tảng */
 :root {
-  --sr-font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --sr-brand: #3459e6;
-  --sr-brand-2: #7c3aed;
-  --sr-score-high: #2fb344;
-  --sr-score-medium: #f59f00;
-  --sr-score-low: #d63939;
-  /* Tabler đọc font từ biến này */
+  --primary: #203c91;
+  --primary-dark: #162c70;
+  --ink: #202b45;
+  --muted: #606c82;
+  --line: #e6e9f4;
+  --page: #f7f8fe;
+  --soft: #edf0fc;
+  --green: #247450;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgb(28 43 91 / 4%);
+  --sr-font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --sr-score-high: #2f8a57;
+  --sr-score-medium: #c98a12;
+  --sr-score-low: #c0485f;
+
+  /* Bootstrap (index.html) */
+  --bs-body-font-family: var(--sr-font);
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--page);
+  --bs-primary: var(--primary);
+  --bs-primary-rgb: 32, 60, 145;
+  --bs-link-color: var(--primary);
+  --bs-link-color-rgb: 32, 60, 145;
+  --bs-link-hover-color: var(--primary-dark);
+  --bs-secondary-color: var(--muted);
+  --bs-border-color: var(--line);
+
+  /* Tabler (admin.html) */
   --tblr-font-sans-serif: var(--sr-font);
+  --tblr-body-color: var(--ink);
+  --tblr-body-bg: var(--page);
+  --tblr-primary: var(--primary);
+  --tblr-primary-rgb: 32, 60, 145;
+  --tblr-primary-darken: var(--primary-dark);
+  --tblr-primary-lt: #e9edfa;
+  --tblr-primary-lt-rgb: 233, 237, 250;
+  --tblr-link-color: var(--primary);
+  --tblr-link-color-rgb: 32, 60, 145;
+  --tblr-link-hover-color: var(--primary-dark);
+  --tblr-border-color: var(--line);
 }
 
-body {
-  font-family: var(--sr-font);
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 105px; }
+body { margin: 0; font-family: var(--sr-font); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5 { color: var(--ink); line-height: 1.3; }
+a { text-underline-offset: 4px; }
+:focus-visible { outline: 3px solid #91a4e0; outline-offset: 3px; }
+::selection { background: #dfe6ff; }
+.skip-link { position: fixed; top: -100px; left: 16px; z-index: 2000; padding: 10px 16px; background: var(--primary); color: #fff; border-radius: 8px; }
+.skip-link:focus { top: 12px; color: #fff; }
+.card { border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.eyebrow { display: inline-block; margin-bottom: 8px; color: #52659c; font-size: .64rem; font-weight: 750; letter-spacing: 1.2px; }
+
+/* 2. Nút, form, nhãn */
+.btn { border-radius: 8px; font-weight: 600; }
+.btn-primary {
+  --bs-btn-color: #fff; --bs-btn-bg: #203c91; --bs-btn-border-color: #203c91;
+  --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #162c70; --bs-btn-hover-border-color: #162c70;
+  --bs-btn-active-color: #fff; --bs-btn-active-bg: #13255e; --bs-btn-active-border-color: #13255e;
+  --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #203c91; --bs-btn-disabled-border-color: #203c91;
+  --bs-btn-focus-shadow-rgb: 32, 60, 145;
+  --tblr-btn-color: #fff; --tblr-btn-bg: #203c91; --tblr-btn-border-color: #203c91;
+  --tblr-btn-hover-color: #fff; --tblr-btn-hover-bg: #162c70; --tblr-btn-hover-border-color: #162c70;
+  --tblr-btn-active-color: #fff; --tblr-btn-active-bg: #13255e; --tblr-btn-active-border-color: #13255e;
+  --tblr-btn-disabled-color: #fff; --tblr-btn-disabled-bg: #203c91; --tblr-btn-disabled-border-color: #203c91;
 }
-
-/* Logo */
-.brand-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  display: inline-grid;
-  place-items: center;
-  background: linear-gradient(135deg, var(--sr-brand), var(--sr-brand-2));
-  color: #fff;
+.btn-outline-primary {
+  --bs-btn-color: #3d589a; --bs-btn-border-color: #c4d0ec; --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #203c91; --bs-btn-hover-border-color: #203c91; --bs-btn-active-bg: #162c70; --bs-btn-active-border-color: #162c70;
+  --tblr-btn-color: #3d589a; --tblr-btn-border-color: #c4d0ec; --tblr-btn-hover-color: #fff;
+  --tblr-btn-hover-bg: #203c91; --tblr-btn-hover-border-color: #203c91; --tblr-btn-active-bg: #162c70; --tblr-btn-active-border-color: #162c70;
 }
-
-/* Matching score badges */
-.badge-high   { background-color: var(--sr-score-high);   color: #fff; } /* >= 80% — green  */
-.badge-medium { background-color: var(--sr-score-medium); color: #fff; } /* 50-79% — yellow */
-.badge-low    { background-color: var(--sr-score-low);    color: #fff; } /* < 50%  — red    */
-
-/* ===== Cổng ứng viên (index.html) ===== */
-.portal-body {
-  background: #f6f8fc;
+.btn-outline-secondary {
+  --bs-btn-color: #61718e; --bs-btn-border-color: #dbe2f0; --bs-btn-hover-color: #304d8b;
+  --bs-btn-hover-bg: #edf2fc; --bs-btn-hover-border-color: #becce8;
+  --tblr-btn-color: #61718e; --tblr-btn-border-color: #dbe2f0; --tblr-btn-hover-color: #304d8b;
+  --tblr-btn-hover-bg: #edf2fc; --tblr-btn-hover-border-color: #becce8;
 }
+.form-label { color: #4d607e; font-weight: 650; }
+.form-control, .form-select { border-color: #dce3f0; border-radius: 8px; }
+.form-control:focus, .form-select:focus { border-color: #91a6d7; box-shadow: 0 0 0 3px rgb(32 60 145 / 10%); }
+.form-control::placeholder { color: #8a96ab; }
+.text-primary { color: var(--primary) !important; }
+.alert { border-radius: 10px; overflow-wrap: anywhere; }
 
-.hero {
-  background: radial-gradient(1200px 400px at 10% -10%, rgba(124, 58, 237, 0.35), transparent),
-    linear-gradient(135deg, #2a46c9 0%, var(--sr-brand) 55%, #5b6cf0 100%);
-  color: #fff;
-}
+/* Huy hiệu điểm Matching: ≥ 80 xanh, 50–79 vàng, < 50 đỏ (utils.js scoreClass) */
+.badge-high   { background-color: var(--sr-score-high);   color: #fff; }
+.badge-medium { background-color: var(--sr-score-medium); color: #fff; }
+.badge-low    { background-color: var(--sr-score-low);    color: #fff; }
 
-.hero-search {
-  max-width: 640px;
-  background: #fff;
-  border-radius: 14px;
-  padding: 6px;
-  box-shadow: 0 10px 30px rgba(20, 30, 90, 0.25);
-}
+/* 3. Modal */
+.modal-backdrop.show { opacity: .4; }
+.modal-content { overflow: hidden; border: 0; border-radius: 16px; box-shadow: 0 24px 80px rgb(28 39 78 / 18%); }
+.modal-header { align-items: flex-start; gap: 16px; padding: 22px 24px; background: #fafbff; border-bottom: 1px solid var(--line); }
+.modal-header .eyebrow, .modal-header .home-eyebrow { margin-bottom: 4px; }
+.modal-title { font-size: 1.3rem; font-weight: 700; overflow-wrap: anywhere; }
+.modal-header .btn-close { flex-shrink: 0; }
+.modal-footer { gap: 8px; background: #fafbff; border-top: 1px solid var(--line); }
 
-.hero-search .form-control {
-  border: 0;
-  box-shadow: none;
-}
+/* 4. Đầu trang HR */
+.site-navbar { position: sticky; top: 0; z-index: 1020; min-height: 74px; padding: 16px 0; background: #fff; border-bottom: 1px solid var(--line); }
+.admin-nav-container { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--primary); font-size: 1.15rem; font-weight: 750; letter-spacing: -.5px; text-decoration: none; }
+.brand:hover { color: var(--primary-dark); text-decoration: none; }
+.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: var(--primary); color: #fff; }
+.brand-ai { color: #6275ab; }
+.nav-context, .session-label { color: var(--muted); font-size: .8rem; }
+.session-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.session-email { max-width: 260px; color: #455675; font-size: .82rem; overflow-wrap: anywhere; }
 
-.job-card .job-icon {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: #eef2ff;
-  color: var(--sr-brand);
-  font-size: 1.3rem;
-}
+/* 5. Đăng nhập HR */
+.login-page { min-height: 100vh; background: radial-gradient(ellipse at 100% 100%, #e1f1eb, transparent 45%), var(--page); }
+.login-layout { display: grid; grid-template-columns: 1.1fr 1fr; max-width: 1080px; margin: 32px auto; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow); }
+.login-introduction { padding: 48px; background: linear-gradient(135deg, #e9edfc, #eef5f1); }
+.login-introduction h2 { margin: 16px 0 24px; color: #304b84; font-size: 2.3rem; font-weight: 720; letter-spacing: -1px; }
+.login-introduction > p { color: #657796; font-size: .9rem; }
+.login-feature { display: flex; gap: 16px; margin-top: 24px; }
+.feature-number { color: #718aba; font-size: .72rem; font-weight: 750; }
+.login-feature strong { color: #496593; font-size: .86rem; }
+.login-feature p { margin: 5px 0 0; color: #73839e; font-size: .78rem; }
+.login-card { align-self: center; padding: 48px; }
+.login-card h1 { font-size: 1.9rem; font-weight: 750; letter-spacing: -.6px; }
+.login-card > p { color: #6b7b95; font-size: .86rem; }
+.login-footnote { margin: 24px 0 0; color: #78869d; font-size: .75rem !important; }
 
-.job-card {
-  border: 1px solid #e6e9f2;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
+/* 6. Khung làm việc HR */
+.admin-body { background: var(--page); }
+.admin-main { width: min(1500px, 100%); margin: auto; padding: 30px 24px 60px; }
+.dashboard-heading { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.dashboard-heading h1 { margin-bottom: 8px; font-size: 2rem; font-weight: 750; letter-spacing: -.8px; }
+.dashboard-heading p { margin: 0; color: #6b7c98; font-size: .88rem; }
+.workspace-card > .card-body { padding: 22px 24px; }
+.job-toolbar { display: flex; align-items: flex-end; gap: 16px; }
+.job-selector { flex: 1; min-width: 0; max-width: 560px; }
+.job-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-left: auto; }
+.stat-pill { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: .35rem .75rem; font-size: .85rem; }
 
-.job-card:hover,
-.job-card:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(30, 40, 90, 0.1);
-  outline: none;
-}
-
-.job-card:focus-visible {
-  border-color: var(--sr-brand);
-}
-
-.skill-tag {
-  background: #eef2ff;
-  color: #3449b8;
-  font-weight: 500;
-  border-radius: 999px;
-  padding: 0.3em 0.75em;
-  font-size: 0.78rem;
-}
-
-/* Nội dung JD: giữ xuống dòng của mô tả / yêu cầu */
-.jd-text {
-  white-space: pre-line;
-  color: #4b5563;
-}
-
-.skill-tag-outline {
-  background: #fff;
-  color: #4b5563;
-  border: 1px solid #dee2e6;
-  border-radius: 999px;
-  padding: 0.3em 0.75em;
-  font-size: 0.78rem;
-}
-
-/* Form nộp CV trong modal JD */
-.apply-box {
-  background: #f8f9fc;
-  border-radius: 14px;
-  padding: 1.25rem;
-}
-
-.dropzone {
-  display: block;
-  border: 2px dashed #c7cff0;
-  border-radius: 12px;
-  background: #fff;
-  padding: 1.25rem;
-  text-align: center;
-  color: #6b7280;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.dropzone:hover,
-.dropzone.is-dragover {
-  border-color: var(--sr-brand);
-  background: #f3f5ff;
-}
-
-.dropzone.has-file {
-  border-style: solid;
-  border-color: var(--sr-score-high);
-  color: #1f2937;
-}
-
-.dropzone.is-invalid {
-  border-color: var(--bs-form-invalid-border-color, #dc3545);
-}
-
+/* 7. Cổng ứng viên: thẻ việc làm, modal JD, form nộp CV (index.js) */
+.job-card { border: 1px solid #e2e7f4; border-radius: 13px; box-shadow: none; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; }
+.job-card:hover, .job-card:focus-visible { transform: translateY(-3px); border-color: #b4c2e4; box-shadow: 0 10px 24px rgb(31 49 107 / 8%); outline: none; }
+.job-card:focus-visible { border-color: var(--primary); }
+.job-card h3 { color: #2b3d60; overflow-wrap: anywhere; }
+.job-card .job-icon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; background: #edf0fc; color: #536ba6; font-size: 1.15rem; }
+.skill-tag { background: #eef1fb; color: #536d9d; font-weight: 500; border-radius: 6px; padding: .3em .7em; font-size: .76rem; }
+.skill-tag-outline { background: #eaf4ed; color: #49775a; font-weight: 500; border-radius: 6px; padding: .3em .7em; font-size: .76rem; }
+.jd-text { white-space: pre-line; color: #5d6c84; line-height: 1.85; overflow-wrap: anywhere; }
+#job-modal-body h3 { color: #344e83; }
+.apply-box { margin-top: 1rem; padding: 1.25rem; border: 1px solid #dfe5f3; border-radius: 12px; background: #fafbff; }
+.dropzone { display: block; padding: 1.25rem; border: 1px dashed #aebbdf; border-radius: 10px; background: #f7f9ff; color: var(--muted); text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+.dropzone:hover, .dropzone.is-dragover { border-color: var(--primary); background: #eef2fd; }
+.dropzone.has-file { border-style: solid; border-color: var(--sr-score-high); color: var(--ink); }
+.dropzone.is-invalid { border-color: var(--bs-form-invalid-border-color, #dc3545); }
 /* Ô chọn tệp bị ẩn: khi nhận focus bằng bàn phím (Tab) thì tô viền vùng kéo thả */
-.dropzone:has(+ #apply-cv:focus-visible) {
-  border-color: var(--sr-brand);
-  box-shadow: 0 0 0 0.25rem rgba(52, 89, 230, 0.25);
-}
+.dropzone:has(+ #apply-cv:focus-visible) { border-color: var(--primary); box-shadow: 0 0 0 .25rem rgb(32 60 145 / 20%); }
 
-/* ===== Bảng HR (admin.html) ===== */
-.kanban-col {
-  min-height: 420px;
-  background: #f1f4f9;
-  border-radius: 12px;
-  padding: 12px;
-}
+/* 8. Bảng Kanban (admin.js) — 5 cột, cuộn ngang trong khung khi màn hình hẹp */
+.kanban-board { display: grid; grid-template-columns: repeat(5, minmax(195px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+.kanban-col { min-height: 420px; padding: 12px; border: 1px solid #dfe5f4; border-radius: 12px; background: #edf1fa; }
+.kanban-col .col-title { display: flex; align-items: center; gap: .5rem; margin-bottom: 12px; color: #4f699b; font-weight: 700; }
+.kanban-col .col-count { margin-left: auto; }
+.col-dot { width: 10px; height: 10px; border-radius: 50%; }
+.col-hint { margin: -6px 0 10px; color: var(--muted); font-size: .75rem; }
+.kanban-list { min-height: 120px; } /* cột rỗng vẫn thả thẻ vào được */
+.app-stats { display: contents; }
 
-.kanban-col .col-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
+.candidate-card { margin-bottom: 10px; padding: 12px; border: 1px solid #e0e6f3; border-radius: 11px; background: #fff; cursor: grab; transition: box-shadow .15s, transform .15s; }
+.candidate-card:hover { box-shadow: 0 6px 18px rgb(25 40 80 / 10%); transform: translateY(-1px); }
+.candidate-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.candidate-card.sortable-ghost { opacity: .35; }
+.candidate-card.sortable-chosen { box-shadow: 0 12px 28px rgb(25 40 80 / 20%); transform: rotate(1.5deg); }
+.candidate-card.is-saving { opacity: .6; cursor: progress; }
+.card-spinner { width: .7rem; height: .7rem; border-width: .15em; }
+.card-menu-btn { width: 26px; height: 26px; padding: 0; }
+.card-name { min-width: 0; }
 
-/* Candidate card */
-.candidate-card {
-  background: #fff;
-  border: 1px solid #e3e8f0;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  cursor: grab;
-  transition: box-shadow 0.15s, transform 0.15s;
-}
+/* 9. Form tạo / sửa tin: ô nhập kỹ năng dạng nhãn */
+.tag-input { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 42px; cursor: text; }
+.tag-input:focus-within { border-color: #91a6d7; box-shadow: 0 0 0 3px rgb(32 60 145 / 10%); }
+.tag-input.is-invalid { background-image: none; }
+.tag-input input { flex: 1 1 140px; min-width: 120px; padding: 2px 0; border: 0; outline: 0; background: transparent; }
+.tag-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: .2em .35em .2em .7em; border-radius: 999px; font-size: .82rem; font-weight: 500; overflow-wrap: anywhere; }
+.tag-chip.required  { background: #eef1fb; color: #3d589a; }
+.tag-chip.preferred { background: #fbf3e2; color: #8a6420; }
+.tag-chip button { padding: 0 2px; border: 0; background: transparent; color: inherit; line-height: 1; opacity: .7; }
+.tag-chip button:hover, .tag-chip button:focus-visible { opacity: 1; }
 
-.candidate-card:hover {
-  box-shadow: 0 6px 18px rgba(25, 40, 80, 0.1);
-  transform: translateY(-1px);
-}
-
-.candidate-card.sortable-ghost {
-  opacity: 0.35;
-}
-
-.candidate-card.sortable-chosen {
-  box-shadow: 0 12px 28px rgba(25, 40, 80, 0.2);
-  transform: rotate(1.5deg);
-}
-
-/* Vòng tròn điểm trong modal hồ sơ: đặt --v (0–100) và --c (màu) bằng style inline */
-.score-ring {
-  --v: 0;
-  --c: var(--sr-score-high);
-  width: 132px;
-  height: 132px;
-  border-radius: 50%;
-  background: conic-gradient(var(--c) calc(var(--v) * 1%), #e9edf3 0);
-  display: grid;
-  place-items: center;
-}
-
-.score-ring > div {
-  width: 104px;
-  height: 104px;
-  border-radius: 50%;
-  background: #fff;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-/* Nền, màn hình đăng nhập và đầu trang HR */
-.admin-body {
-  background: #f6f8fc;
-}
-
-.login-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: radial-gradient(900px 400px at 10% -10%, rgba(124, 58, 237, 0.18), transparent), #f6f8fc;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 16px;
-}
-
-.user-email-menu {
-  max-width: 240px;
-}
-
-.job-switch {
-  max-width: 420px;
-}
-
-.stat-pill {
-  background: #fff;
-  border: 1px solid #e6e9f2;
-  border-radius: 10px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.85rem;
-}
-
-/* Bảng 5 cột: cuộn ngang trong khung khi màn hình hẹp */
-.kanban-board {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(250px, 1fr));
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.kanban-col .col-count {
-  margin-left: auto;
-}
-
-.col-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.col-hint {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin: -6px 0 10px;
-}
-
-/* Ô nhập kỹ năng dạng nhãn (form tin tuyển dụng) */
-.tag-input {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-  min-height: 42px;
-  cursor: text;
-}
-
-.tag-input:focus-within {
-  border-color: var(--sr-brand);
-  box-shadow: 0 0 0 0.25rem rgba(52, 89, 230, 0.2);
-}
-
-.tag-input.is-invalid {
-  background-image: none;
-}
-
-.tag-input input {
-  border: 0;
-  outline: 0;
-  flex: 1 1 140px;
-  min-width: 120px;
-  padding: 2px 0;
-  background: transparent;
-}
-
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  border-radius: 999px;
-  padding: 0.2em 0.35em 0.2em 0.7em;
-  font-size: 0.82rem;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-
-.tag-chip.required  { background: #eef2ff; color: #3449b8; }
-.tag-chip.preferred { background: #fff7e6; color: #9a6400; }
-
-.tag-chip button {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  opacity: 0.7;
-  line-height: 1;
-  padding: 0 2px;
-}
-
-.tag-chip button:hover,
-.tag-chip button:focus-visible {
-  opacity: 1;
-}
-
-/* Kanban: vùng thả, thẻ đang lưu, menu chuyển cột */
-.app-stats {
-  display: contents;
-}
-
-.kanban-list {
-  min-height: 120px; /* cột rỗng vẫn thả thẻ vào được */
-}
-
-.candidate-card:focus-visible {
-  outline: 2px solid var(--sr-brand);
-  outline-offset: 2px;
-}
-
-.candidate-card.is-saving {
-  opacity: 0.6;
-  cursor: progress;
-}
-
-.card-spinner {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-width: 0.15em;
-}
-
-.card-menu-btn {
-  width: 26px;
-  height: 26px;
-  padding: 0;
-}
-
-.card-name {
-  min-width: 0;
-}
-
-/* Modal hồ sơ chi tiết (6.7, 6.8) */
-.detail-avatar {
-  width: 48px;
-  height: 48px;
-  font-size: 1.2rem;
-}
-
-@media (max-width: 767.98px) {
-  .detail-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-}
-
-.detail-tabs .nav-link {
-  white-space: nowrap;
-}
-
-.score-ring .ring-value {
-  font-size: 1.9rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.metric-label {
-  font-size: 0.8rem;
-  color: #6b7280;
-}
-
-.skill-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  padding: 0.25em 0.7em;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.skill-ok      { background: #e8f7ec; color: #1e7b34; }
-.skill-missing { background: #fdecec; color: #b42323; }
-.skill-pref    { background: #fff4e0; color: #9a6400; }
-
-.skill-note {
-  font-size: 0.72rem;
-  opacity: 0.8;
-  font-weight: 400;
-}
-
-.timeline-item {
-  border-left: 2px solid #e3e8f0;
-  padding: 0 0 1rem 1rem;
-  position: relative;
-}
-
-.timeline-item::before {
-  content: "";
-  position: absolute;
-  left: -6px;
-  top: 4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--sr-brand);
-}
-
-.question-item .accordion-button {
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
-.cv-frame {
-  width: 100%;
-  height: 70vh;
-  border: 1px solid #e3e8f0;
-  border-radius: 8px;
-}
-
+/* 10. Modal hồ sơ chi tiết + đánh giá AI (6.7, 6.8) */
+.detail-avatar { width: 48px; height: 48px; font-size: 1.2rem; }
+.detail-tabs .nav-link { white-space: nowrap; }
+/* Vòng tròn điểm: đặt --v (0–100) và --c (màu) bằng style inline */
+.score-ring { --v: 0; --c: var(--sr-score-high); display: grid; place-items: center; width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(var(--c) calc(var(--v) * 1%), #e9edf3 0); }
+.score-ring > div { display: grid; place-items: center; width: 104px; height: 104px; border-radius: 50%; background: #fff; text-align: center; }
+.score-ring .ring-value { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+.metric-label { color: var(--muted); font-size: .8rem; }
+.skill-chip { display: inline-flex; align-items: center; gap: 4px; padding: .25em .7em; border-radius: 999px; font-size: .8rem; font-weight: 500; }
+.skill-ok      { background: #e4f3e9; color: #2f7048; }
+.skill-missing { background: #fbe9ed; color: #a63d55; }
+.skill-pref    { background: #fbf3e2; color: #8a6420; }
+.skill-note { font-size: .72rem; font-weight: 400; opacity: .8; }
+.timeline-item { position: relative; padding: 0 0 1rem 1rem; border-left: 2px solid #e0e6f3; }
+.timeline-item::before { content: ""; position: absolute; top: 4px; left: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.question-item .accordion-button { align-items: flex-start; gap: .5rem; font-size: .92rem; }
 /* Câu hỏi không có phần mở rộng: không hiện mũi tên, không bấm được */
-.question-item .no-toggle {
-  pointer-events: none;
-}
+.question-item .no-toggle { pointer-events: none; }
+.question-item .no-toggle::after { display: none; }
+.cv-frame { width: 100%; height: 70vh; border: 1px solid #e0e6f3; border-radius: 8px; }
 
-.question-item .no-toggle::after {
-  display: none;
-}
+/* 11. Trang quản lý tin tuyển dụng (6.9) */
+.jobs-search { width: 100%; max-width: 280px; }
+.jobs-table .job-title-cell { min-width: 240px; }
+.skill-mini { padding: .1em .55em; border-radius: 999px; background: #eef1fb; color: #3d589a; font-size: .75rem; font-weight: 500; }
+.job-title-link { padding: 0; border: 0; background: none; color: inherit; font-weight: 600; text-align: left; text-decoration: none; }
+.job-title-link:hover, .job-title-link:focus-visible { color: var(--primary); }
+.job-row-closed, .job-row-closed .job-title-link { color: #6b7280; }
 
-.question-item .accordion-button {
-  font-size: 0.92rem;
+/* 12. Màn hình hẹp */
+@media (max-width: 991.98px) {
+  .session-label { display: none; }
+  .login-layout { grid-template-columns: 1fr; max-width: 600px; }
+  .login-introduction, .login-card { padding: 32px; }
+  .login-feature { display: none; }
+  /* Menu HR: thu thành một hàng nút ngang để Kanban lên gần đầu trang */
+  .role-workspace-sidebar .app-menu { padding: 8px; }
+  .role-workspace-sidebar .app-menu-header,
+  .role-workspace-sidebar .app-menu-label,
+  .role-workspace-sidebar .app-menu-arrow { display: none; }
+  .role-workspace-sidebar .app-menu-content { padding-top: 0; }
+  .role-workspace-sidebar .app-menu-links { flex-direction: row; gap: 6px; }
+  .role-workspace-sidebar .app-menu-links > * { display: flex; flex: 1 1 0; min-width: 0; }
+  .role-workspace-sidebar .app-menu-link { flex: 1; justify-content: center; gap: 6px; min-height: 44px; padding: 8px; font-size: .78rem; text-align: center; }
 }
-
-/* Trang quản lý tin tuyển dụng (6.9) */
-.jobs-search {
-  width: 100%;
-  max-width: 280px;
+@media (max-width: 575.98px) {
+  .role-workspace-sidebar .app-menu-icon { display: none; }
 }
-
-.jobs-table .job-title-cell {
-  min-width: 240px;
+@media (max-width: 767.98px) {
+  .detail-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 }
-
-.skill-mini {
-  background: #eef2ff;
-  color: #3449b8;
-  border-radius: 999px;
-  padding: 0.1em 0.55em;
-  font-size: 0.75rem;
-  font-weight: 500;
+@media (max-width: 575.98px) {
+  .site-navbar { min-height: 64px; padding: 12px 0; }
+  .admin-nav-container { padding: 0 16px; gap: 10px; }
+  .brand { font-size: 1.02rem; }
+  .brand-mark { width: 32px; height: 32px; }
+  .session-bar { gap: 8px; }
+  .session-email { display: none; }
+  .admin-main { padding: 20px 16px 48px; }
+  .login-layout { margin: 0 auto; border-radius: 16px; }
+  .login-introduction, .login-card { padding: 24px; }
+  .login-introduction h2 { margin-bottom: 8px; font-size: 1.7rem; }
+  .login-card h1 { font-size: 1.6rem; }
+  .dashboard-heading h1 { font-size: 1.6rem; }
+  .job-toolbar { flex-direction: column; align-items: stretch; }
+  .job-selector { max-width: none; }
+  .job-actions { margin-left: 0; }
+  .job-actions .btn { flex: 1; }
+  .workspace-card > .card-body { padding: 16px; }
+  .jobs-search { max-width: none; }
+  .modal-header { padding: 16px; }
 }
-
-.job-title-link {
-  font-weight: 600;
-  color: inherit;
-  text-decoration: none;
-  background: none;
-  border: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.job-title-link:hover,
-.job-title-link:focus-visible {
-  color: var(--sr-brand);
-}
-
-.job-row-closed,
-.job-row-closed .job-title-link {
-  color: #6b7280;
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }

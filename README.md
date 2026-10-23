@@ -21,7 +21,7 @@
 | **Backend** | Python 3.10+, FastAPI, Uvicorn, Pydantic |
 | **Database & ORM** | MySQL 8.0 (Cloud Aiven), SQLAlchemy 2.0, PyMySQL (SSL) |
 | **Authentication** | JWT (JSON Web Token), SHA-256 Hashing |
-| **Frontend** | HTML5, CSS3, JavaScript thuần (ES6+), không có bước build. Qua CDN: Bootstrap 5 (theme Bootswatch Zephyr cho `index.html`, Tabler cho `admin.html`), Bootstrap Icons, SortableJS |
+| **Frontend** | HTML5, CSS3, JavaScript thuần (ES6+), không có bước build. Qua CDN: Bootstrap 5 (`index.html`), Tabler (`admin.html`), Bootstrap Icons, SortableJS. Giao diện thống nhất theo thiết kế của nhánh `frontend-hai` |
 | **AI Pipeline** | Google Gemini API (Flash Model) + Sentence-Transformers / Ollama Fallback |
 
 ---
@@ -44,7 +44,10 @@ DoAnCoSo/
 │   ├── requirements.txt    # Danh sách thư viện Python
 │   └── venv/               # Môi trường ảo Python
 ├── frontend/
-│   ├── css/style.css       # File định dạng tùy chỉnh
+│   ├── css/
+│   │   ├── style.css       # Giao diện chung (màu, nút, form, đăng nhập, Kanban, modal)
+│   │   ├── menu/menu.css   # Menu dọc dùng chung cho ứng viên và HR
+│   │   └── user/candidate-home.css  # Riêng cho Cổng ứng viên
 │   ├── js/
 │   │   ├── utils.js        # Hàm dùng chung: escapeHtml, formatDate, showToast, renderState…
 │   │   ├── api.js          # API Client dùng chung (mọi lời gọi API đi qua đây)

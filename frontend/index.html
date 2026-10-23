@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartRecruit AI — Tìm việc làm</title>
+  <meta name="theme-color" content="#19368b" />
+  <meta name="description" content="Khám phá việc làm theo kỹ năng và kinh nghiệm cùng SmartRecruit AI." />
+  <title>Khám phá việc làm — SmartRecruit AI</title>
 
-  <!-- Font Be Vietnam Pro -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Bootstrap 5.3.3, theme Bootswatch Zephyr (dùng thay bootstrap.min.css) -->
+  <!-- Bootstrap 5.3.3 -->
   <link
-    href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
-    integrity="sha384-HUqMmx587pEpVPUDL2fU/GZ0FWpp1BEFYrt7gdZjPHvhOw1cgj15JqvhLWdXaHrb"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
 
@@ -26,69 +23,257 @@
     crossorigin="anonymous"
   />
 
+  <!-- CSS chung → CSS menu → CSS cổng ứng viên -->
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/menu/menu.css" />
+  <link rel="stylesheet" href="css/user/candidate-home.css" />
 </head>
-<body class="portal-body">
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
-    <div class="container">
-      <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
-        <span class="brand-logo"><i class="bi bi-stars"></i></span>
-        SmartRecruit AI
+<body class="candidate-home">
+  <a class="skip-link" href="#main-content">Đến nội dung chính</a>
+
+  <header class="home-header">
+    <div class="home-container home-header-inner">
+      <a class="home-brand" href="index.html">
+        <span class="home-logo" aria-hidden="true">S</span>
+        <span>SmartRecruit<span class="home-brand-ai"> AI</span></span>
       </a>
-      <span class="navbar-text text-muted small d-none d-md-inline">
-        <i class="bi bi-briefcase me-1"></i>Cổng thông tin tuyển dụng
-      </span>
-    </div>
-  </nav>
 
-  <!-- Hero -->
-  <header class="hero py-5">
-    <div class="container py-lg-4">
-      <span class="badge rounded-pill text-bg-light text-primary mb-3">
-        <i class="bi bi-cpu me-1"></i>Sàng lọc hồ sơ bằng AI
-      </span>
-      <h1 class="display-5 fw-bold mb-3">Tìm công việc phù hợp với bạn</h1>
-      <p class="lead mb-4 opacity-75">Nộp hồ sơ trực tuyến — AI sẽ đánh giá và phản hồi nhanh chóng.</p>
+      <nav class="home-topnav" aria-label="Điều hướng trang ứng viên">
+        <a href="#feed-heading">Khám phá việc làm</a>
+        <a href="#home-jobs-heading">Việc đang tuyển</a>
+        <a href="#application-guide">Hướng dẫn ứng tuyển</a>
+      </nav>
 
-      <div class="hero-search d-flex align-items-center gap-2">
-        <i class="bi bi-search text-muted ps-2"></i>
-        <input
-          id="job-search"
-          type="search"
-          class="form-control"
-          placeholder="Tìm theo vị trí hoặc kỹ năng (VD: Python, FastAPI)"
-          aria-label="Tìm việc làm"
-        />
-      </div>
-      <div class="mt-3 small opacity-75">
-        <i class="bi bi-briefcase-fill me-1"></i><span id="job-count">Đang tải…</span>
-      </div>
+      <span class="home-audience">Dành cho ứng viên</span>
     </div>
   </header>
 
-  <!-- Job listings (populated by JS) -->
-  <main class="container py-5">
-    <h2 class="h4 fw-bold mb-1">Việc làm đang tuyển</h2>
-    <p class="text-muted mb-4">Bấm vào một vị trí để xem chi tiết và ứng tuyển</p>
+  <main id="main-content" class="home-container">
+    <div class="home-layout">
+      <!-- Menu dọc ứng viên -->
+      <aside class="home-sidebar" aria-label="Menu ứng viên">
+        <nav class="app-menu" aria-label="Menu dành cho ứng viên">
+          <details class="app-menu-disclosure" open>
+            <summary class="app-menu-header">
+              <svg class="app-menu-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16M4 12h12M4 18h8"></path>
+              </svg>
+              <span>Menu</span>
+              <span class="app-menu-role">Ứng viên</span>
+            </summary>
 
-    <div id="job-list" class="row g-4">
-      <div class="col-12 text-center text-muted py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2">Đang tải danh sách việc làm…</p>
+            <div class="app-menu-content">
+              <p class="app-menu-label">KHÁM PHÁ CƠ HỘI</p>
+              <div class="app-menu-links">
+                <a class="app-menu-link" href="#feed-heading" aria-current="location">
+                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m3 10 9-7 9 7"></path>
+                    <path d="M5 9v12h14V9M9 21v-8h6v8"></path>
+                  </svg>
+                  <span>Trang chủ việc làm</span>
+                  <span class="app-menu-arrow" aria-hidden="true">›</span>
+                </a>
+                <a class="app-menu-link" href="#home-jobs-heading">
+                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="7" width="18" height="14" rx="2"></rect>
+                    <path d="M8 7V4h8v3M3 12a22 22 0 0 0 18 0M10 13h4"></path>
+                  </svg>
+                  <span>Danh sách việc làm</span>
+                  <span class="app-menu-arrow" aria-hidden="true">›</span>
+                </a>
+                <a class="app-menu-link" href="#application-guide">
+                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Z"></path>
+                    <path d="M12 5v15"></path>
+                  </svg>
+                  <span>Hướng dẫn ứng tuyển</span>
+                  <span class="app-menu-arrow" aria-hidden="true">›</span>
+                </a>
+              </div>
+
+              <div class="app-menu-help">
+                <strong>Bắt đầu hành trình mới</strong>
+                <p>Chọn công việc phù hợp và gửi CV trực tuyến, không cần tạo tài khoản.</p>
+              </div>
+            </div>
+          </details>
+
+          <footer class="app-menu-footer">
+            <span class="app-menu-status" aria-hidden="true"></span>
+            <span>SmartRecruit AI · Cổng ứng viên</span>
+          </footer>
+        </nav>
+      </aside>
+
+      <div class="home-content">
+        <!-- Giới thiệu và tìm kiếm -->
+        <section class="home-hero" aria-labelledby="feed-heading">
+          <span class="home-pill">
+            <span aria-hidden="true">✧</span>
+            TUYỂN DỤNG THÔNG MINH, KẾT NỐI CON NGƯỜI
+          </span>
+
+          <h1 id="feed-heading">
+            Tìm công việc phù hợp,<br />
+            <span>mở ra hành trình mới.</span>
+          </h1>
+
+          <p class="home-hero-description">
+            Khám phá vị trí theo kỹ năng và kinh nghiệm của bạn.<br />
+            Gửi hồ sơ trực tuyến, AI hỗ trợ đội ngũ tuyển dụng đánh giá nhanh hơn.
+          </p>
+
+          <div class="home-search" role="search">
+            <div class="home-search-row">
+              <div class="home-keyword">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                  <path d="m16 16 4.5 4.5"></path>
+                </svg>
+                <label for="job-search" class="visually-hidden">Tìm vị trí hoặc kỹ năng</label>
+                <input
+                  type="search"
+                  id="job-search"
+                  placeholder="Tìm theo vị trí hoặc kỹ năng (VD: Python, FastAPI)…"
+                  autocomplete="off"
+                />
+              </div>
+
+              <a href="#home-jobs-heading" class="btn btn-primary">
+                Xem việc làm <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+
+            <div class="home-search-hint">
+              <span class="home-dot" aria-hidden="true"></span>
+              Kết quả lọc ngay khi bạn gõ, theo tiêu đề và kỹ năng của tin tuyển dụng.
+            </div>
+          </div>
+
+          <div class="home-benefits">
+            <div>
+              <span class="home-benefit-icon" aria-hidden="true">01</span>
+              <p><strong>Đánh giá bằng AI</strong><small>So khớp kỹ năng với mô tả công việc</small></p>
+            </div>
+            <div>
+              <span class="home-benefit-icon mint" aria-hidden="true">02</span>
+              <p><strong>Ứng tuyển trực tuyến</strong><small>Không cần tạo tài khoản</small></p>
+            </div>
+            <div>
+              <span class="home-benefit-icon" aria-hidden="true">03</span>
+              <p><strong>CV định dạng PDF</strong><small>Dung lượng nhỏ hơn 5 MB</small></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Danh sách việc làm (index.js vẽ vào #job-list) -->
+        <section class="home-section home-jobs-section" aria-labelledby="home-jobs-heading">
+          <div class="home-section-heading">
+            <div>
+              <span class="home-eyebrow">
+                <span class="home-dot" aria-hidden="true"></span>
+                CƠ HỘI ĐANG MỞ
+              </span>
+              <h2 id="home-jobs-heading">Bước tiếp theo cho sự nghiệp của bạn</h2>
+            </div>
+          </div>
+
+          <div class="home-results">
+            <span id="job-count" role="status" aria-live="polite">Đang tải…</span>
+            <span>Bấm vào một vị trí để xem chi tiết và ứng tuyển</span>
+          </div>
+
+          <div id="job-list" class="row g-3">
+            <div class="col-12 text-center text-muted py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2">Đang tải danh sách việc làm…</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lời nhắc chuẩn bị hồ sơ -->
+        <section class="home-banner" aria-labelledby="home-banner-heading">
+          <div>
+            <span class="home-banner-label">HỒ SƠ RÕ RÀNG · CƠ HỘI PHÙ HỢP</span>
+            <h2 id="home-banner-heading">
+              Để kỹ năng của bạn<br />
+              được nhà tuyển dụng nhìn thấy.
+            </h2>
+            <p>
+              Chọn vị trí phù hợp, chuẩn bị CV và gửi thông tin liên hệ.
+              Đội ngũ tuyển dụng sẽ xem xét hồ sơ của bạn.
+            </p>
+          </div>
+          <a href="#application-guide" class="btn home-banner-button">Chuẩn bị hồ sơ ↗</a>
+        </section>
+
+        <section id="application-guide" class="home-section" aria-labelledby="home-guide-heading">
+          <div class="home-section-heading">
+            <div>
+              <span class="home-eyebrow">SẴN SÀNG CHO CƠ HỘI MỚI</span>
+              <h2 id="home-guide-heading">Ứng tuyển trong ba bước</h2>
+            </div>
+          </div>
+
+          <div class="home-guide-grid">
+            <article>
+              <span>01</span>
+              <h3>Hiểu công việc</h3>
+              <p>Đọc mô tả, kỹ năng và kinh nghiệm của vị trí bạn quan tâm.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Chuẩn bị CV</h3>
+              <p>Dùng PDF nhỏ hơn 5 MB, trình bày rõ kỹ năng và kinh nghiệm liên quan.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Gửi và giữ kết nối</h3>
+              <p>Dùng email, số điện thoại đang hoạt động để đội ngũ tuyển dụng liên hệ.</p>
+            </article>
+          </div>
+        </section>
+
+        <footer class="home-footer">
+          <div>
+            <a class="home-brand" href="index.html">
+              <span class="home-logo" aria-hidden="true">S</span>
+              <span>SmartRecruit AI</span>
+            </a>
+            <p>Kết nối năng lực với cơ hội.</p>
+          </div>
+
+          <nav aria-label="Liên kết cuối trang">
+            <strong>Dành cho ứng viên</strong>
+            <a href="#home-jobs-heading">Việc đang tuyển</a>
+            <a href="#application-guide">Hướng dẫn ứng tuyển</a>
+            <a href="admin.html">Dành cho nhà tuyển dụng</a>
+          </nav>
+
+          <div class="home-footer-note">
+            <strong>Thông tin hồ sơ</strong>
+            <p>
+              Sử dụng email và số điện thoại đang hoạt động.
+              Kết quả phân tích AI chỉ được cung cấp cho bộ phận tuyển dụng.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
-  </main>
 
-  <footer class="border-top bg-white py-4 text-center text-muted small">© 2026 SmartRecruit AI</footer>
+    <noscript>
+      <div class="alert alert-warning">Vui lòng bật JavaScript để xem việc làm và gửi hồ sơ.</div>
+    </noscript>
+  </main>
 
   <!-- Modal chi tiết JD (nội dung do index.js điền) -->
   <div class="modal fade" id="job-modal" tabindex="-1" aria-labelledby="job-modal-title" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content border-0 rounded-4">
-        <div class="modal-header border-0 pb-0">
+      <div class="modal-content">
+        <div class="modal-header">
           <div>
-            <h2 class="modal-title h5 fw-bold" id="job-modal-title">Chi tiết công việc</h2>
+            <span class="home-eyebrow">THÔNG TIN TUYỂN DỤNG</span>
+            <h2 class="modal-title" id="job-modal-title">Chi tiết công việc</h2>
             <div class="small text-muted" id="job-modal-meta"></div>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -98,7 +283,8 @@
 
           <!-- 5.3 Form nộp CV (hiện khi bấm "Ứng tuyển") -->
           <section class="apply-box d-none mt-2" id="apply-section" aria-labelledby="apply-title">
-            <h3 class="h6 fw-bold mb-3" id="apply-title"><i class="bi bi-send me-1 text-primary"></i>Ứng tuyển vị trí này</h3>
+            <span class="home-eyebrow">BẮT ĐẦU KẾT NỐI</span>
+            <h3 class="h6 fw-bold mb-3" id="apply-title">Gửi hồ sơ ứng tuyển</h3>
 
             <!-- 5.6 Thông báo thành công (thay cho form sau khi gửi xong) -->
             <div class="text-center py-4 d-none" id="apply-success" tabindex="-1">
@@ -147,11 +333,11 @@
             </form>
           </section>
         </div>
-        <div class="modal-footer border-0">
+        <div class="modal-footer">
           <span class="badge text-bg-secondary me-auto d-none" id="job-closed-badge">
             <i class="bi bi-lock me-1"></i>Tin đã đóng
           </span>
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
           <button type="button" class="btn btn-primary px-4 d-none" id="job-apply-btn">
             <i class="bi bi-send me-1"></i>Ứng tuyển
           </button>
