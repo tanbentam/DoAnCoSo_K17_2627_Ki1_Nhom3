@@ -157,4 +157,6 @@ ai-recruitment-system/
 
 ## Current Milestone
 
+**Cập nhật 17/10/2026:** Đã xong frontend Mục 5 (Cổng ứng viên) và Mục 6 (Bảng điều khiển HR, gồm 6.9 trang quản lý tin) trên nhánh `feature/frontend-tan`; nhật ký ở `docs/Phan 5/`, `docs/Phan 6/`. Cách chạy cả hệ thống: `README.md` mục 4–5. Việc tiếp theo phía frontend: 8.2 (kiểm thử trọn luồng), 8.5 (dọn code, chuẩn hóa thông báo lỗi).
+
 **Cập nhật 16/10/2026:** Đã xong backend lõi (Mục 1–4): CSDL Aiven (TLS), REST API, AI Pipeline Hybrid (Gemini + Ollama dự phòng, Sentence-Transformers), chấm điểm và sinh câu hỏi phỏng vấn. Lần test toàn bộ backend gần nhất đạt hết (unit 184, smoke API 35/35, E2E). Giai đoạn tiếp theo: frontend (Mục 5, 6) theo `docs/API cho Frontend.md`; song song backend làm Mục 7 (email) và các việc ở Mục 9.

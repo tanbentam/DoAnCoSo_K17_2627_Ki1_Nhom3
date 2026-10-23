@@ -9,7 +9,7 @@ Tài liệu cho người làm frontend SmartRecruit AI (Mục 5 – Cổng ứng
 | Swagger UI http://127.0.0.1:8000/docs | Thử gọi API trực tiếp, luôn khớp với code backend |
 | [checklist.md](../checklist.md) Mục 5, 6, 9 | Danh sách việc cần làm và các quyết định còn mở |
 
-**Cập nhật:** 16/10/2026, dựa trên backend đã kiểm thử ([Test-Reports](Test-Reports/README.md)).
+**Cập nhật:** 17/10/2026. **Mục 5 và Mục 6 đã xong** trên nhánh `feature/frontend-tan`; nhật ký từng mục ở [docs/Phan 5](Phan%205/readme.md) và [docs/Phan 6](Phan%206/readme.md). Muốn đổi giao diện: xem [Mục 10](#10-đổi-giao-diện-những-gì-không-được-đổi-tên).
 
 ---
 
@@ -36,7 +36,10 @@ Tài liệu cho người làm frontend SmartRecruit AI (Mục 5 – Cổng ứng
 1. **Chạy backend** theo [API cho Frontend.md, Mục 1](API%20cho%20Frontend.md#1-chạy-backend-trên-máy-frontend).
    - Kiểm tra http://127.0.0.1:8000/health có `"status": "healthy"`.
    - Đặt `AI_PROVIDER=local` nếu có Ollama, để thử nhiều lần không tốn lượt Gemini.
-2. **Chạy frontend** bằng extension **Live Server** của VS Code: chuột phải `frontend/index.html` → *Open with Live Server* (mặc định http://127.0.0.1:5500). Backend đã mở CORS cho mọi origin.
+2. **Chạy frontend** bằng một web server tĩnh (backend đã mở CORS cho mọi origin), chọn một trong hai cách:
+   - Tại thư mục gốc dự án: `python -m http.server 5500 --bind 127.0.0.1 --directory frontend`, rồi mở http://127.0.0.1:5500/index.html và http://127.0.0.1:5500/admin.html.
+   - Extension **Live Server** của VS Code: chuột phải `frontend/index.html` → *Open with Live Server*.
+   - Sửa code xong mà trình duyệt vẫn chạy bản cũ: tải lại bằng **Ctrl + F5**.
 3. **Tài khoản HR:** `hr@smartrecruit.com` / `admin123`.
 4. **CV để thử nộp:**
    - 3 CV mẫu trong `backend/tests/fixtures/sample_cvs/`. Nếu chưa có thì tạo bằng `python scripts/generate_sample_cvs.py` tại `backend/`.
@@ -183,12 +186,13 @@ Cần thêm API hoặc trường dữ liệu: ghi đề xuất theo [quy tắc �
 
 ## 7. Quyết định cần chốt trước khi code phần liên quan
 
-| # | Câu hỏi | Ảnh hưởng | Đề xuất |
+| # | Câu hỏi | Ảnh hưởng | Kết quả (17/10/2026) |
 | --- | --- | --- | --- |
-| 1 | Kanban **4 cột** (checklist) hay **5 trạng thái** (backend: `offer`, `rejected` tách riêng)? | A5, A6 | Cột cuối "Kết quả" chứa cả `offer` và `rejected` (nhãn xanh / đỏ). Thả thẻ vào cột này thì hỏi HR chọn "Nhận" hay "Từ chối" |
-| 2 | Cột *Applied*: AI chuyển hồ sơ sang `screening` ngay khi bắt đầu chấm, nên cột này gần như luôn trống | A5 | Giữ cột nhưng ghi chú "Hồ sơ mới, AI đang xử lý". Hoặc gộp *Applied* + *Screening* thành "Sàng lọc AI" |
-| 3 | Có nhận CV `.docx` không? | P3, P4 | Chỉ nhận **PDF** cho tới khi xử lý xong Issue 06 (báo backend để đổi cả API cho thống nhất) |
-| 4 | Đăng nhập nằm trong `admin.html` hay tách `login.html`? | A1 | Trong `admin.html` (ẩn / hiện bằng JS), đỡ thêm một trang |
+| 1 | Kanban **4 cột** (checklist) hay **5 trạng thái** (backend: `offer`, `rejected` tách riêng)? | A5, A6 | ✅ **5 cột**, khớp 5 trạng thái backend: Mới nộp, Sàng lọc, Phỏng vấn, Đề nghị nhận việc, Từ chối |
+| 2 | Cột *Applied*: AI chuyển hồ sơ sang `screening` ngay khi bắt đầu chấm, nên cột này gần như luôn trống | A5 | ✅ Giữ cột, ghi chú "Hồ sơ mới, AI đang xử lý" |
+| 3 | Có nhận CV `.docx` không? | P3, P4 | ⏳ Tạm chỉ nhận **PDF** cho tới khi xử lý xong [Issue 06](Issues/06-cv-docx-khong-duoc-cham.md) |
+| 4 | Đăng nhập nằm trong `admin.html` hay tách `login.html`? | A1 | ✅ Trong `admin.html` (ẩn / hiện bằng JS) |
+| 5 | Mục *Tin tuyển dụng* trên thanh điều hướng | — | ✅ Thêm trang quản lý tin (checklist 6.9), là màn hình `#tin-tuyen-dung` trong `admin.html` |
 
 ---
 
@@ -228,3 +232,32 @@ Chạy backend ở `AI_PROVIDER=local`, mở DevTools (F12): tab **Console** kh�
 - Làm xong mục nào thì đánh dấu `[x]` mục đó trong `checklist.md`.
 - Không commit `.env`, tệp CV thật, thư mục `backend/venv/`.
 - Gặp lỗi API hoặc dữ liệu lạ: ghi lại `application_id`, request đã gửi và response nhận được, rồi báo người phụ trách backend hoặc tạo issue trong `docs/Issues/`.
+
+---
+
+## 10. Đổi giao diện: những gì không được đổi tên
+
+Giao diện đổi được thoải mái ở `css/style.css` (biến `--sr-*`, màu, font, khoảng cách) và ở phần HTML: `admin.html`, `index.html`, cùng các hàm vẽ trong JS (`cardHtml`, `renderBoard`, `renderJobsPage`, `overviewHtml`… trong `admin.js`; hàm vẽ thẻ tin, modal JD trong `index.js`). Phần gọi API (`api.js`) và logic (kéo thả, lưu trạng thái, xử lý lỗi) không cần sửa.
+
+Chỉ cần **giữ nguyên tên** các móc nối mà JS dùng để tìm phần tử. Đổi tên thì phải sửa đồng thời trong JS.
+
+**`index.html`, các `id`:** `job-list`, `job-count`, `job-search`, `job-modal`, `job-modal-title`, `job-modal-meta`, `job-modal-body`, `job-closed-badge`, `job-apply-btn`, `apply-section`, `apply-form`, `apply-fieldset`, `apply-cv`, `apply-cv-label`, `apply-dropzone`, `apply-submit-btn`, `apply-error`, `apply-error-text`, `apply-success`, `apply-success-email`.
+
+**`admin.html`, các `id`:**
+- Khung, đăng nhập: `view-login`, `view-dashboard`, `view-kanban`, `view-jobs`, `admin-nav`, `login-form`, `login-email`, `login-password`, `login-toggle-password`, `login-error`, `login-submit`, `user-avatar`, `logout-btn`.
+- Kanban: `job-select`, `job-meta`, `reload-btn`, `edit-job-btn`, `create-job-btn`, `kanban-board`.
+- Trang quản lý tin: `jobs-stats`, `jobs-reload-btn`, `jobs-create-btn`, `jobs-filter`, `jobs-search`, `jobs-list`.
+- Form tin: `job-modal`, `job-modal-title`, `job-form`, `job-form-error`, `job-fieldset`, `job-title`, `job-required-skills`, `job-preferred-skills`, `job-exp`, `job-description`, `job-requirements`, `job-save-btn`, `job-close-btn`.
+- Xác nhận đóng tin: `close-job-modal`, `close-job-name`, `close-job-error`, `close-job-back`, `close-job-confirm`.
+- Modal hồ sơ: `detail-modal`, `detail-avatar`, `detail-name`, `detail-sub`, `detail-status`, `detail-move-btn`, `detail-move-menu`, `detail-alert`, các tab `tab-overview` / `tab-skills` / `tab-exp` / `tab-questions` / `tab-cv`, các khung `pane-overview` / `pane-skills` / `pane-exp` / `pane-questions` / `pane-cv`.
+
+**Class và thuộc tính JS dựa vào:**
+- Chung (`utils.js`): `#toast-container`, `.state-message`, `.state-hint`, `.state-retry`; class huy hiệu điểm `badge-high` / `badge-medium` / `badge-low` (đổi màu ở `style.css` thì được, đổi tên thì phải sửa `scoreClass`).
+- Kanban: `.kanban-list[data-status]` (vùng thả của SortableJS), `.candidate-card[data-id]`, `.kanban-empty`, `.card-menu`, `[data-move]`, `.is-saving`, `.app-stats`.
+- Điều hướng: `[data-view-nav]` trên mục menu; địa chỉ `#kanban` / `#tin-tuyen-dung`.
+- Trang quản lý tin: `[data-job-action]` + `[data-job-id]`, `#jobs-filter [data-filter]`, `[data-count]`.
+- Form tin: `.tag-input[data-kind]` (bên trong có một `<input>`), `.tag-chip`, `.job-edit-only`, `.invalid-feedback` đứng ngay sau ô nhập.
+- Modal hồ sơ: `.tab-count` trong nút tab, `[data-detail-move]`, `.cv-open`, `.cv-download`.
+- Đăng nhập / tài khoản: `.user-email`.
+
+Sau khi đổi giao diện, chạy lại các bước trong [Mục 8](#8-tự-kiểm-thử-trước-khi-báo-xong) để chắc không mất chức năng.
