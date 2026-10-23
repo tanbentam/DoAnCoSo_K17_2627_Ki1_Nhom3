@@ -7,6 +7,6 @@ Mỗi mục trong `checklist.md` Mục 7 có một file log riêng: làm gì, fi
 
 | File | Mục checklist | Trạng thái | Commit |
 | --- | --- | --- | --- |
-| [Phan 7.5.md](Phan%207.5.md) | 7.5 Sắp xếp / lọc ứng viên theo điểm trên Kanban | Xong | |
+| [Phan 7.5.md](Phan%207.5.md) | 7.5 Sắp xếp / lọc ứng viên theo điểm trên Kanban | Xong | `e397a3d` |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý.

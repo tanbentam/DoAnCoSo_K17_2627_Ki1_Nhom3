@@ -15,9 +15,11 @@
 .home-logo { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 10px; background: #e9edff; color: #294596; font-size: 1rem; }
 .home-brand-ai { color: #7584b2; }
 .home-topnav { display: flex; align-items: center; gap: 25px; }
-.home-topnav a { color: #69748c; font-size: .78rem; text-decoration: none; }
+.home-topnav a { color: #69748c; font-size: .78rem; text-decoration: none; white-space: nowrap; }
 .home-topnav a:hover { color: var(--primary); }
 .home-audience { padding: 6px 12px; border-radius: 999px; background: #edf0ff; color: #6072a6; font-size: .67rem; }
+.home-hr-link { flex-shrink: 0; white-space: nowrap; }
+.home-hr-short { display: none; }
 .home-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: start; gap: 28px; }
 .home-sidebar { position: sticky; top: 102px; padding-top: 24px; }
 .home-sidebar-note { margin: 25px 14px; color: #8590a8; font-size: .72rem; line-height: 1.9; }
@@ -121,22 +123,20 @@
 @media (max-width: 991.98px) {
   .home-layout { grid-template-columns: 1fr; }
   .home-sidebar { position: static; padding-top: 14px; }
-  /* Menu dọc trùng với thanh điều hướng trên đầu trang, ẩn để nội dung chính lên đầu */
-  .candidate-home .home-sidebar { display: none; }
   .home-sidebar-note, .home-sidebar .role-menu-heading, .home-sidebar .role-menu-note { display: none; }
   .home-sidebar .role-menu { padding: 0 0 12px; }
   .home-sidebar .role-menu-link { min-height: 52px; }
   .home-audience { display: none; }
-  .home-topnav { gap: 16px; }
+  /* Dưới 992px không đủ chỗ cho logo + 3 link + nút HR: bỏ các link cuộn trong trang */
+  .home-topnav { display: none; }
   .home-hero { padding-top: 35px; }
 }
 @media (max-width: 575.98px) {
   .home-container { padding: 0 16px; }
   .home-header-inner { min-height: 68px; gap: 10px; }
   .home-brand { font-size: .95rem; }
-  .home-topnav a { font-size: .65rem; }
-  .home-topnav a:last-child { display: none; }
-  .home-topnav { gap: 10px; }
+  .home-hr-full { display: none; }
+  .home-hr-short { display: inline; }
   .home-hero { padding: 30px 12px 24px; }
   .home-hero h1 { font-size: 1.9rem; letter-spacing: -1px; }
   .home-hero-description { font-size: .76rem; }

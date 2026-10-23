@@ -23,9 +23,8 @@
     crossorigin="anonymous"
   />
 
-  <!-- CSS chung → CSS menu → CSS cổng ứng viên -->
+  <!-- CSS chung → CSS cổng ứng viên -->
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/menu/menu.css" />
   <link rel="stylesheet" href="css/user/candidate-home.css" />
 </head>
 <body class="candidate-home">
@@ -44,216 +43,161 @@
         <a href="#application-guide">Hướng dẫn ứng tuyển</a>
       </nav>
 
-      <span class="home-audience">Dành cho ứng viên</span>
+      <a class="btn btn-outline-primary btn-sm home-hr-link" href="admin.html">
+        <i class="bi bi-person-badge me-1" aria-hidden="true"></i><span class="home-hr-full">Dành cho nhà tuyển dụng</span><span class="home-hr-short">Nhà tuyển dụng</span>
+      </a>
     </div>
   </header>
 
   <main id="main-content" class="home-container">
-    <div class="home-layout">
-      <!-- Menu dọc ứng viên -->
-      <aside class="home-sidebar" aria-label="Menu ứng viên">
-        <nav class="app-menu" aria-label="Menu dành cho ứng viên">
-          <details class="app-menu-disclosure" open>
-            <summary class="app-menu-header">
-              <svg class="app-menu-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 6h16M4 12h12M4 18h8"></path>
+    <div class="home-content">
+      <!-- Giới thiệu và tìm kiếm -->
+      <section class="home-hero" aria-labelledby="feed-heading">
+        <span class="home-pill">
+          <span aria-hidden="true">✧</span>
+          TUYỂN DỤNG THÔNG MINH, KẾT NỐI CON NGƯỜI
+        </span>
+
+        <h1 id="feed-heading">
+          Tìm công việc phù hợp,<br />
+          <span>mở ra hành trình mới.</span>
+        </h1>
+
+        <p class="home-hero-description">
+          Khám phá vị trí theo kỹ năng và kinh nghiệm của bạn.<br />
+          Gửi hồ sơ trực tuyến, AI hỗ trợ đội ngũ tuyển dụng đánh giá nhanh hơn.
+        </p>
+
+        <div class="home-search" role="search">
+          <div class="home-search-row">
+            <div class="home-keyword">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                <path d="m16 16 4.5 4.5"></path>
               </svg>
-              <span>Menu</span>
-              <span class="app-menu-role">Ứng viên</span>
-            </summary>
-
-            <div class="app-menu-content">
-              <p class="app-menu-label">KHÁM PHÁ CƠ HỘI</p>
-              <div class="app-menu-links">
-                <a class="app-menu-link" href="#feed-heading" aria-current="location">
-                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m3 10 9-7 9 7"></path>
-                    <path d="M5 9v12h14V9M9 21v-8h6v8"></path>
-                  </svg>
-                  <span>Trang chủ việc làm</span>
-                  <span class="app-menu-arrow" aria-hidden="true">›</span>
-                </a>
-                <a class="app-menu-link" href="#home-jobs-heading">
-                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="7" width="18" height="14" rx="2"></rect>
-                    <path d="M8 7V4h8v3M3 12a22 22 0 0 0 18 0M10 13h4"></path>
-                  </svg>
-                  <span>Danh sách việc làm</span>
-                  <span class="app-menu-arrow" aria-hidden="true">›</span>
-                </a>
-                <a class="app-menu-link" href="#application-guide">
-                  <svg class="app-menu-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Z"></path>
-                    <path d="M12 5v15"></path>
-                  </svg>
-                  <span>Hướng dẫn ứng tuyển</span>
-                  <span class="app-menu-arrow" aria-hidden="true">›</span>
-                </a>
-              </div>
-
-              <div class="app-menu-help">
-                <strong>Bắt đầu hành trình mới</strong>
-                <p>Chọn công việc phù hợp và gửi CV trực tuyến, không cần tạo tài khoản.</p>
-              </div>
+              <label for="job-search" class="visually-hidden">Tìm vị trí hoặc kỹ năng</label>
+              <input
+                type="search"
+                id="job-search"
+                placeholder="Tìm theo vị trí hoặc kỹ năng (VD: Python, FastAPI)…"
+                autocomplete="off"
+              />
             </div>
-          </details>
 
-          <footer class="app-menu-footer">
-            <span class="app-menu-status" aria-hidden="true"></span>
-            <span>SmartRecruit AI · Cổng ứng viên</span>
-          </footer>
-        </nav>
-      </aside>
-
-      <div class="home-content">
-        <!-- Giới thiệu và tìm kiếm -->
-        <section class="home-hero" aria-labelledby="feed-heading">
-          <span class="home-pill">
-            <span aria-hidden="true">✧</span>
-            TUYỂN DỤNG THÔNG MINH, KẾT NỐI CON NGƯỜI
-          </span>
-
-          <h1 id="feed-heading">
-            Tìm công việc phù hợp,<br />
-            <span>mở ra hành trình mới.</span>
-          </h1>
-
-          <p class="home-hero-description">
-            Khám phá vị trí theo kỹ năng và kinh nghiệm của bạn.<br />
-            Gửi hồ sơ trực tuyến, AI hỗ trợ đội ngũ tuyển dụng đánh giá nhanh hơn.
-          </p>
-
-          <div class="home-search" role="search">
-            <div class="home-search-row">
-              <div class="home-keyword">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-                  <circle cx="10.5" cy="10.5" r="6.5"></circle>
-                  <path d="m16 16 4.5 4.5"></path>
-                </svg>
-                <label for="job-search" class="visually-hidden">Tìm vị trí hoặc kỹ năng</label>
-                <input
-                  type="search"
-                  id="job-search"
-                  placeholder="Tìm theo vị trí hoặc kỹ năng (VD: Python, FastAPI)…"
-                  autocomplete="off"
-                />
-              </div>
-
-              <a href="#home-jobs-heading" class="btn btn-primary">
-                Xem việc làm <span aria-hidden="true">↗</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="home-benefits">
-            <div>
-              <span class="home-benefit-icon" aria-hidden="true">01</span>
-              <p><strong>Đánh giá bằng AI</strong><small>So khớp kỹ năng với mô tả công việc</small></p>
-            </div>
-            <div>
-              <span class="home-benefit-icon mint" aria-hidden="true">02</span>
-              <p><strong>Ứng tuyển trực tuyến</strong><small>Không cần tạo tài khoản</small></p>
-            </div>
-            <div>
-              <span class="home-benefit-icon" aria-hidden="true">03</span>
-              <p><strong>CV định dạng PDF</strong><small>Dung lượng nhỏ hơn 5 MB</small></p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Danh sách việc làm (index.js vẽ vào #job-list) -->
-        <section class="home-section home-jobs-section" aria-labelledby="home-jobs-heading">
-          <div class="home-section-heading">
-            <div>
-              <span class="home-eyebrow">
-                <span class="home-dot" aria-hidden="true"></span>
-                CƠ HỘI ĐANG MỞ
-              </span>
-              <h2 id="home-jobs-heading">Bước tiếp theo cho sự nghiệp của bạn</h2>
-            </div>
-          </div>
-
-          <div class="home-results">
-            <span id="job-count" role="status" aria-live="polite">Đang tải…</span>
-            <span>Bấm vào một vị trí để xem chi tiết và ứng tuyển</span>
-          </div>
-
-          <div id="job-list" class="row g-3">
-            <div class="col-12 text-center text-muted py-5">
-              <div class="spinner-border text-primary" role="status"></div>
-              <p class="mt-2">Đang tải danh sách việc làm…</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Lời nhắc chuẩn bị hồ sơ -->
-        <section class="home-banner" aria-labelledby="home-banner-heading">
-          <div>
-            <span class="home-banner-label">HỒ SƠ RÕ RÀNG · CƠ HỘI PHÙ HỢP</span>
-            <h2 id="home-banner-heading">
-              Để kỹ năng của bạn<br />
-              được nhà tuyển dụng nhìn thấy.
-            </h2>
-            <p>
-              Chọn vị trí phù hợp, chuẩn bị CV và gửi thông tin liên hệ.
-              Đội ngũ tuyển dụng sẽ xem xét hồ sơ của bạn.
-            </p>
-          </div>
-          <a href="#application-guide" class="btn home-banner-button">Chuẩn bị hồ sơ ↗</a>
-        </section>
-
-        <section id="application-guide" class="home-section" aria-labelledby="home-guide-heading">
-          <div class="home-section-heading">
-            <div>
-              <span class="home-eyebrow">SẴN SÀNG CHO CƠ HỘI MỚI</span>
-              <h2 id="home-guide-heading">Ứng tuyển trong ba bước</h2>
-            </div>
-          </div>
-
-          <div class="home-guide-grid">
-            <article>
-              <span>01</span>
-              <h3>Hiểu công việc</h3>
-              <p>Đọc mô tả, kỹ năng và kinh nghiệm của vị trí bạn quan tâm.</p>
-            </article>
-            <article>
-              <span>02</span>
-              <h3>Chuẩn bị CV</h3>
-              <p>Dùng PDF nhỏ hơn 5 MB, trình bày rõ kỹ năng và kinh nghiệm liên quan.</p>
-            </article>
-            <article>
-              <span>03</span>
-              <h3>Gửi và giữ kết nối</h3>
-              <p>Dùng email, số điện thoại đang hoạt động để đội ngũ tuyển dụng liên hệ.</p>
-            </article>
-          </div>
-        </section>
-
-        <footer class="home-footer">
-          <div>
-            <a class="home-brand" href="index.html">
-              <span class="home-logo" aria-hidden="true">S</span>
-              <span>SmartRecruit AI</span>
+            <a href="#home-jobs-heading" class="btn btn-primary">
+              Xem việc làm <span aria-hidden="true">↗</span>
             </a>
-            <p>Kết nối năng lực với cơ hội.</p>
           </div>
+        </div>
 
-          <nav aria-label="Liên kết cuối trang">
-            <strong>Dành cho ứng viên</strong>
-            <a href="#home-jobs-heading">Việc đang tuyển</a>
-            <a href="#application-guide">Hướng dẫn ứng tuyển</a>
-            <a href="admin.html">Dành cho nhà tuyển dụng</a>
-          </nav>
-
-          <div class="home-footer-note">
-            <strong>Thông tin hồ sơ</strong>
-            <p>
-              Sử dụng email và số điện thoại đang hoạt động.
-              Kết quả phân tích AI chỉ được cung cấp cho bộ phận tuyển dụng.
-            </p>
+        <div class="home-benefits">
+          <div>
+            <span class="home-benefit-icon" aria-hidden="true">01</span>
+            <p><strong>Đánh giá bằng AI</strong><small>So khớp kỹ năng với mô tả công việc</small></p>
           </div>
-        </footer>
-      </div>
+          <div>
+            <span class="home-benefit-icon mint" aria-hidden="true">02</span>
+            <p><strong>Ứng tuyển trực tuyến</strong><small>Không cần tạo tài khoản</small></p>
+          </div>
+          <div>
+            <span class="home-benefit-icon" aria-hidden="true">03</span>
+            <p><strong>CV định dạng PDF</strong><small>Dung lượng nhỏ hơn 5 MB</small></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danh sách việc làm (index.js vẽ vào #job-list) -->
+      <section class="home-section home-jobs-section" aria-labelledby="home-jobs-heading">
+        <div class="home-section-heading">
+          <div>
+            <span class="home-eyebrow">
+              <span class="home-dot" aria-hidden="true"></span>
+              CƠ HỘI ĐANG MỞ
+            </span>
+            <h2 id="home-jobs-heading">Bước tiếp theo cho sự nghiệp của bạn</h2>
+          </div>
+        </div>
+
+        <div class="home-results">
+          <span id="job-count" role="status" aria-live="polite">Đang tải…</span>
+          <span>Bấm vào một vị trí để xem chi tiết và ứng tuyển</span>
+        </div>
+
+        <div id="job-list" class="row g-3">
+          <div class="col-12 text-center text-muted py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Đang tải danh sách việc làm…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lời nhắc chuẩn bị hồ sơ -->
+      <section class="home-banner" aria-labelledby="home-banner-heading">
+        <div>
+          <span class="home-banner-label">HỒ SƠ RÕ RÀNG · CƠ HỘI PHÙ HỢP</span>
+          <h2 id="home-banner-heading">
+            Để kỹ năng của bạn<br />
+            được nhà tuyển dụng nhìn thấy.
+          </h2>
+          <p>
+            Chọn vị trí phù hợp, chuẩn bị CV và gửi thông tin liên hệ.
+            Đội ngũ tuyển dụng sẽ xem xét hồ sơ của bạn.
+          </p>
+        </div>
+        <a href="#application-guide" class="btn home-banner-button">Chuẩn bị hồ sơ ↗</a>
+      </section>
+
+      <section id="application-guide" class="home-section" aria-labelledby="home-guide-heading">
+        <div class="home-section-heading">
+          <div>
+            <span class="home-eyebrow">SẴN SÀNG CHO CƠ HỘI MỚI</span>
+            <h2 id="home-guide-heading">Ứng tuyển trong ba bước</h2>
+          </div>
+        </div>
+
+        <div class="home-guide-grid">
+          <article>
+            <span>01</span>
+            <h3>Hiểu công việc</h3>
+            <p>Đọc mô tả, kỹ năng và kinh nghiệm của vị trí bạn quan tâm.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Chuẩn bị CV</h3>
+            <p>Dùng PDF nhỏ hơn 5 MB, trình bày rõ kỹ năng và kinh nghiệm liên quan.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Gửi và giữ kết nối</h3>
+            <p>Dùng email, số điện thoại đang hoạt động để đội ngũ tuyển dụng liên hệ.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="home-footer">
+        <div>
+          <a class="home-brand" href="index.html">
+            <span class="home-logo" aria-hidden="true">S</span>
+            <span>SmartRecruit AI</span>
+          </a>
+          <p>Kết nối năng lực với cơ hội.</p>
+        </div>
+
+        <nav aria-label="Liên kết cuối trang">
+          <strong>Dành cho ứng viên</strong>
+          <a href="#home-jobs-heading">Việc đang tuyển</a>
+          <a href="#application-guide">Hướng dẫn ứng tuyển</a>
+          <a href="admin.html">Dành cho nhà tuyển dụng</a>
+        </nav>
+
+        <div class="home-footer-note">
+          <strong>Thông tin hồ sơ</strong>
+          <p>
+            Sử dụng email và số điện thoại đang hoạt động.
+            Kết quả phân tích AI chỉ được cung cấp cho bộ phận tuyển dụng.
+          </p>
+        </div>
+      </footer>
     </div>
 
     <noscript>
