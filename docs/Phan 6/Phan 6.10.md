@@ -64,13 +64,16 @@ Giữ toàn bộ JS và chức năng của `frontend-tan` (API, Kanban kéo th�
 - **Khổ 375px:** cả `index.html` và `admin.html` (đăng nhập, Kanban, Tin tuyển dụng) đều có `scrollWidth = 375`, không phần tử nào tràn ngang. Bảng Kanban cuộn ngang trong khung riêng, như thiết kế cũ.
 - **Khổ 1366px:** menu dọc 240px, Kanban vừa khung (1037/1037).
 - **Console:** không có lỗi JS. Chỉ có lỗi CORS / `ERR_FAILED` của các lời gọi API thật lúc tải trang: backend trả 500 vì không có CSDL, không phải lỗi giao diện.
-- **Chưa kiểm:**
-  - Kéo thả bằng chuột thật (SortableJS) mới thử qua menu chuyển cột. Phần kéo thả không đổi JS.
-  - Luồng có CSDL thật và AI chấm thật.
-  - Nên thử lại cả hai khi Aiven bật lại.
+- **Thử lại với CSDL thật** (23/10/2026, sau khi bạn bật lại Aiven, commit `7efc99f`):
+  - Cổng ứng viên tải đủ 4 tin thật, console không có lỗi.
+  - Đăng nhập bằng tài khoản seed `hr@smartrecruit.com` thành công.
+  - **Kéo thả bằng chuột thật:** kéo thẻ hồ sơ #58 (tin 8 "Frontend Developer (React)") từ *Sàng lọc* sang *Mới nộp*, có thông báo "Đã chuyển…". Sau đó kéo về *Sàng lọc*; API xác nhận `status = screening`, đúng như ban đầu.
+  - Modal hồ sơ #58 với dữ liệu AI thật: vòng điểm 71%, lọc cứng 100, ngữ nghĩa 52, tóm tắt AI, 4 câu hỏi phỏng vấn, kinh nghiệm 5,2 năm.
+  - Có 1 lỗi 401 trong console lúc mở trang: token giả `mock-token` còn sót trong `localStorage` từ lần thử bằng API giả lập. Trang xử lý đúng: xóa token và chuyển về màn hình đăng nhập.
+- **Chưa kiểm:** nộp CV thật để AI chấm thật (`AI_PROVIDER=auto` sẽ gọi Gemini, tốn lượt). Phần nộp CV không đổi JS; để dành cho mục 8.2 (kiểm thử trọn luồng).
 
 ## Lưu ý
-- **Dữ liệu thử còn sót:** không có. Dữ liệu `[TEST]` chỉ nằm trong bộ nhớ trình duyệt; CSDL không bị ghi gì.
+- **Dữ liệu thử còn sót:** không có. Dữ liệu `[TEST]` chỉ nằm trong bộ nhớ trình duyệt. Trên CSDL thật chỉ có hồ sơ #58 bị đổi trạng thái 2 lần, và đã được trả về `screening` như cũ (`updated_at` của hồ sơ này đổi theo).
 - `.claude/launch.json` (cấu hình chạy máy chủ cho Claude) và các file báo cáo `.docx`/`.pdf` trong `docs/` không thuộc commit này.
 - `candidate-home.css` còn các class của Hải không dùng tới (lọc ngành nghề, sắp xếp…). Để lại để dọn ở mục 8.5 hoặc khi làm lại các bộ lọc đó.
 - Font đổi từ Be Vietnam Pro sang Segoe UI theo thiết kế của Hải. Trên macOS / Linux sẽ dùng font hệ thống thay thế.
