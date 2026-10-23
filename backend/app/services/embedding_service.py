@@ -11,6 +11,7 @@ và cache trong thư mục EMBEDDING_CACHE_DIR để các lần sau chạy đư�
 """
 
 import logging
+import os
 import re
 import threading
 import time
@@ -28,6 +29,18 @@ from app.core.config import (
 )
 
 logger = logging.getLogger(__name__)
+
+if os.name == "nt":
+    # Conda-based Python can resolve an older C++ runtime first. Prepare the
+    # runtime before any caller (including tests) imports sentence-transformers.
+    import ctypes
+
+    try:
+        system32 = Path(os.environ["SystemRoot"]) / "System32"
+        for dll in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll"):
+            ctypes.WinDLL(str(system32 / dll))
+    except OSError as e:
+        logger.warning("[EmbeddingService] Không thể nạp Windows C++ runtime: %s", e)
 
 # Số từ tối đa mỗi đoạn: ~128 token của tokenizer ≈ 80-90 từ tiếng Việt/Anh
 DEFAULT_CHUNK_WORDS = 80
@@ -76,6 +89,11 @@ def get_embedding_model():
 
         try:
             from sentence_transformers import SentenceTransformer
+        except OSError as e:
+            raise EmbeddingModelLoadError(
+                "Không thể nạp thư viện native của PyTorch. Kiểm tra Microsoft "
+                f"Visual C++ Redistributable x64. Chi tiết: {e}"
+            ) from e
         except ImportError as e:
             raise EmbeddingModelLoadError(
                 "Chưa cài thư viện sentence-transformers. Chạy: pip install -r requirements.txt"

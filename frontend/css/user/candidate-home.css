@@ -1,0 +1,154 @@
+/* Candidate landing page — load after shared style.css */
+.candidate-home {
+  --primary: #19368b;
+  --primary-dark: #12286c;
+  --ink: #1e2845;
+  --muted: #68738c;
+  --line: #e8eaf6;
+  background: #fafaff;
+  color: var(--ink);
+}
+.home-container { width: min(1540px, 100%); margin: auto; padding: 0 28px; }
+.home-header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--line); background: #fff; }
+.home-header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 76px; }
+.home-brand { display: inline-flex; align-items: center; gap: 9px; color: #243b78; font-size: 1.1rem; font-weight: 750; text-decoration: none; letter-spacing: -.5px; }
+.home-logo { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 10px; background: #e9edff; color: #294596; font-size: 1rem; }
+.home-brand-ai { color: #7584b2; }
+.home-topnav { display: flex; align-items: center; gap: 25px; }
+.home-topnav a { color: #69748c; font-size: .78rem; text-decoration: none; }
+.home-topnav a:hover { color: var(--primary); }
+.home-audience { padding: 6px 12px; border-radius: 999px; background: #edf0ff; color: #6072a6; font-size: .67rem; }
+.home-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: start; gap: 28px; }
+.home-sidebar { position: sticky; top: 102px; padding-top: 24px; }
+.home-sidebar-note { margin: 25px 14px; color: #8590a8; font-size: .72rem; line-height: 1.9; }
+.home-content { min-width: 0; }
+.home-hero { padding: 55px 20px 36px; text-align: center; background: radial-gradient(ellipse at 100% 45%, #dcf5eb, transparent 47%), radial-gradient(ellipse at 0 0, #e9eaff, transparent 60%), #f7f7ff; border-radius: 0 0 22px 22px; }
+.home-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #deebe6; border-radius: 999px; background: #eef8f3; color: #39715b; font-size: .58rem; font-weight: 700; letter-spacing: .6px; }
+.home-hero h1 { margin: 24px 0 17px; font-size: clamp(2rem, 3.1vw, 3.2rem); font-weight: 760; line-height: 1.2; letter-spacing: -1.5px; }
+.home-hero h1 span { color: #244194; }
+.home-hero-description { margin-bottom: 28px; color: #7c849b; font-size: .86rem; line-height: 1.9; }
+.home-search { max-width: 1040px; margin: auto; padding: 12px; border: 1px solid #ebedf7; border-radius: 13px; background: white; box-shadow: 0 12px 25px rgb(29 46 103 / 10%); text-align: left; }
+.home-search-row { display: flex; align-items: center; gap: 12px; }
+.home-keyword { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 5px 7px; color: #7683a2; }
+.home-keyword svg { flex-shrink: 0; }
+.home-keyword input { width: 100%; min-width: 0; padding: 9px 0; border: 0; outline: 0; background: transparent; font-size: .77rem; }
+.home-keyword:focus-within { border-radius: 7px; box-shadow: 0 0 0 2px #e5eafa; }
+.home-search-select { width: 155px; flex-shrink: 0; padding-left: 12px; border-left: 1px solid var(--line); }
+.home-search-select label { display: block; color: #939bb0; font-size: .59rem; }
+.home-search-select select { width: 100%; padding: 6px 0; border: 0; outline-offset: 3px; background: white; color: #5f6c8c; font-size: .72rem; }
+.home-search-row > .btn { flex-shrink: 0; min-height: 43px; font-size: .75rem; }
+.home-search-hint { display: flex; align-items: center; gap: 6px; margin: 8px 7px 0; color: #9299ad; font-size: .63rem; }
+.home-dot { display: inline-block; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #41856b; }
+.home-benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 850px; margin: 29px auto 0; }
+.home-benefits > div { display: flex; align-items: center; gap: 11px; padding: 15px; border: 1px solid #eeeff8; border-radius: 11px; background: rgb(255 255 255 / 90%); text-align: left; }
+.home-benefit-icon { display: grid; place-items: center; width: 35px; height: 35px; flex-shrink: 0; border-radius: 10px; background: #e6eaff; color: #5971bc; font-size: .7rem; font-weight: 750; }
+.home-benefit-icon.mint { background: #ddf3e9; color: #478367; }
+.home-benefits p { margin: 0; }
+.home-benefits strong, .home-benefits small { display: block; }
+.home-benefits strong { color: #48597b; font-size: .75rem; font-weight: 650; }
+.home-benefits small { margin-top: 3px; color: #8a94ac; font-size: .64rem; }
+.home-section { margin-top: 42px; }
+.home-section-heading { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 9px; }
+.home-eyebrow { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; color: #6177ab; font-size: .59rem; font-weight: 750; letter-spacing: 1.1px; }
+.home-section-heading h2 { margin: 0; font-size: clamp(1.25rem, 1.8vw, 1.6rem); font-weight: 700; letter-spacing: -.5px; }
+.home-section-description { margin-bottom: 20px; color: #8992a8; font-size: .72rem; }
+.home-text-button { padding: 5px 0; border: 0; background: transparent; color: #526ca8; font-size: .7rem; }
+.home-text-button:hover { text-decoration: underline; }
+.home-industry-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.home-industry-grid .group-button { position: relative; display: grid; gap: 4px; min-height: 128px; padding: 16px; border: 1px solid #e9ecf7; border-radius: 12px; background: white; text-align: left; }
+.home-industry-grid:not(.is-expanded) .group-button:nth-child(n+9) { display: none; }
+.home-industry-grid .group-button:hover { border-color: #b6c4e9; box-shadow: 0 7px 18px rgb(42 58 109 / 5%); }
+.home-industry-grid .group-button.is-active { border-color: #aebde6; background: #f2f5ff; }
+.home-industry-grid .group-icon { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 8px; border-radius: 9px; background: #e9ecff; color: #536cb2; font-size: .65rem; font-weight: 750; }
+.home-industry-grid .group-button:nth-child(3n+2) .group-icon { background: #def4e9; color: #438065; }
+.home-industry-grid .group-button:nth-child(3n) .group-icon { background: #fbefdd; color: #937447; }
+.home-industry-grid .group-name { color: #4a5876; font-size: .74rem; font-weight: 650; }
+.home-industry-grid .group-count { color: #8e97ab; font-size: .63rem; }
+.home-industry-grid .group-count::after { content: " việc làm đang mở"; }
+.home-industry-grid .group-button::after { content: "↗"; position: absolute; top: 15px; right: 15px; color: #adb9d8; }
+.home-jobs-section { padding: 25px; border: 1px solid #eef0fb; border-radius: 18px; background: #f2f4fd; }
+.home-sort { display: flex; align-items: center; gap: 8px; }
+.home-sort label { color: #7d88a1; font-size: .7rem; white-space: nowrap; }
+.home-sort select { width: 115px; min-height: 35px; font-size: .72rem; }
+.home-results { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 10px 0 18px; color: #818da5; font-size: .73rem; }
+.home-job-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.home-job-grid > .feed-state { grid-column: 1 / -1; }
+.home-job-grid .job-post { border-color: #e5eaf6; border-radius: 12px; }
+.home-job-grid .post-header { gap: 7px; padding: 14px 14px 4px; }
+.home-job-grid .post-avatar { width: 29px; height: 29px; border-radius: 8px; font-size: .85rem; }
+.home-job-grid .post-publisher strong { font-size: .64rem; }
+.home-job-grid .post-publisher span { font-size: .58rem; }
+.home-job-grid .post-open { padding: 3px 5px; font-size: .52rem; }
+.home-job-grid .post-content { padding: 10px 14px 15px; }
+.home-job-grid .post-title button { font-size: .87rem; line-height: 1.55; }
+.home-job-grid .post-metadata { font-size: .62rem; }
+.home-job-grid .post-description { font-size: .7rem; -webkit-line-clamp: 3; }
+.home-job-grid .badge { font-size: .59rem; }
+.home-job-grid .post-footer { gap: 6px; padding: 12px 14px 15px; }
+.home-job-grid .post-footer-note { font-size: .59rem; }
+.home-job-grid .post-footer .btn { padding: 8px 5px; font-size: .66rem; }
+.home-more { display: flex; justify-content: center; margin-top: 24px; }
+.home-more .btn { background: white; font-size: .75rem; }
+.home-banner { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 42px; padding: 32px; border-radius: 17px; background: linear-gradient(115deg, #18378b, #3f5c9d); box-shadow: 0 12px 28px rgb(26 51 124 / 15%); }
+.home-banner-label { display: inline-block; padding: 5px 9px; border: 1px solid rgb(255 255 255 / 16%); border-radius: 999px; background: rgb(255 255 255 / 9%); color: #dce6ff; font-size: .57rem; letter-spacing: .6px; }
+.home-banner h2 { margin: 16px 0 12px; color: white; font-size: 1.6rem; font-weight: 700; }
+.home-banner p { max-width: 570px; margin: 0; color: #d4dff5; font-size: .79rem; }
+.home-banner-button { flex-shrink: 0; background: #e5f3ec; color: #345c4c; border-color: #e5f3ec; font-size: .77rem; }
+.home-banner-button:hover { background: white; color: #254c3c; }
+.home-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+.home-guide-grid article { padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.home-guide-grid article > span { display: inline-block; margin-bottom: 16px; color: #879cc7; font-size: .74rem; font-weight: 750; }
+.home-guide-grid h3 { font-size: .93rem; font-weight: 700; }
+.home-guide-grid p { margin: 10px 0 0; color: #7c89a2; font-size: .74rem; line-height: 1.9; }
+.home-footer { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 25px; margin-top: 44px; padding: 30px 0; border-top: 1px solid var(--line); }
+.home-footer p { max-width: 290px; margin: 12px 0 0; color: #8b95ab; font-size: .72rem; }
+.home-footer nav { display: grid; align-content: start; gap: 8px; }
+.home-footer strong { color: #556785; font-size: .78rem; }
+.home-footer nav a { width: fit-content; color: #8591a8; font-size: .72rem; text-decoration: none; }
+.home-footer nav a:hover { color: var(--primary); }
+.candidate-home .role-menu-link[aria-current] { background: #e9edff; border-left-color: #29489a; color: #29489a; box-shadow: none; }
+.candidate-home .role-menu-link[aria-current] small { color: #6e7eaa; }
+.candidate-home .role-menu-note { color: #8792a8; }
+.candidate-home .btn-primary { --bs-btn-bg: #19368b; --bs-btn-border-color: #19368b; --bs-btn-hover-bg: #12286c; --bs-btn-hover-border-color: #12286c; --bs-btn-disabled-bg: #19368b; --bs-btn-disabled-border-color: #19368b; }
+@media (max-width: 1399.98px) {
+  .home-layout { grid-template-columns: 190px minmax(0, 1fr); gap: 20px; }
+  .home-job-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-industry-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-search-row { flex-wrap: wrap; }
+  .home-keyword { flex-basis: 100%; border-bottom: 1px solid var(--line); }
+  .home-search-select { flex: 1; width: auto; }
+}
+@media (max-width: 991.98px) {
+  .home-layout { grid-template-columns: 1fr; }
+  .home-sidebar { position: static; padding-top: 14px; }
+  .home-sidebar-note, .home-sidebar .role-menu-heading, .home-sidebar .role-menu-note { display: none; }
+  .home-sidebar .role-menu { padding: 0 0 12px; }
+  .home-sidebar .role-menu-link { min-height: 52px; }
+  .home-audience { display: none; }
+  .home-topnav { gap: 16px; }
+  .home-hero { padding-top: 35px; }
+}
+@media (max-width: 575.98px) {
+  .home-container { padding: 0 16px; }
+  .home-header-inner { min-height: 68px; gap: 10px; }
+  .home-brand { font-size: .95rem; }
+  .home-topnav a { font-size: .65rem; }
+  .home-topnav a:last-child { display: none; }
+  .home-topnav { gap: 10px; }
+  .home-hero { padding: 30px 12px 24px; }
+  .home-hero h1 { font-size: 1.9rem; letter-spacing: -1px; }
+  .home-hero-description { font-size: .76rem; }
+  .home-pill { font-size: .5rem; }
+  .home-search-select { min-width: 0; padding-left: 5px; border-left: 0; }
+  .home-search-row > .btn { width: 100%; }
+  .home-benefits { grid-template-columns: 1fr; gap: 8px; }
+  .home-benefits > div { padding: 12px; }
+  .home-industry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .home-industry-grid .group-button { padding: 12px; }
+  .home-section { margin-top: 30px; }
+  .home-jobs-section { padding: 16px; }
+  .home-job-grid, .home-guide-grid { grid-template-columns: 1fr; }
+  .home-banner { flex-direction: column; align-items: flex-start; padding: 24px; }
+  .home-banner h2 { font-size: 1.35rem; }
+  .home-footer { grid-template-columns: 1fr; }
+}
