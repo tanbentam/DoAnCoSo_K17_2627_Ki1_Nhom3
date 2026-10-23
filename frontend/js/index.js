@@ -19,7 +19,7 @@ function jobCardHtml(job) {
     .join("");
 
   return `
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-xl-4 col-xxl-3">
       <article class="card job-card h-100" tabindex="0" role="button" data-job-id="${Number(job.id)}"
         aria-label="Xem chi tiết ${escapeHtml(job.title)}">
         <div class="card-body d-flex flex-column">

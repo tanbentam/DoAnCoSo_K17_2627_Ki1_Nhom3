@@ -23,7 +23,8 @@
   /* Bootstrap (index.html) */
   --bs-body-font-family: var(--sr-font);
   --bs-body-color: var(--ink);
-  --bs-body-bg: var(--page);
+  /* Không đổi --bs-body-bg: Bootstrap dùng biến này làm nền ô nhập, modal, dropdown (phải giữ màu trắng).
+     Nền trang đặt riêng ở .candidate-home / .admin-body */
   --bs-primary: var(--primary);
   --bs-primary-rgb: 32, 60, 145;
   --bs-link-color: var(--primary);
@@ -142,6 +143,8 @@ a { text-underline-offset: 4px; }
 .job-selector { flex: 1 1 260px; min-width: 0; max-width: 560px; }
 .board-filter { flex: 0 1 190px; min-width: 175px; }
 .job-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-left: auto; }
+/* Menu dọc HR: cao vừa nội dung, vẫn bám theo khi cuộn (menu.css đặt cao gần hết màn hình) 
+.role-workspace-sidebar .app-menu { min-height: 0; }*/
 .stat-pill { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: .35rem .75rem; font-size: .85rem; }
 
 /* 7. Cổng ứng viên: thẻ việc làm, modal JD, form nộp CV (index.js) */
@@ -196,6 +199,8 @@ a { text-underline-offset: 4px; }
 /* 10. Modal hồ sơ chi tiết + đánh giá AI (6.7, 6.8) */
 .detail-avatar { width: 48px; height: 48px; font-size: 1.2rem; }
 .detail-tabs .nav-link { white-space: nowrap; }
+/* Giữ chiều cao modal ổn định khi chuyển tab (từ 768px; nhỏ hơn thì modal đã full màn hình) */
+@media (min-width: 768px) { #detail-modal .tab-content { min-height: 380px; } }
 /* Vòng tròn điểm: đặt --v (0–100) và --c (màu) bằng style inline */
 .score-ring { --v: 0; --c: var(--sr-score-high); display: grid; place-items: center; width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(var(--c) calc(var(--v) * 1%), #e9edf3 0); }
 .score-ring > div { display: grid; place-items: center; width: 104px; height: 104px; border-radius: 50%; background: #fff; text-align: center; }
@@ -256,9 +261,15 @@ a { text-underline-offset: 4px; }
   .login-introduction, .login-card { padding: 24px; }
   .login-introduction h2 { margin-bottom: 8px; font-size: 1.7rem; }
   .login-card h1 { font-size: 1.6rem; }
-  .dashboard-heading h1 { font-size: 1.6rem; }
-  .job-toolbar { flex-direction: column; align-items: stretch; }
-  .job-selector, .board-filter { flex: none; min-width: 0; max-width: none; }
+  /* Điện thoại: thu gọn phần trên để bảng Kanban lên gần màn hình đầu */
+  .dashboard-heading { margin-bottom: 14px; }
+  .dashboard-heading h1 { margin-bottom: 0; font-size: 1.6rem; }
+  .dashboard-heading p { display: none; }
+  .job-toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .job-selector, .job-actions { grid-column: 1 / -1; }
+  .job-selector, .board-filter { min-width: 0; max-width: none; }
+  .board-filter .form-select { padding-left: .6rem; padding-right: 1.7rem; background-position: right .45rem center; font-size: .8rem; }
+  .job-toolbar .form-label { margin-bottom: 4px; }
   .job-actions { margin-left: 0; }
   .job-actions .btn { flex: 1; }
   .workspace-card > .card-body { padding: 16px; }
