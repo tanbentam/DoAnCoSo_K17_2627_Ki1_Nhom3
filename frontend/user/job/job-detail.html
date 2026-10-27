@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta
+    name="description"
+    content="Xem chi tiết công việc và nộp hồ sơ trực tuyến tại SmartRecruit AI."
+  />
+
+  <title>Chi tiết công việc | SmartRecruit AI</title>
+
+  <!-- CSS nội dung trang -->
+  <link
+    rel="stylesheet"
+    href="../../css/user/job/job-detail.css?v=5"
+  />
+
+  <!-- CSS menu dùng chung cho HR và ứng viên -->
+  <link rel="stylesheet" href="../../css/menu/menu.css?v=9" />
+</head>
+
+<body class="job-detail-page fixed-menu-page">
+  <a class="skip-link" href="#main-content">
+    Bỏ qua đến nội dung chính
+  </a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="sr-brand" href="../index.html" aria-label="SmartRecruit AI — Trang chủ">
+      <span class="sr-brand-mark" aria-hidden="true">S</span>
+      <span>SmartRecruit <span class="sr-brand-ai">AI</span></span>
+      </a>
+
+      <span class="header-label">Không gian ứng viên</span>
+    </div>
+  </header>
+
+  <div class="job-page-container">
+    <div class="role-workspace">
+      <!--
+        Nội dung được tải từ:
+        frontend/user/menu/user-menu.html
+
+        Kiểu dáng và vị trí menu được quản lý bởi:
+        frontend/css/menu/menu.css?v=7
+      -->
+      <aside
+        class="role-workspace-sidebar"
+        aria-label="Menu ứng viên"
+      >
+        <div data-role-menu="user"></div>
+      </aside>
+
+      <main
+        id="main-content"
+        class="role-workspace-content"
+        tabindex="-1"
+      >
+        <nav class="breadcrumb" aria-label="Đường dẫn">
+          <a href="../index.html">Trang chủ</a>
+          <span aria-hidden="true">/</span>
+
+          <a href="../index.html#home-jobs-heading">Việc làm</a>
+          <span aria-hidden="true">/</span>
+
+          <span aria-current="page">Chi tiết công việc</span>
+        </nav>
+
+        <!-- Trạng thái tải hoặc lỗi -->
+        <section
+          id="page-state"
+          class="panel page-state"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <span
+            id="page-spinner"
+            class="spinner"
+            aria-hidden="true"
+          ></span>
+
+          <h1 id="state-title">Đang tải công việc</h1>
+
+          <p id="state-description">
+            Vui lòng chờ trong giây lát.
+          </p>
+
+          <div class="state-actions">
+            <button
+              id="retry-button"
+              type="button"
+              class="button button-primary"
+              hidden
+            >
+              Thử lại
+            </button>
+
+            <a class="text-link" href="../index.html">
+              ← Trở về danh sách
+            </a>
+          </div>
+        </section>
+
+        <!-- Chỉ hiển thị khi tải được công việc -->
+        <div id="job-content" hidden>
+          <section class="job-hero panel" aria-labelledby="job-title">
+            <div class="hero-main">
+              <div class="job-logo" aria-hidden="true">S</div>
+
+              <div class="hero-copy">
+                <p class="eyebrow">
+                  CƠ HỘI NGHỀ NGHIỆP · SMARTRECRUIT AI
+                </p>
+
+                <h1 id="job-title"></h1>
+
+                <div class="job-meta">
+                  <span id="job-status" class="badge"></span>
+
+                  <span
+                    id="job-experience"
+                    class="badge badge-purple"
+                  ></span>
+
+                  <span id="job-date" class="meta-date"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-actions">
+              <a
+                id="apply-link"
+                class="button button-primary"
+                href="#application"
+              >
+                Ứng tuyển ngay
+                <span aria-hidden="true">↗</span>
+              </a>
+
+              <p>Gửi CV trực tiếp đến bộ phận tuyển dụng</p>
+            </div>
+          </section>
+
+          <div
+            id="closed-notice"
+            class="notice notice-warning"
+            role="status"
+            hidden
+          >
+            Vị trí này đã ngừng nhận hồ sơ.
+            Bạn có thể tham khảo các cơ hội khác.
+          </div>
+
+          <div class="detail-layout">
+            <div class="detail-main">
+              <!-- Điều hướng nội dung trong trang, không thay menu chung -->
+              <nav class="section-nav" aria-label="Nội dung công việc">
+                <a href="#description">Mô tả công việc</a>
+                <a href="#requirements">Yêu cầu</a>
+                <a href="#skills">Kỹ năng</a>
+              </nav>
+
+              <section class="information-banner">
+                <span class="information-icon" aria-hidden="true">✦</span>
+
+                <div>
+                  <h2>Hiểu rõ vị trí trước khi ứng tuyển</h2>
+                  <p>
+                    Đọc mô tả, đối chiếu kỹ năng và chuẩn bị CV
+                    phù hợp với yêu cầu của nhà tuyển dụng.
+                  </p>
+                </div>
+              </section>
+
+              <section
+                id="description"
+                class="panel content-panel"
+                aria-labelledby="description-heading"
+              >
+                <h2 id="description-heading" class="section-heading">
+                  <span aria-hidden="true">▤</span>
+                  Mô tả công việc
+                </h2>
+
+                <div id="job-description" class="long-text"></div>
+              </section>
+
+              <section
+                id="requirements"
+                class="panel content-panel"
+                aria-labelledby="requirements-heading"
+              >
+                <h2 id="requirements-heading" class="section-heading">
+                  <span aria-hidden="true">✓</span>
+                  Yêu cầu ứng viên
+                </h2>
+
+                <div id="job-requirements" class="long-text"></div>
+
+                <div class="experience-note">
+                  <span aria-hidden="true">◷</span>
+                  <p id="experience-description"></p>
+                </div>
+              </section>
+
+              <section
+                id="skills"
+                class="panel content-panel"
+                aria-labelledby="skills-heading"
+              >
+                <h2 id="skills-heading" class="section-heading">
+                  <span aria-hidden="true">◇</span>
+                  Kỹ năng và năng lực
+                </h2>
+
+                <h3>Kỹ năng bắt buộc</h3>
+                <div id="required-skills" class="skill-list"></div>
+
+                <h3 class="preferred-heading">Kỹ năng ưu tiên</h3>
+                <div id="preferred-skills" class="skill-list"></div>
+              </section>
+
+              <section
+  class="panel content-panel"
+  aria-labelledby="process-heading"
+>
+  <h2 id="process-heading" class="section-heading">
+    <span aria-hidden="true">↗</span>
+    Tiến độ hồ sơ của bạn
+  </h2>
+
+  <p
+    id="application-progress-message"
+    class="muted"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    Bạn chưa gửi hồ sơ cho vị trí này trong phiên hiện tại.
+  </p>
+
+  <ol
+    id="application-progress"
+    class="application-progress"
+    aria-label="Tiến độ gửi hồ sơ"
+  >
+    <li data-progress-step="prepare" aria-current="step">
+      <span class="progress-number" aria-hidden="true">01</span>
+
+      <div>
+        <h3>Chuẩn bị hồ sơ</h3>
+        <p>Điền thông tin liên hệ và chọn CV PDF hợp lệ.</p>
+        <span class="progress-label">Bước hiện tại</span>
+      </div>
+    </li>
+
+    <li data-progress-step="send">
+      <span class="progress-number" aria-hidden="true">02</span>
+
+      <div>
+        <h3>Gửi hồ sơ</h3>
+        <p>Chờ xác nhận tiếp nhận từ máy chủ.</p>
+        <span class="progress-label">Chưa thực hiện</span>
+      </div>
+    </li>
+
+    <li data-progress-step="received">
+      <span class="progress-number" aria-hidden="true">03</span>
+
+      <div>
+        <h3>Hệ thống tiếp nhận</h3>
+        <p>
+          Hồ sơ được lưu để phục vụ quy trình tuyển dụng.
+          Bước này chưa xác nhận HR đã xem hoặc AI đã phân tích xong.
+        </p>
+        <span class="progress-label">Chưa xác nhận</span>
+      </div>
+    </li>
+  </ol>
+
+  <p id="application-reference" class="muted" hidden></p>
+</section>
+            </div>
+
+            <aside
+              class="detail-sidebar"
+              aria-label="Ứng tuyển và cơ hội khác"
+            >
+              <section
+                id="application"
+                class="panel application-panel"
+                aria-labelledby="application-heading"
+              >
+                <div class="application-header">
+                  <span class="eyebrow">BƯỚC TIẾP THEO CỦA BẠN</span>
+
+                  <h2 id="application-heading">
+                    Ứng tuyển vị trí này
+                  </h2>
+
+                  <p>
+                    Không cần tạo tài khoản.
+                    Chỉ cần thông tin liên hệ và CV.
+                  </p>
+                </div>
+
+                <div
+                  id="application-message"
+                  class="notice"
+                  role="status"
+                  aria-live="polite"
+                  tabindex="-1"
+                  hidden
+                ></div>
+
+                <form
+                  id="application-form"
+                  novalidate
+                  aria-busy="false"
+                >
+                  <fieldset id="application-fields" disabled>
+                    <legend class="sr-only">
+                      Thông tin ứng tuyển
+                    </legend>
+
+                    <div class="field">
+                      <label for="full-name">
+                        Họ và tên
+                        <span class="required" aria-hidden="true">*</span>
+                      </label>
+
+                      <input
+                        id="full-name"
+                        name="full_name"
+                        type="text"
+                        autocomplete="name"
+                        minlength="2"
+                        maxlength="150"
+                        placeholder="Nhập họ và tên"
+                        aria-describedby="full-name-error"
+                        required
+                      />
+
+                      <p id="full-name-error" class="field-error"></p>
+                    </div>
+
+                    <div class="field">
+                      <label for="email">
+                        Email
+                        <span class="required" aria-hidden="true">*</span>
+                      </label>
+
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        maxlength="255"
+                        placeholder="ban@email.com"
+                        aria-describedby="email-error"
+                        required
+                      />
+
+                      <p id="email-error" class="field-error"></p>
+                    </div>
+
+                    <div class="field">
+                      <label for="phone">Số điện thoại</label>
+
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        autocomplete="tel"
+                        maxlength="30"
+                        placeholder="Nhập số điện thoại"
+                        aria-describedby="phone-error"
+                      />
+
+                      <p id="phone-error" class="field-error"></p>
+                    </div>
+
+                    <div class="field">
+                      <label for="cv-file">
+                        CV của bạn
+                        <span class="required" aria-hidden="true">*</span>
+                      </label>
+
+                      <label class="upload-area" for="cv-file">
+                        <span class="upload-icon" aria-hidden="true">↑</span>
+                        <strong>Chọn CV định dạng PDF</strong>
+                        <span id="file-name">Chưa chọn tệp</span>
+                      </label>
+
+                      <input
+                        id="cv-file"
+                        class="file-input"
+                        name="cv_file"
+                        type="file"
+                        accept=".pdf,application/pdf"
+                        aria-describedby="cv-help cv-file-error"
+                        required
+                      />
+
+                      <p id="cv-help" class="field-help">
+                        Chỉ nhận PDF, dung lượng nhỏ hơn 5 MB.
+                      </p>
+
+                      <p id="cv-file-error" class="field-error"></p>
+                    </div>
+
+                    <button
+                      id="submit-button"
+                      type="submit"
+                      class="button button-green submit-button"
+                    >
+                      Nộp hồ sơ
+                    </button>
+                  </fieldset>
+                </form>
+
+                <p class="application-note">
+                  Kiểm tra kỹ email và số điện thoại để nhà tuyển dụng
+                  có thể liên hệ với bạn.
+                </p>
+              </section>
+
+              <section class="panel sidebar-panel">
+                <h2>Chuẩn bị CV tốt hơn</h2>
+
+                <ul class="tips-list">
+                  <li>Nêu rõ kinh nghiệm liên quan đến vị trí.</li>
+                  <li>Ưu tiên kỹ năng phù hợp với yêu cầu công việc.</li>
+                  <li>Kiểm tra CV đọc được trước khi gửi.</li>
+                </ul>
+              </section>
+
+              <section
+                class="panel sidebar-panel"
+                aria-labelledby="related-heading"
+              >
+                <div class="sidebar-heading">
+                  <h2 id="related-heading">Cơ hội khác</h2>
+
+                  <a href="../index.html#home-jobs-heading">
+                    Xem tất cả
+                  </a>
+                </div>
+
+                <div id="related-jobs" aria-live="polite">
+                  <p class="muted">Đang tải các vị trí khác…</p>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+
+        <noscript>
+          <div class="notice notice-warning">
+            Vui lòng bật JavaScript để xem công việc và gửi hồ sơ.
+          </div>
+        </noscript>
+      </main>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <a class="brand footer-brand" href="../index.html">
+          SmartRecruit AI
+        </a>
+
+        <p>Kết nối năng lực với cơ hội nghề nghiệp phù hợp.</p>
+      </div>
+
+      <a class="text-link" href="../index.html">
+        ← Khám phá thêm việc làm
+      </a>
+    </div>
+  </footer>
+
+  <!-- API dùng chung -->
+  <script src="../../js/api.js"></script>
+
+  <!-- Tải menu HTML dùng chung của ứng viên -->
+  <script src="../../js/menu/user-menu.js?v=7"></script>
+
+  <!-- Logic riêng của chức năng chi tiết và ứng tuyển -->
+  <script src="../../js/user/job/job-detail.js?v=5"></script>
+</body>
+</html>

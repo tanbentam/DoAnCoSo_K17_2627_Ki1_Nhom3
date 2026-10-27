@@ -2,8 +2,14 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#19368b" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta name="theme-color" content="#24396d" />
+
   <meta
     name="description"
     content="Khám phá việc làm theo ngành nghề, kỹ năng và kinh nghiệm cùng SmartRecruit AI."
@@ -19,42 +25,61 @@
     crossorigin="anonymous"
   />
 
-  <!-- CSS chung → CSS ứng viên → CSS menu -->
+  <!-- CSS chung -->
   <link rel="stylesheet" href="../css/style.css?v=20" />
-  <link rel="stylesheet" href="../css/user/candidate-home.css?v=2" />
-  <link rel="stylesheet" href="../css/menu/menu.css?v=2" />
+
+  <!-- CSS nội dung trang chủ -->
+  <link
+    rel="stylesheet"
+    href="../css/user/candidate-home.css?v=3"
+  />
+
+  <!-- CSS menu chung luôn tải cuối cùng -->
+  <link rel="stylesheet" href="../css/menu/menu.css?v=9" />
 </head>
 
-<body class="candidate-home">
-  <a class="skip-link" href="#main-content">Đến nội dung chính</a>
+<body class="candidate-home fixed-menu-page">
+  <a class="skip-link" href="#main-content">
+    Đến nội dung chính
+  </a>
 
+  <!-- Thanh đầu trang -->
   <header class="home-header">
     <div class="home-container home-header-inner">
-      <a class="home-brand" href="./index.html">
-        <span class="home-logo" aria-hidden="true">S</span>
-        <span>SmartRecruit<span class="home-brand-ai"> AI</span></span>
-      </a>
+      <a
+        class="sr-brand"
+        href="./index.html"
+        aria-label="SmartRecruit AI — Trang chủ ứng viên"
+      >
+       <span class="sr-brand-mark" aria-hidden="true">S</span>
+       <span>SmartRecruit <span class="sr-brand-ai">AI</span></span>
+       </a>
 
-      <nav class="home-topnav" aria-label="Điều hướng trang ứng viên">
-        <a href="#feed-heading">Khám phá việc làm</a>
-        <a href="#filter-heading">Ngành nghề</a>
-        <a href="#application-guide">Hướng dẫn ứng tuyển</a>
-      </nav>
-
-      <span class="home-audience">Dành cho ứng viên</span>
+      <span class="home-audience">Không gian ứng viên</span>
     </div>
   </header>
 
-  <main id="main-content" class="home-container">
-    <div class="home-layout">
-      <!-- Nạp từ user/menu/user-menu.html -->
-      <aside class="home-sidebar" aria-label="Menu ứng viên">
+  <main
+    id="main-content"
+    class="home-container"
+    tabindex="-1"
+  >
+    <div class="home-layout role-workspace">
+      
+      <aside
+        class="role-workspace-sidebar"
+        aria-label="Menu ứng viên"
+      >
         <div data-role-menu="user"></div>
       </aside>
 
-      <div class="home-content">
+      <!-- Nội dung nằm bên phải menu -->
+      <div class="home-content role-workspace-content">
         <!-- Giới thiệu và tìm kiếm -->
-        <section class="home-hero" aria-labelledby="feed-heading">
+        <section
+          class="home-hero"
+          aria-labelledby="feed-heading"
+        >
           <span class="home-pill">
             <span aria-hidden="true">✧</span>
             TUYỂN DỤNG THÔNG MINH, KẾT NỐI CON NGƯỜI
@@ -87,7 +112,10 @@
                     <path d="m16 16 4.5 4.5"></path>
                   </svg>
 
-                  <label for="job-search" class="visually-hidden">
+                  <label
+                    for="job-search"
+                    class="visually-hidden"
+                  >
                     Tìm vị trí, kỹ năng hoặc từ khóa
                   </label>
 
@@ -101,13 +129,19 @@
 
                 <div class="home-search-select">
                   <label for="home-industry">Ngành nghề</label>
+
                   <select id="home-industry" disabled>
-                    <option value="">Đang tải ngành nghề…</option>
+                    <option value="">
+                      Đang tải ngành nghề…
+                    </option>
                   </select>
                 </div>
 
                 <div class="home-search-select">
-                  <label for="experience-filter">Kinh nghiệm</label>
+                  <label for="experience-filter">
+                    Kinh nghiệm
+                  </label>
+
                   <select id="experience-filter">
                     <option value="all">Tất cả kinh nghiệm</option>
                     <option value="zero">Không yêu cầu</option>
@@ -117,7 +151,10 @@
                   </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
                   Tìm việc ngay
                   <span aria-hidden="true">↗</span>
                 </button>
@@ -132,7 +169,13 @@
 
           <div class="home-benefits">
             <div>
-              <span class="home-benefit-icon" aria-hidden="true">01</span>
+              <span
+                class="home-benefit-icon"
+                aria-hidden="true"
+              >
+                01
+              </span>
+
               <p>
                 <strong>Khám phá đa ngành</strong>
                 <small>Lọc theo chuyên môn của bạn</small>
@@ -140,7 +183,13 @@
             </div>
 
             <div>
-              <span class="home-benefit-icon mint" aria-hidden="true">02</span>
+              <span
+                class="home-benefit-icon mint"
+                aria-hidden="true"
+              >
+                02
+              </span>
+
               <p>
                 <strong>Ứng tuyển trực tuyến</strong>
                 <small>Không cần tạo tài khoản</small>
@@ -148,7 +197,13 @@
             </div>
 
             <div>
-              <span class="home-benefit-icon" aria-hidden="true">03</span>
+              <span
+                class="home-benefit-icon"
+                aria-hidden="true"
+              >
+                03
+              </span>
+
               <p>
                 <strong>CV định dạng PDF</strong>
                 <small>Dung lượng nhỏ hơn 5 MB</small>
@@ -157,12 +212,20 @@
           </div>
         </section>
 
-        <!-- Ngành nghề -->
-        <section class="home-section" aria-labelledby="filter-heading">
+        <!-- Danh mục ngành nghề -->
+        <section
+          class="home-section"
+          aria-labelledby="filter-heading"
+        >
           <div class="home-section-heading">
             <div>
-              <span class="home-eyebrow">KHÁM PHÁ THỊ TRƯỜNG</span>
-              <h2 id="filter-heading">Tìm cơ hội theo ngành nghề</h2>
+              <span class="home-eyebrow">
+                KHÁM PHÁ THỊ TRƯỜNG
+              </span>
+
+              <h2 id="filter-heading">
+                Tìm cơ hội theo ngành nghề
+              </h2>
             </div>
 
             <button
@@ -177,7 +240,8 @@
           </div>
 
           <p class="home-section-description">
-            Nhóm nghề được gợi ý từ tiêu đề và kỹ năng trong tin tuyển dụng.
+            Nhóm nghề được gợi ý từ tiêu đề và kỹ năng
+            trong tin tuyển dụng.
           </p>
 
           <div
@@ -199,6 +263,7 @@
                 <span class="home-dot" aria-hidden="true"></span>
                 CƠ HỘI ĐANG MỞ
               </span>
+
               <h2 id="home-jobs-heading">
                 Bước tiếp theo cho sự nghiệp của bạn
               </h2>
@@ -206,6 +271,7 @@
 
             <div class="home-sort">
               <label for="job-sort">Sắp xếp</label>
+
               <select id="job-sort" class="form-select">
                 <option value="newest">Mới nhất</option>
                 <option value="oldest">Cũ nhất</option>
@@ -214,7 +280,11 @@
           </div>
 
           <div class="home-results">
-            <span id="job-result-count" role="status" aria-live="polite">
+            <span
+              id="job-result-count"
+              role="status"
+              aria-live="polite"
+            >
               Đang tải việc làm…
             </span>
 
@@ -234,9 +304,17 @@
             hidden
           ></div>
 
-          <div id="job-list" class="home-job-grid" aria-busy="true">
+          <div
+            id="job-list"
+            class="home-job-grid"
+            aria-busy="true"
+          >
             <div class="surface feed-state" role="status">
-              <div class="spinner-border" aria-hidden="true"></div>
+              <div
+                class="spinner-border"
+                aria-hidden="true"
+              ></div>
+
               <p>Đang tải cơ hội việc làm…</p>
             </div>
           </div>
@@ -254,22 +332,30 @@
         </section>
 
         <!-- Hướng dẫn chuẩn bị hồ sơ -->
-        <section class="home-banner" aria-labelledby="home-banner-heading">
+        <section
+          class="home-banner"
+          aria-labelledby="home-banner-heading"
+        >
           <div>
             <span class="home-banner-label">
               HỒ SƠ RÕ RÀNG · CƠ HỘI PHÙ HỢP
             </span>
+
             <h2 id="home-banner-heading">
               Để kỹ năng của bạn<br />
               được nhà tuyển dụng nhìn thấy.
             </h2>
+
             <p>
               Chọn vị trí phù hợp, chuẩn bị CV và gửi thông tin liên hệ.
               Đội ngũ tuyển dụng sẽ xem xét hồ sơ của bạn.
             </p>
           </div>
 
-          <a href="#application-guide" class="btn home-banner-button">
+          <a
+            href="#application-guide"
+            class="btn home-banner-button"
+          >
             Chuẩn bị hồ sơ ↗
           </a>
         </section>
@@ -281,8 +367,13 @@
         >
           <div class="home-section-heading">
             <div>
-              <span class="home-eyebrow">SẴN SÀNG CHO CƠ HỘI MỚI</span>
-              <h2 id="home-guide-heading">Ứng tuyển trong ba bước</h2>
+              <span class="home-eyebrow">
+                SẴN SÀNG CHO CƠ HỘI MỚI
+              </span>
+
+              <h2 id="home-guide-heading">
+                Ứng tuyển trong ba bước
+              </h2>
             </div>
           </div>
 
@@ -290,29 +381,40 @@
             <article>
               <span>01</span>
               <h3>Hiểu công việc</h3>
-              <p>Đọc mô tả, kỹ năng và kinh nghiệm của vị trí bạn quan tâm.</p>
+              <p>
+                Đọc mô tả, kỹ năng và kinh nghiệm
+                của vị trí bạn quan tâm.
+              </p>
             </article>
 
             <article>
               <span>02</span>
               <h3>Chuẩn bị CV</h3>
-              <p>Dùng PDF nhỏ hơn 5 MB, trình bày kinh nghiệm liên quan.</p>
+              <p>
+                Dùng PDF nhỏ hơn 5 MB,
+                trình bày kinh nghiệm liên quan.
+              </p>
             </article>
 
             <article>
               <span>03</span>
               <h3>Gửi và giữ kết nối</h3>
-              <p>Kiểm tra email, điện thoại và liên hệ từ đội ngũ tuyển dụng.</p>
+              <p>
+                Kiểm tra email, điện thoại
+                và liên hệ từ đội ngũ tuyển dụng.
+              </p>
             </article>
           </div>
         </section>
 
+        <!-- Footer nằm trong vùng nội dung, bên phải menu -->
         <footer class="home-footer">
           <div>
             <a class="home-brand" href="./index.html">
               <span class="home-logo" aria-hidden="true">S</span>
               <span>SmartRecruit AI</span>
             </a>
+
             <p>Kết nối năng lực với cơ hội.</p>
           </div>
 
@@ -331,17 +433,21 @@
             </p>
           </div>
         </footer>
+
+        <noscript>
+          <div class="alert alert-warning">
+            Vui lòng bật JavaScript để xem việc làm và gửi hồ sơ.
+          </div>
+        </noscript>
       </div>
     </div>
-
-    <noscript>
-      <div class="alert alert-warning">
-        Vui lòng bật JavaScript để xem việc làm và gửi hồ sơ.
-      </div>
-    </noscript>
   </main>
 
-  <!-- Chi tiết công việc và ứng tuyển -->
+  <!--
+    Giữ các phần tử modal để tương thích với index.js hiện tại.
+    Hàm openJob() đã đổi sang điều hướng trang chi tiết
+    thì modal này sẽ không được mở.
+  -->
   <div
     class="modal fade"
     id="job-detail-modal"
@@ -349,11 +455,16 @@
     aria-labelledby="job-detail-title"
     aria-hidden="true"
   >
-    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div
+      class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <span class="home-eyebrow">THÔNG TIN TUYỂN DỤNG</span>
+            <span class="home-eyebrow">
+              THÔNG TIN TUYỂN DỤNG
+            </span>
+
             <h2 id="job-detail-title" class="modal-title">
               Chi tiết công việc
             </h2>
@@ -368,13 +479,27 @@
         </div>
 
         <div class="modal-body">
-          <div id="job-detail-loading" class="feed-state" role="status" hidden>
-            <div class="spinner-border" aria-hidden="true"></div>
+          <div
+            id="job-detail-loading"
+            class="feed-state"
+            role="status"
+            hidden
+          >
+            <div
+              class="spinner-border"
+              aria-hidden="true"
+            ></div>
             <p>Đang tải thông tin tuyển dụng…</p>
           </div>
 
-          <div id="job-detail-error" class="alert alert-danger" role="alert" hidden>
+          <div
+            id="job-detail-error"
+            class="alert alert-danger"
+            role="alert"
+            hidden
+          >
             <p id="job-detail-error-message"></p>
+
             <button
               type="button"
               id="job-detail-retry"
@@ -384,32 +509,53 @@
             </button>
           </div>
 
-          <div id="job-detail-empty" class="alert alert-info" role="status" hidden>
+          <div
+            id="job-detail-empty"
+            class="alert alert-info"
+            role="status"
+            hidden
+          >
             Không có thông tin tuyển dụng để hiển thị.
           </div>
 
           <div id="job-detail-content" hidden>
             <div class="d-flex flex-wrap gap-2 mb-3">
               <span id="job-detail-status" class="badge"></span>
-              <span id="job-detail-experience" class="badge text-bg-light"></span>
+
+              <span
+                id="job-detail-experience"
+                class="badge text-bg-light"
+              ></span>
             </div>
 
             <p class="small text-muted">
-              Ngày đăng: <span id="job-detail-date"></span>
+              Ngày đăng:
+              <span id="job-detail-date"></span>
             </p>
 
-            <div id="job-detail-closed" class="alert alert-warning" role="status" hidden>
+            <div
+              id="job-detail-closed"
+              class="alert alert-warning"
+              role="status"
+              hidden
+            >
               Tin đã đóng. Vị trí này hiện không nhận hồ sơ.
             </div>
 
             <section class="detail-section">
               <h3>Mô tả công việc</h3>
-              <p id="job-detail-description" class="preserve-text"></p>
+              <p
+                id="job-detail-description"
+                class="preserve-text"
+              ></p>
             </section>
 
             <section class="detail-section">
               <h3>Yêu cầu ứng viên</h3>
-              <p id="job-detail-requirements" class="preserve-text"></p>
+              <p
+                id="job-detail-requirements"
+                class="preserve-text"
+              ></p>
             </section>
 
             <section class="detail-section">
@@ -436,13 +582,25 @@
             hidden
           >
             <span class="home-eyebrow">BẮT ĐẦU KẾT NỐI</span>
-            <h3 id="application-heading">Gửi hồ sơ ứng tuyển</h3>
-            <p class="small text-muted">Các trường có dấu * là bắt buộc.</p>
+
+            <h3 id="application-heading">
+              Gửi hồ sơ ứng tuyển
+            </h3>
+
+            <p class="small text-muted">
+              Các trường có dấu * là bắt buộc.
+            </p>
 
             <form id="application-form" novalidate>
               <div class="row g-3">
                 <div class="col-12">
-                  <label for="candidate-name" class="form-label">Họ và tên *</label>
+                  <label
+                    for="candidate-name"
+                    class="form-label"
+                  >
+                    Họ và tên *
+                  </label>
+
                   <input
                     type="text"
                     id="candidate-name"
@@ -454,11 +612,21 @@
                     required
                     aria-describedby="candidate-name-error"
                   />
-                  <div id="candidate-name-error" class="invalid-feedback"></div>
+
+                  <div
+                    id="candidate-name-error"
+                    class="invalid-feedback"
+                  ></div>
                 </div>
 
                 <div class="col-md-6">
-                  <label for="candidate-email" class="form-label">Email *</label>
+                  <label
+                    for="candidate-email"
+                    class="form-label"
+                  >
+                    Email *
+                  </label>
+
                   <input
                     type="email"
                     id="candidate-email"
@@ -469,11 +637,21 @@
                     required
                     aria-describedby="candidate-email-error"
                   />
-                  <div id="candidate-email-error" class="invalid-feedback"></div>
+
+                  <div
+                    id="candidate-email-error"
+                    class="invalid-feedback"
+                  ></div>
                 </div>
 
                 <div class="col-md-6">
-                  <label for="candidate-phone" class="form-label">Số điện thoại</label>
+                  <label
+                    for="candidate-phone"
+                    class="form-label"
+                  >
+                    Số điện thoại
+                  </label>
+
                   <input
                     type="tel"
                     id="candidate-phone"
@@ -483,25 +661,43 @@
                     maxlength="30"
                     aria-describedby="candidate-phone-error"
                   />
-                  <div id="candidate-phone-error" class="invalid-feedback"></div>
+
+                  <div
+                    id="candidate-phone-error"
+                    class="invalid-feedback"
+                  ></div>
                 </div>
 
                 <div class="col-12">
                   <div class="upload-panel">
-                    <label for="candidate-cv" class="form-label">CV của bạn *</label>
+                    <label
+                      for="candidate-cv"
+                      class="form-label"
+                    >
+                      CV của bạn *
+                    </label>
+
                     <input
                       type="file"
                       id="candidate-cv"
                       name="cv_file"
                       class="form-control"
-                      accept=".pdf"
+                      accept=".pdf,application/pdf"
                       required
                       aria-describedby="candidate-cv-help candidate-cv-error"
                     />
-                    <div id="candidate-cv-help" class="form-text">
+
+                    <div
+                      id="candidate-cv-help"
+                      class="form-text"
+                    >
                       PDF · Dung lượng nhỏ hơn 5 MB
                     </div>
-                    <div id="candidate-cv-error" class="invalid-feedback"></div>
+
+                    <div
+                      id="candidate-cv-error"
+                      class="invalid-feedback"
+                    ></div>
                   </div>
                 </div>
 
@@ -514,7 +710,10 @@
                     hidden
                   ></div>
 
-                  <button type="submit" class="btn btn-primary">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                  >
                     Gửi hồ sơ
                   </button>
                 </div>
@@ -546,15 +745,20 @@
     </div>
   </div>
 
-  <!-- Mỗi script chỉ được nạp một lần -->
+  <!-- Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"
   ></script>
 
+  <!-- API dùng chung -->
   <script src="../js/api.js"></script>
-  <script src="../js/user/index.js?v=23"></script>
-  <script src="../js/menu/user-menu.js?v=2"></script>
+
+  <!-- Logic trang chủ -->
+  <script src="../js/user/index.js?v=24"></script>
+
+  <!-- Tải menu HTML dùng chung của ứng viên -->
+  <script src="../js/menu/user-menu.js?v=8"></script>
 </body>
 </html>

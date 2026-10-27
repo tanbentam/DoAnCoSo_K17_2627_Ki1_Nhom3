@@ -737,55 +737,17 @@
     ui.name.focus({ preventScroll: true });
   }
 
-  async function openJob(id, applyImmediately = false) {
-    if (submitting || closing) return;
+  function openJob(id, applyImmediately = false) {
+  const url = new URL("./job/job-detail.html", window.location.href);
 
-    const version = ++detailVersion;
+  url.searchParams.set("id", String(id));
 
-    currentJobId = id;
-    applyAfterLoad = applyImmediately;
-    selectedJob = null;
-
-    resetApplication();
-
-    ui.detailTitle.textContent = "Chi tiết công việc";
-    setDetailState("loading");
-    modal.show();
-
-    try {
-      const job = await JobAPI.get(id);
-
-      if (version !== detailVersion) return;
-
-      if (!job) {
-        setDetailState("empty");
-        return;
-      }
-
-      if (
-        typeof job !== "object" ||
-        Array.isArray(job) ||
-        job.id == null
-      ) {
-        throw new Error("Thông tin tuyển dụng không hợp lệ.");
-      }
-
-      selectedJob = job;
-      renderJob(job);
-
-      if (applyAfterLoad && job.status === "open") {
-        revealApplication();
-      }
-    } catch (error) {
-      if (version !== detailVersion) return;
-
-      selectedJob = null;
-      setDetailState(
-        "error",
-        error.message || "Không tải được chi tiết."
-      );
-    }
+  if (applyImmediately) {
+    url.hash = "application-form";
   }
+
+  window.location.assign(url.href);
+}
 
   // ==================== GỬI HỒ SƠ HIỆN TẠI ====================
 

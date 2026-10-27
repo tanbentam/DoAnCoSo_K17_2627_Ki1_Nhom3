@@ -251,3 +251,158 @@
     transition: none;
   }
 }
+/* Menu cố định sát mép trái cho các trang chức năng */
+
+/* Shared page layout: candidate home, job details and HR. */
+.fixed-menu-page {
+  --sidebar-width: 250px;
+  --header-height: 80px;
+  --page-padding: 24px;
+  padding-top: var(--header-height);
+}
+.fixed-menu-page :is(.home-header, .site-header, .site-navbar) {
+  position: fixed;
+  inset: 0 0 auto;
+  height: var(--header-height);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e7eaf4;
+}
+.fixed-menu-page :is(.home-header-inner, .header-inner, .admin-nav-container) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0 var(--page-padding);
+  flex-wrap: nowrap;
+}
+.fixed-menu-page :is(.home-topnav, .header-nav) {
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.fixed-menu-page :is(.home-brand, .brand) { flex-shrink: 0; }
+.fixed-menu-page :is(main.home-container, .job-page-container, .admin-main) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.fixed-menu-page :is(.home-layout, .role-workspace) {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.fixed-menu-page .role-workspace[hidden] { display: none !important; }
+.fixed-menu-page :is(.home-sidebar, .career-sidebar, .role-workspace-sidebar) {
+  position: fixed;
+  top: var(--header-height);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  background: #24396d;
+  z-index: 90;
+}
+.fixed-menu-page .app-menu {
+  min-height: calc(100dvh - var(--header-height));
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.fixed-menu-page :is(.home-content, .role-workspace-content) {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  margin: 0 0 0 var(--sidebar-width);
+  padding: var(--page-padding);
+  box-sizing: border-box;
+}
+.fixed-menu-page #login-section { padding: 32px var(--page-padding); }
+.fixed-menu-page > .site-footer { margin-left: var(--sidebar-width); }
+.fixed-menu-page [id] { scroll-margin-top: calc(var(--header-height) + 20px); }
+.fixed-menu-page.job-detail-page :is(.detail-main, .detail-sidebar, .hero-copy) { min-width: 0; }
+.fixed-menu-page.job-detail-page .detail-layout {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+}
+@media (max-width: 1250px) {
+  .fixed-menu-page.job-detail-page .detail-layout { grid-template-columns: 1fr; }
+  .fixed-menu-page.job-detail-page .detail-sidebar { position: static; }
+  .fixed-menu-page.job-detail-page .job-hero { flex-direction: column; align-items: stretch; }
+  .fixed-menu-page.job-detail-page .hero-actions { flex-basis: auto; text-align: left; }
+}
+@media (max-width: 991.98px) {
+  .fixed-menu-page { --page-padding: 16px; }
+  .fixed-menu-page :is(.home-sidebar, .career-sidebar, .role-workspace-sidebar) {
+    position: static;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+  .fixed-menu-page .app-menu { min-height: auto; }
+  .fixed-menu-page :is(.home-content, .role-workspace-content) { margin-left: 0; }
+  .fixed-menu-page > .site-footer { margin-left: 0; }
+  .fixed-menu-page :is(.home-audience, .header-label, .session-label) { display: none; }
+}
+@media (max-width: 575.98px) {
+  .fixed-menu-page { --header-height: 72px; --page-padding: 14px; }
+  .fixed-menu-page :is(.home-header-inner, .header-inner, .admin-nav-container) { gap: 12px; }
+  .fixed-menu-page .home-topnav { gap: 12px; }
+  .fixed-menu-page .session-bar { flex-wrap: nowrap; gap: 8px; }
+  .fixed-menu-page .session-email { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+/* Logo chung cho toàn bộ website */
+.sr-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  color: #24396d;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sr-brand:visited,
+.sr-brand:hover,
+.sr-brand:focus {
+  color: #24396d;
+  text-decoration: none;
+}
+
+.sr-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 17px;
+  background: #e9edff;
+  color: #294797;
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.sr-brand-ai {
+  color: #7489bd;
+}
