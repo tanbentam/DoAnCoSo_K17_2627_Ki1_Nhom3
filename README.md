@@ -82,6 +82,8 @@ Sao chép `.env.example` thành `.env` ở **thư mục gốc dự án** rồi �
 | `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODELS` | Khóa và model Gemini (model dự phòng dùng khi hết hạn mức) |
 | `AI_PROVIDER` | `cloud` (chỉ Gemini), `local` (chỉ Ollama), `auto` (Gemini, lỗi thì chuyển Ollama). Không có Ollama thì đặt `cloud` |
 | `SECRET_KEY` | Chuỗi ngẫu nhiên để ký token đăng nhập |
+| `EMAIL_MODE` | Email tự động cho ứng viên: `file` (mặc định, ghi thư thành tệp `.eml` trong `backend/outbox/` để xem thử), `smtp` (gửi thật), `off` (tắt) |
+| `SMTP_USER`, `SMTP_PASSWORD` | Gmail gửi thư và **App Password** 16 ký tự (Tài khoản Google → Bảo mật → bật Xác minh 2 bước → Mật khẩu ứng dụng). Chỉ cần khi `EMAIL_MODE=smtp` |
 
 Danh sách đầy đủ và giải thích từng biến: xem chú thích trong `.env.example`.
 

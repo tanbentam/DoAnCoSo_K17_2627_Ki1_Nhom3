@@ -91,10 +91,10 @@ Ký hiệu:
 
 ## 7. Supporting Services & Notifications
 
-* [ ] Xây dựng Service gửi Email tự động qua SMTP (sử dụng tài khoản Gmail App Password)
-* [ ] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
-* [ ] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview*
-* [ ] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
+* [x] Xây dựng Service gửi Email tự động qua SMTP (sử dụng tài khoản Gmail App Password) (xong 23/10/2026: `EMAIL_MODE=smtp|file|off`, mặc định `file` ghi `.eml`; chưa gửi thử Gmail thật vì chưa có App Password)
+* [x] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
+* [x] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview* (HR nhập giờ / địa điểm trong hộp xác nhận, bỏ trống thì thư báo sẽ liên hệ; tin tuyển dụng có thêm trường địa điểm)
+* [x] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
 * [x] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (frontend xong 23/10/2026: ô *Sắp xếp* điểm cao → thấp / mới nộp trước, ô *Điểm tối thiểu* tất cả / từ 50 / từ 80)
 
 ## 8. Quality, Testing & Defense Preparation

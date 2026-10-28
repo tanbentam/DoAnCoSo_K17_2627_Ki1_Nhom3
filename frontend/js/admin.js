@@ -186,7 +186,9 @@ function renderJobMeta(job) {
   jobMetaEl.innerHTML = `
     <span class="badge ${isOpen ? "bg-green-lt" : "bg-secondary-lt"}">${isOpen ? "Đang mở" : "Đã đóng"}</span>
     <span class="stat-pill"><i class="bi bi-calendar3 me-1"></i>Đăng ${escapeHtml(formatDate(job.created_at, false))}</span>
-    <span class="stat-pill"><i class="bi bi-award me-1"></i>${exp}</span>`;
+    <span class="stat-pill"><i class="bi bi-award me-1"></i>${exp}</span>${job.location
+      ? `<span class="stat-pill text-break"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(job.location)}</span>`
+      : ""}`;
 }
 
 function onJobChanged() {
@@ -411,7 +413,7 @@ function initSortable() {
           renderBoard(); // thả lại cột cũ: hiện lại ô "Kéo thẻ vào đây"
           return;
         }
-        moveApplication(id, to);
+        requestMove(id, to);
       },
     }));
   });
@@ -421,13 +423,13 @@ function initSortable() {
  * 6.6: đổi trạng thái hồ sơ. Cập nhật giao diện ngay (thẻ sang cột mới, xếp lại theo điểm),
  * rồi gọi API; lỗi thì trả thẻ về cột cũ và báo lỗi.
  */
-async function moveApplication(id, newStatus) {
+async function moveApplication(id, newStatus, extra = {}) {
   const app = applications.find((a) => a.id === id);
-  if (!app || savingIds.has(id)) return;
+  if (!app || savingIds.has(id)) return false;
   const oldStatus = app.status;
   if (oldStatus === newStatus) {
     renderBoard();
-    return;
+    return false;
   }
 
   const name = app.candidate?.full_name ?? `#${id}`;
@@ -437,16 +439,19 @@ async function moveApplication(id, newStatus) {
   if (detailAppId === id) renderDetailHeader();
 
   try {
-    const updated = await ApplicationAPI.updateStatus(id, newStatus);
+    const updated = await ApplicationAPI.updateStatus(id, newStatus, extra);
     const index = applications.findIndex((a) => a.id === id);
     if (index !== -1 && updated && typeof updated === "object") applications[index] = updated;
-    showToast(`Đã chuyển "${name}" sang ${columnOf(newStatus).label}`, "success");
+    const emailNote = updated?.email_queued ? ", email đang được gửi tới ứng viên" : "";
+    showToast(`Đã chuyển "${name}" sang ${columnOf(newStatus).label}${emailNote}`, "success");
+    return true;
   } catch (err) {
     const current = applications.find((a) => a.id === id);
     if (current) current.status = oldStatus;
     if (err.status !== 401) {
       showToast(`Chưa chuyển được "${name}": ${err.message.replace(/[.\s]+$/, "")}. Thẻ đã về cột ${columnOf(oldStatus).label}.`, "danger");
     }
+    return false;
   } finally {
     savingIds.delete(id);
     if (!dashboardViewEl.classList.contains("d-none")) renderBoard();
@@ -454,12 +459,131 @@ async function moveApplication(id, newStatus) {
   }
 }
 
+// ===== Mục 7: hỏi xác nhận trước khi chuyển sang cột có gửi email cho ứng viên =====
+const EMAIL_STATUSES = {
+  interview: { title: "Mời phỏng vấn",         bar: "bg-purple", button: "btn-primary", mail: "thư mời phỏng vấn" },
+  offer:     { title: "Gửi đề nghị nhận việc", bar: "bg-green",  button: "btn-success", mail: "thư báo trúng tuyển" },
+  rejected:  { title: "Từ chối hồ sơ",         bar: "bg-red",    button: "btn-danger",  mail: "thư cảm ơn, báo chưa phù hợp" },
+};
+const moveModalEl = document.getElementById("move-modal");
+const moveModal = new bootstrap.Modal(moveModalEl);
+const moveFormEl = document.getElementById("move-form");
+const moveInterviewAtEl = document.getElementById("move-interview-at");
+const moveLocationEl = document.getElementById("move-interview-location");
+const moveSendEmailEl = document.getElementById("move-send-email");
+const moveErrorEl = document.getElementById("move-error");
+const moveConfirmBtn = document.getElementById("move-confirm-btn");
+let pendingMove = null; // { id, status, fromDetail }
+let moveSaving = false;
+
+/** Giá trị cho <input type="datetime-local"> theo giờ máy, VD "2026-10-26T09:30". */
+function toLocalInputValue(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Chuyển cột: cột có gửi email thì mở hộp xác nhận, cột khác chuyển ngay. */
+function requestMove(id, newStatus, { fromDetail = false } = {}) {
+  const app = applications.find((a) => a.id === id);
+  const info = EMAIL_STATUSES[newStatus];
+  if (!info || !app || savingIds.has(id) || app.status === newStatus) {
+    moveApplication(id, newStatus);
+    return;
+  }
+
+  pendingMove = { id, status: newStatus, fromDetail };
+  const name = app.candidate?.full_name ?? `#${id}`;
+  const jobTitle = app.job?.title ?? selectedJob()?.title ?? "";
+  document.getElementById("move-title").textContent = info.title;
+  document.getElementById("move-status-bar").className = `modal-status ${info.bar}`;
+  document.getElementById("move-desc").innerHTML =
+    `Chuyển <b>${escapeHtml(name)}</b>${jobTitle ? ` (${escapeHtml(jobTitle)})` : ""} sang cột <b>${escapeHtml(columnOf(newStatus).label)}</b>.`;
+  document.getElementById("move-mail-kind").textContent = info.mail;
+  document.getElementById("move-email").textContent = app.candidate?.email ?? "ứng viên";
+  moveSendEmailEl.checked = true;
+
+  const isInterview = newStatus === "interview";
+  document.getElementById("move-interview-fields").classList.toggle("d-none", !isInterview);
+  moveInterviewAtEl.classList.remove("is-invalid");
+  moveInterviewAtEl.value = "";
+  moveInterviewAtEl.min = toLocalInputValue(new Date());
+  moveLocationEl.value = app.job?.location ?? selectedJob()?.location ?? "";
+
+  moveErrorEl.classList.add("d-none");
+  moveConfirmBtn.className = `btn ${info.button}`;
+  setMoveSaving(false);
+
+  // Bootstrap không chồng 2 modal: đang mở hồ sơ chi tiết thì ẩn trước, xong việc mở lại
+  if (fromDetail && detailModalEl.classList.contains("show")) {
+    detailModalEl.addEventListener("hidden.bs.modal", () => moveModal.show(), { once: true });
+    detailModal.hide();
+  } else {
+    moveModal.show();
+  }
+}
+
+function setMoveSaving(saving) {
+  moveSaving = saving;
+  moveFormEl.querySelectorAll("input, button").forEach((el) => { el.disabled = saving; });
+  moveConfirmBtn.innerHTML = saving
+    ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang lưu…'
+    : "Xác nhận";
+}
+
+moveInterviewAtEl.addEventListener("input", () => moveInterviewAtEl.classList.remove("is-invalid"));
+
+moveModalEl.addEventListener("shown.bs.modal", () => {
+  (pendingMove?.status === "interview" ? moveInterviewAtEl : moveConfirmBtn).focus();
+});
+
+// Đang lưu thì không cho đóng hộp (Esc, bấm nền, nút X)
+moveModalEl.addEventListener("hide.bs.modal", (event) => {
+  if (moveSaving) event.preventDefault();
+});
+
+moveModalEl.addEventListener("hidden.bs.modal", () => {
+  const done = pendingMove;
+  pendingMove = null;
+  if (!dashboardViewEl.classList.contains("d-none")) renderBoard(); // Hủy: thẻ đã kéo quay về cột cũ
+  if (done?.fromDetail && Auth.isLoggedIn()) openApplicationDetail(done.id);
+});
+
+moveFormEl.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!pendingMove || moveSaving) return;
+  const { id, status } = pendingMove;
+  const extra = { send_email: moveSendEmailEl.checked };
+
+  if (status === "interview") {
+    const value = moveInterviewAtEl.value;
+    const at = value ? new Date(value) : null;
+    if (at && (Number.isNaN(at.getTime()) || at.getTime() < Date.now() - 60 * 1000)) {
+      moveInterviewAtEl.classList.add("is-invalid");
+      moveInterviewAtEl.focus();
+      return;
+    }
+    extra.interview_at = at ? at.toISOString() : null;
+    extra.interview_location = moveLocationEl.value.trim() || null;
+  }
+
+  setMoveSaving(true);
+  moveErrorEl.classList.add("d-none");
+  const ok = await moveApplication(id, status, extra);
+  setMoveSaving(false);
+  if (ok) {
+    moveModal.hide();
+  } else if (Auth.isLoggedIn()) {
+    moveErrorEl.textContent = "Chưa lưu được, thẻ vẫn ở cột cũ. Xem thông báo lỗi ở góc màn hình rồi thử lại.";
+    moveErrorEl.classList.remove("d-none");
+  }
+});
+
 // Menu ⋮ trên thẻ (cách chuyển cột không cần kéo: bàn phím, điện thoại)
 boardEl.addEventListener("click", (event) => {
   const moveBtn = event.target.closest("[data-move]");
   if (moveBtn) {
     const card = moveBtn.closest(".candidate-card");
-    moveApplication(Number(card.dataset.id), moveBtn.dataset.move);
+    requestMove(Number(card.dataset.id), moveBtn.dataset.move);
     return;
   }
   if (event.target.closest(".card-menu")) return;
@@ -532,8 +656,11 @@ function renderDetailHeader(analysis = null) {
   const jobTitle = analysis?.job_title ?? selectedJob()?.title ?? "";
   document.getElementById("detail-name").textContent = name;
   document.getElementById("detail-avatar").textContent = (String(name).match(/\p{L}/u)?.[0] ?? "?").toUpperCase(); // bỏ qua ký tự như "[" trong "[TEST]"
+  const schedule = app?.status === "interview" && (app.interview_at || app.interview_location)
+    ? `<div class="mt-1"><i class="bi bi-calendar-event me-1"></i>Phỏng vấn: ${app.interview_at ? `<b>${escapeHtml(formatDate(app.interview_at))}</b>` : "chưa chốt giờ"}${app.interview_location ? ` · ${escapeHtml(app.interview_location)}` : ""}</div>`
+    : "";
   document.getElementById("detail-sub").innerHTML =
-    `Ứng tuyển: <b>${escapeHtml(jobTitle)}</b>${app?.created_at ? ` · Nộp ${escapeHtml(formatDate(app.created_at))}` : ""}`;
+    `Ứng tuyển: <b>${escapeHtml(jobTitle)}</b>${app?.created_at ? ` · Nộp ${escapeHtml(formatDate(app.created_at))}` : ""}${schedule}`;
 
   const status = app?.status ?? analysis?.status;
   const col = columnOf(status);
@@ -550,7 +677,7 @@ function renderDetailHeader(analysis = null) {
 
 document.getElementById("detail-move-menu").addEventListener("click", (event) => {
   const btn = event.target.closest("[data-detail-move]");
-  if (btn && detailAppId !== null) moveApplication(detailAppId, btn.dataset.detailMove);
+  if (btn && detailAppId !== null) requestMove(detailAppId, btn.dataset.detailMove, { fromDetail: true });
 });
 
 function setTabCount(tabId, text, badgeClass) {
@@ -1048,6 +1175,7 @@ const jobFieldsetEl = document.getElementById("job-fieldset");
 const jobFormErrorEl = document.getElementById("job-form-error");
 const jobTitleEl = document.getElementById("job-title");
 const jobExpEl = document.getElementById("job-exp");
+const jobLocationEl = document.getElementById("job-location");
 const jobDescriptionEl = document.getElementById("job-description");
 const jobRequirementsEl = document.getElementById("job-requirements");
 const requiredSkillsBoxEl = document.getElementById("job-required-skills");
@@ -1090,6 +1218,7 @@ function openJobForm(job = null) {
   jobDescriptionEl.value = job?.description ?? "";
   jobRequirementsEl.value = job?.requirements ?? "";
   jobExpEl.value = job?.experience_years_min ?? 0;
+  jobLocationEl.value = job?.location ?? "";
   requiredSkills.set(job?.required_skills ?? []);
   preferredSkills.set(job?.preferred_skills ?? []);
 
@@ -1139,6 +1268,7 @@ function readJobForm() {
     required_skills: required,
     preferred_skills: preferredSkills.get(),
     experience_years_min: exp,
+    location: jobLocationEl.value.trim() || null,
   };
 }
 

@@ -15,6 +15,9 @@ venv/
 *.env
 !.env.example
 
+# Thư email ghi ra tệp khi EMAIL_MODE=file (Mục 7)
+backend/outbox/
+
 # Uploaded files
 backend/uploads/cv/*.pdf
 backend/uploads/cv/*.docx

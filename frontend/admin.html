@@ -314,6 +314,12 @@
               <div class="invalid-feedback">Vui lòng nhập tiêu đề vị trí</div>
             </div>
 
+            <div class="mb-3">
+              <label class="form-label" for="job-location">Địa điểm làm việc</label>
+              <input class="form-control" id="job-location" maxlength="255" placeholder="VD: Chi nhánh Cầu Giấy, 123 Xuân Thủy, Hà Nội" />
+              <div class="form-hint">Không bắt buộc. Hiện trên cổng ứng viên và điền sẵn vào thư mời phỏng vấn.</div>
+            </div>
+
             <div class="row g-3 mb-3">
               <div class="col-12 col-md-8">
                 <label class="form-label required" for="job-required-input">Kỹ năng bắt buộc <span class="text-secondary fw-normal">(tiêu chí lọc cứng)</span></label>
@@ -386,6 +392,46 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Mục 7: xác nhận chuyển cột có gửi email (Phỏng vấn / Đề nghị nhận việc / Từ chối) -->
+  <div class="modal fade" id="move-modal" tabindex="-1" aria-labelledby="move-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+      <form class="modal-content" id="move-form" novalidate>
+        <div class="modal-status" id="move-status-bar"></div>
+        <div class="modal-header">
+          <h2 class="modal-title" id="move-title">Chuyển hồ sơ</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3" id="move-desc"></p>
+
+          <fieldset id="move-interview-fields" class="d-none">
+            <div class="mb-3">
+              <label class="form-label" for="move-interview-at">Thời gian phỏng vấn</label>
+              <input type="datetime-local" class="form-control" id="move-interview-at" />
+              <div class="invalid-feedback">Chọn thời gian sau hiện tại, hoặc để trống</div>
+              <div class="form-hint">Để trống nếu chưa chốt: thư sẽ báo HR liên hệ để thống nhất lịch.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="move-interview-location">Địa điểm hoặc link họp online</label>
+              <input class="form-control" id="move-interview-location" maxlength="255" placeholder="VD: Phòng họp tầng 5, 123 Xuân Thủy / link Google Meet" />
+              <div class="form-hint">Điền sẵn địa điểm của tin tuyển dụng, sửa được.</div>
+            </div>
+          </fieldset>
+
+          <label class="form-check mb-0">
+            <input class="form-check-input" type="checkbox" id="move-send-email" checked />
+            <span class="form-check-label">Gửi <span id="move-mail-kind">email thông báo</span> tới <b id="move-email" class="text-break"></b></span>
+          </label>
+          <div id="move-error" class="alert alert-danger py-2 small mt-3 mb-0 d-none" role="alert"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="move-confirm-btn">Xác nhận</button>
+        </div>
+      </form>
     </div>
   </div>
 

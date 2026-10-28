@@ -62,11 +62,21 @@ OLLAMA_NUM_CTX: int = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
 OLLAMA_KEEP_ALIVE: str = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.2"))
 
-# --- Email ---
+# --- Email (Mục 7) ---
+# smtp: gửi thật qua SMTP | file: ghi thư thành tệp .eml vào EMAIL_OUTBOX_DIR (kiểm thử, không tốn hạn mức) | off: tắt
+EMAIL_MODE: str = os.getenv("EMAIL_MODE", "file").strip().lower()
 SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
+# 587 = STARTTLS, 465 = SSL ngay từ đầu
 SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER: str = os.getenv("SMTP_USER", "")
-SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+# Gmail: dùng App Password 16 ký tự (Tài khoản Google → Bảo mật → Mật khẩu ứng dụng), không dùng mật khẩu đăng nhập
+SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
+SMTP_TIMEOUT_SECONDS: int = int(os.getenv("SMTP_TIMEOUT_SECONDS", "20"))
+EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "SmartRecruit AI - Phòng Nhân sự")
+# Tên công ty ghi trong nội dung thư
+COMPANY_NAME: str = os.getenv("COMPANY_NAME", "SmartRecruit AI")
+# Thư mục chứa tệp .eml khi EMAIL_MODE=file (tương đối theo thư mục backend)
+EMAIL_OUTBOX_DIR: str = os.getenv("EMAIL_OUTBOX_DIR", "outbox")
 
 from pathlib import Path
 

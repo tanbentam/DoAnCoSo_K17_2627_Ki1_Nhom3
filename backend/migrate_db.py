@@ -41,6 +41,25 @@ MIGRATIONS = [
             "WHERE ai_status IN ('partial', 'failed')",
         ],
     ),
+    (
+        "2026-10-23: thêm jobs.location (địa điểm làm việc / chi nhánh, Mục 7.3)",
+        "SELECT COUNT(*) FROM information_schema.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'jobs' AND COLUMN_NAME = 'location'",
+        [
+            "ALTER TABLE jobs ADD COLUMN location VARCHAR(255) NULL "
+            "COMMENT 'Địa điểm làm việc / chi nhánh' AFTER experience_years_min",
+        ],
+    ),
+    (
+        "2026-10-23: thêm applications.interview_at + interview_location (lịch phỏng vấn, Mục 7.3)",
+        "SELECT COUNT(*) FROM information_schema.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'applications' AND COLUMN_NAME = 'interview_at'",
+        [
+            "ALTER TABLE applications "
+            "ADD COLUMN interview_at DATETIME NULL COMMENT 'Thời gian phỏng vấn (UTC), NULL = HR sẽ liên hệ chốt lịch', "
+            "ADD COLUMN interview_location VARCHAR(255) NULL COMMENT 'Địa điểm hoặc link phỏng vấn online'",
+        ],
+    ),
 ]
 
 

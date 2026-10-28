@@ -3,6 +3,7 @@ api/applications.py — API quản lý hồ sơ ứng tuyển & Nộp hồ sơ
 """
 import os
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import (
     APIRouter,
@@ -31,7 +32,14 @@ from app.schemas.application import (
     ApplicationResponse,
     ApplicationStatusUpdate,
 )
+from app.schemas.candidate import is_valid_candidate_email
 from app.services.ai_tasks import process_application_ai
+from app.services.email_notifications import (
+    notify_application_received,
+    notify_status_changed,
+    should_notify_status,
+)
+from app.services.email_service import is_email_enabled
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
@@ -49,13 +57,21 @@ async def apply_job(
     """
     API nộp hồ sơ ứng tuyển (Public):
     - Nhận dữ liệu multipart/form-data gồm thông tin ứng viên và tệp CV.
-    - Kiểm tra tin tuyển dụng có mở nhận hồ sơ hay không.
+    - Kiểm tra định dạng email (sai trả 422) và tin tuyển dụng có mở nhận hồ sơ hay không.
     - Kiểm tra định dạng tệp (.pdf, .docx) và kích thước tệp (tối đa 5MB).
     - Lưu tệp CV an toàn vào thư mục cục bộ uploads/cv với tên tệp ngẫu nhiên tránh ghi đè/tấn công path traversal.
     - Tạo hoặc cập nhật thông tin Candidate và tạo bản ghi Application (trạng thái: applied).
     """
+    # 0. Kiểm tra định dạng email (email sai lưu vào CSDL sẽ làm lỗi API danh sách hồ sơ)
+    clean_email = email.strip().lower()
+    if not is_valid_candidate_email(clean_email):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Email không hợp lệ, vui lòng kiểm tra lại",
+        )
+
     # 1. Kiểm tra Job có tồn tại và đang mở hay không
-    job = db.query(Job).filter(Job.id == job_id).first()
+    job =db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -91,7 +107,6 @@ async def apply_job(
         )
 
     # 3. Quản lý Candidate & Kiểm tra nộp trùng
-    clean_email = email.strip().lower()
     clean_name = full_name.strip()
     clean_phone = phone.strip() if phone else None
 
@@ -146,7 +161,9 @@ async def apply_job(
     db.commit()
     db.refresh(application)
 
-    # 6. Kích hoạt xử lý AI ngầm qua BackgroundTasks (không làm chậm response của ứng viên)
+    # 6. Tác vụ ngầm (không làm chậm response của ứng viên), chạy lần lượt theo thứ tự thêm vào:
+    #    email xác nhận trước (vài giây) rồi mới tới AI chấm điểm (vài chục giây)
+    background_tasks.add_task(notify_application_received, application.id)
     background_tasks.add_task(process_application_ai, application.id)
 
     return ApplicationApplyResponse(
@@ -343,12 +360,16 @@ def download_application_cv(
 def update_application_status(
     application_id: int,
     status_update: ApplicationStatusUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_hr),
 ):
     """
     Cập nhật trạng thái Kanban của ứng viên khi kéo thả (chỉ HR/Admin):
     - Cho phép chuyển đổi trạng thái giữa: applied, screening, interview, offer, rejected.
+    - Sang interview: lưu lịch phỏng vấn interview_at / interview_location (đều tùy chọn).
+    - Sang interview / offer / rejected (từ cột khác) và send_email = true: gửi email ngầm cho ứng viên
+      (thư mời phỏng vấn, thư trúng tuyển, thư cảm ơn từ chối). Trường email_queued trong response cho biết đã xếp thư hay chưa.
     - Trả về đầy đủ thông tin ứng viên để frontend Kanban cập nhật thẻ ngay lập tức.
     """
     app_record = (
@@ -363,8 +384,33 @@ def update_application_status(
             detail="Không tìm thấy hồ sơ ứng tuyển",
         )
 
-    app_record.status = status_update.status
+    old_status = app_record.status
+    new_status = status_update.status
+
+    if new_status == ApplicationStatus.interview:
+        interview_at = status_update.interview_at
+        if interview_at is not None:
+            # CSDL lưu giờ UTC không kèm múi giờ; giờ gửi lên không kèm múi giờ được hiểu là UTC
+            if interview_at.tzinfo is not None:
+                interview_at = interview_at.astimezone(timezone.utc).replace(tzinfo=None)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            if interview_at < now - timedelta(minutes=5):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Thời gian phỏng vấn đã qua, vui lòng chọn thời gian sau hiện tại",
+                )
+        app_record.interview_at = interview_at
+        app_record.interview_location = status_update.interview_location
+
+    app_record.status = new_status
     db.commit()
     db.refresh(app_record)
-    return app_record
 
+    email_queued = False
+    if status_update.send_email and is_email_enabled() and should_notify_status(old_status, new_status):
+        background_tasks.add_task(notify_status_changed, app_record.id, new_status)
+        email_queued = True
+
+    response = ApplicationResponse.model_validate(app_record, from_attributes=True)
+    response.email_queued = email_queued
+    return response

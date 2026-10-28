@@ -2,7 +2,18 @@
 schemas/candidate.py — Pydantic models (DTOs) cho Candidate
 """
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
+
+_EMAIL_ADAPTER = TypeAdapter(EmailStr)
+
+
+def is_valid_candidate_email(email: str) -> bool:
+    """Cùng chuẩn EmailStr của CandidateResponse: email nhận lúc nộp hồ sơ phải trả ra được ở danh sách."""
+    try:
+        _EMAIL_ADAPTER.validate_python(email)
+        return True
+    except ValidationError:
+        return False
 
 
 class CandidateBase(BaseModel):

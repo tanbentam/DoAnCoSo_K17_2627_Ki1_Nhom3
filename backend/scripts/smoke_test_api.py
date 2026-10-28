@@ -136,6 +136,12 @@ def run_smoke_tests(client: httpx.Client, run_tag: str, processed_app_id: Option
     r.check("Nộp hồ sơ", "Tệp quá 5MB → 400",
             lambda: _expect(r.apply(state["job_id"], "big", "big.pdf", b"%PDF-1.4\n" + b"0" * (5 * 1024 * 1024 + 10)), 400) and None)
     r.check("Nộp hồ sơ", "Tin không tồn tại → 404", lambda: _expect(r.apply(99999999, "nojob"), 404) and None)
+    r.check("Nộp hồ sơ", "Email sai định dạng (thiếu @) → 422",
+            lambda: _expect(r.client.post(
+                "/api/applications/apply",
+                data={"job_id": state["job_id"], "full_name": "Smoke Test", "email": f"test.smokebad.{r.run_tag}example.com"},
+                files={"cv_file": ("cv.pdf", SAMPLE_CV.read_bytes(), "application/pdf")},
+            ), 422) and None)
 
     # ── Danh sách & bộ lọc (HR) ──────────────────────────────────────────────
     def list_by_job():

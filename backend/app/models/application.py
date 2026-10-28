@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     JSON,
+    String,
     Text,
     UniqueConstraint,
     func,
@@ -62,6 +63,8 @@ class Application(Base):
         ai_summary      : Đoạn tóm tắt ngắn do AI sinh ra về ứng viên.
         ai_status       : Tiến trình xử lý AI ngầm: pending|processing|done|partial|failed.
         ai_error        : Mô tả các bước AI bị lỗi (nếu có).
+        interview_at    : Thời gian phỏng vấn (UTC) HR nhập khi chuyển sang cột Interview (tùy chọn).
+        interview_location: Địa điểm / link phỏng vấn (tùy chọn).
         created_at      : Thời điểm nộp hồ sơ (UTC, tự động).
         updated_at      : Thời điểm cập nhật cuối (UTC, tự động cập nhật).
     """
@@ -181,6 +184,19 @@ class Application(Base):
         Text,
         nullable=True,
         comment="Mô tả ngắn các bước AI bị lỗi (khi ai_status = partial/failed)",
+    )
+
+    # ── Lịch phỏng vấn (Mục 7.3) ───────────────────────────────────────────────
+    interview_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Thời gian phỏng vấn (UTC), NULL = HR sẽ liên hệ chốt lịch",
+    )
+
+    interview_location: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        comment="Địa điểm hoặc link phỏng vấn online",
     )
 
     # ── Timestamps ─────────────────────────────────────────────────────────────

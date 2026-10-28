@@ -27,7 +27,9 @@ function jobCardHtml(job) {
             <div class="job-icon"><i class="bi bi-briefcase"></i></div>
             <div>
               <h3 class="h6 fw-bold mb-1">${escapeHtml(job.title)}</h3>
-              <div class="small text-muted"><i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}</div>
+              <div class="small text-muted"><i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}</div>${job.location
+                ? `<div class="small text-muted text-break"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(job.location)}</div>`
+                : ""}
             </div>
           </div>
           <div class="d-flex flex-wrap gap-1 mb-3">${skills}</div>
@@ -44,7 +46,7 @@ function renderJobs() {
   const keyword = normalizeText(jobSearchEl.value.trim());
   const jobs = keyword
     ? allJobs.filter((job) =>
-        normalizeText([job.title, ...(job.required_skills ?? []), ...(job.preferred_skills ?? [])].join(" ")).includes(keyword))
+        normalizeText([job.title, job.location ?? "", ...(job.required_skills ?? []), ...(job.preferred_skills ?? [])].join(" ")).includes(keyword))
     : allJobs;
 
   if (allJobs.length === 0) {
@@ -98,7 +100,8 @@ let detailRequestId = 0; // bỏ qua kết quả cũ khi người dùng mở tin
 
 function jobMetaHtml(job) {
   return `<i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}`
-    + ` · <i class="bi bi-calendar3 ms-1 me-1"></i>Đăng ${formatDate(job.created_at, false)}`;
+    + ` · <i class="bi bi-calendar3 ms-1 me-1"></i>Đăng ${formatDate(job.created_at, false)}`
+    + (job.location ? ` · <i class="bi bi-geo-alt ms-1 me-1"></i>${escapeHtml(job.location)}` : "");
 }
 
 function skillTagsHtml(skills, cls) {
