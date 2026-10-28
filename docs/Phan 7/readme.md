@@ -6,7 +6,7 @@ Mỗi mục trong `checklist.md` Mục 7 có một file log riêng: làm gì, fi
 
 | File | Mục checklist | Trạng thái | Commit |
 | --- | --- | --- | --- |
-| [Phan 7.1 - 7.4.md](Phan%207.1%20-%207.4.md) | 7.1–7.4 Email tự động qua SMTP: xác nhận hồ sơ, mời phỏng vấn, kết quả | Xong (chưa gửi Gmail thật) | |
+| [Phan 7.1 - 7.4.md](Phan%207.1%20-%207.4.md) | 7.1–7.4 Email tự động qua SMTP: xác nhận hồ sơ, mời phỏng vấn, kết quả | Xong (chưa gửi Gmail thật) | `3de68c4` |
 | [Phan 7.5.md](Phan%207.5.md) | 7.5 Sắp xếp / lọc ứng viên theo điểm trên Kanban | Xong | `e397a3d` |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý.

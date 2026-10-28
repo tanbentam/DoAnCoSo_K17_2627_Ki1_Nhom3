@@ -105,7 +105,7 @@ Ký hiệu:
 * *CV 3:* Khác từ ngữ nhưng đồng nghĩa (kiểm tra tính năng Semantic Matching)
 
 
-* [~] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban (backend/API đã test, chờ frontend)
+* [x] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban (xong 28/10/2026 với AI `auto` và `local`, email chế độ `file`; chưa gửi Gmail thật. Báo cáo: `docs/Test-Reports/2026-10-28_1711_toan-app-8.2.md`)
 * [~] Kiểm thử hiệu năng và độ ổn định của API xử lý nền (`BackgroundTasks`) (10 hồ sơ nộp lần lượt ổn định, chưa test nhiều hồ sơ cùng lúc)
 * [~] Kiểm thử chuyển đổi sang chạy mô hình Local Ollama trên GPU RTX 4060 ở trạng thái ngắt mạng (đã chạy `local`, chưa ngắt mạng)
 * [ ] Tối ưu hóa mã nguồn Frontend, loại bỏ code thừa và chuẩn hóa thông báo lỗi giao diện
