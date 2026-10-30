@@ -837,7 +837,7 @@ function interviewQuestions(d) {
 }
 
 /** Tab 4 – Câu hỏi phỏng vấn (6.8): nhãn loại, kỹ năng; mở rộng xem mục đích và gợi ý câu trả lời. */
-function questionsHtml(questions) {
+function questionsHtml(questions, provider) {
   if (!questions.length) {
     return '<p class="text-secondary small mb-0">Chưa có câu hỏi phỏng vấn gợi ý cho hồ sơ này.</p>';
   }
@@ -862,7 +862,12 @@ function questionsHtml(questions) {
         </div>
       </div>`;
   }).join("");
+  // Issue 08: mô hình cục bộ (Ollama) sinh câu hỏi kém hơn Gemini → nhắc HR chỉ dùng để tham khảo
+  const localNote = provider === "ollama"
+    ? '<div class="alert alert-warning small py-2 mb-3"><i class="bi bi-cpu me-1"></i>Câu hỏi gợi ý do mô hình cục bộ (Ollama) sinh khi chạy offline, chỉ dùng để tham khảo.</div>'
+    : "";
   return `
+    ${localNote}
     <p class="text-secondary small">AI gợi ý dựa trên kỹ năng còn thiếu và các điểm cần kiểm chứng. Bấm vào câu hỏi để xem mục đích và gợi ý câu trả lời tốt.</p>
     <div class="accordion" id="question-list">${items}</div>`;
 }
@@ -878,7 +883,7 @@ function renderDetail(d) {
   detailPanes.overview.innerHTML = overviewHtml(d, app);
   detailPanes.skills.innerHTML = skillsHtml(d);
   detailPanes.exp.innerHTML = experienceHtml(d);
-  detailPanes.questions.innerHTML = questionsHtml(questions);
+  detailPanes.questions.innerHTML = questionsHtml(questions, d.ai_extracted_info?.interview_details?.ai_meta?.provider);
 }
 
 /** Tải kết quả AI của hồ sơ. keepTab = true khi tự làm mới (giữ tab đang xem). */

@@ -89,7 +89,7 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
 | `full_name` | ✅ | ≤ 150 ký tự |
 | `email` | ✅ | ≤ 255 ký tự. Mỗi email chỉ nộp 1 lần cho mỗi tin |
 | `phone` | | ≤ 30 ký tự |
-| `cv_file` | ✅ | `.pdf` (khuyến nghị) hoặc `.docx`, **tối đa 5MB** |
+| `cv_file` | ✅ | Chỉ `.pdf` ([Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md), chốt 28/10/2026), **tối đa 5MB** |
 
 ```js
 const form = new FormData();
@@ -106,14 +106,14 @@ const res = await fetch(`${API}/api/applications/apply`, { method: "POST", body:
 | --- | --- | --- |
 | 201 | Thành công | `{"message": "Nộp hồ sơ ứng tuyển thành công!", "application_id": 51, "candidate_id": 47, "job_id": 1, "status": "applied", "ai_status": "pending"}` |
 | 400 | Tin đã đóng | "Tin tuyển dụng này đã đóng, không tiếp nhận thêm hồ sơ" |
-| 400 | Sai định dạng | "Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf hoặc .docx" |
+| 400 | Sai định dạng | "Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf" (kể cả `.docx`) |
 | 400 | Quá dung lượng | "Dung lượng tệp vượt quá giới hạn cho phép (5MB)" |
 | 400 | Nộp trùng | "Bạn đã nộp hồ sơ ứng tuyển vào vị trí này rồi" |
 | 404 | Tin không tồn tại | "Tin tuyển dụng không tồn tại" |
 | 422 | Email sai định dạng | "Email không hợp lệ, vui lòng kiểm tra lại" (`detail` là **chuỗi**) |
 | 422 | Thiếu trường / sai kiểu | `detail` là **mảng** lỗi của FastAPI. Nên kiểm tra form ở frontend trước khi gửi |
 
-> ⚠️ **CV `.docx`** được nhận nhưng AI **chưa đọc được**: hồ sơ sẽ có `ai_status = "failed"` ([Issue 06](Issues/06-cv-docx-khong-duoc-cham.md)). Nhóm cần chốt: giữ `.docx`, hoặc form chỉ nhận PDF.
+> ℹ️ Từ 28/10/2026 API **không nhận `.docx`** nữa vì AI chỉ đọc được PDF ([Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md)). Hồ sơ `.docx` cũ vẫn xem/tải được qua API CV gốc.
 
 Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giây sau đó. Hệ thống cũng gửi ngầm **email xác nhận đã nhận hồ sơ** tới địa chỉ ứng viên nhập (Mục 7.2).
 
@@ -193,7 +193,7 @@ Trong `onEnd` của SortableJS: gọi API; nếu lỗi thì **trả thẻ về c
 | `processing` | AI đang chấm (30–40s) | Spinner "AI đang chấm..." |
 | `done` | Hoàn tất mọi bước | Huy hiệu điểm (≥ 80 xanh, 50–79 vàng, < 50 đỏ) |
 | `partial` | Có điểm nhưng thiếu một số kết quả (VD: chưa có câu hỏi phỏng vấn) | Huy hiệu điểm + biểu tượng ⚠️, tooltip = `ai_error` |
-| `failed` | Không chấm được (CV hỏng, `.docx`, lỗi hệ thống) | Nhãn "Không chấm được", tooltip = `ai_error` |
+| `failed` | Không chấm được (CV hỏng, `.docx` cũ, lỗi hệ thống) | Nhãn "Không chấm được", tooltip = `ai_error` |
 
 Khi trên bảng còn thẻ `pending` / `processing`, gọi lại danh sách mỗi **5–10 giây**. Khi mọi thẻ đã `done` / `partial` / `failed` thì dừng gọi.
 

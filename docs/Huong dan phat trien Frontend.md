@@ -92,7 +92,7 @@ Kiểm tra form ở frontend (khớp với kiểm tra phía backend):
 | Họ tên | Bắt buộc, 2–150 ký tự |
 | Email | Bắt buộc, đúng định dạng email, ≤ 255 ký tự |
 | Số điện thoại | Không bắt buộc, ≤ 30 ký tự, chỉ chữ số, khoảng trắng, `+`, `-`, `.` |
-| Tệp CV | Bắt buộc, đuôi `.pdf` (và `.docx` nếu nhóm chốt giữ, xem Mục 7), **< 5MB** (`file.size < 5 * 1024 * 1024`) |
+| Tệp CV | Bắt buộc, chỉ đuôi `.pdf` (Issue 06 chốt 28/10/2026), **< 5MB** (`file.size < 5 * 1024 * 1024`) |
 
 ### 4.2. Bảng điều khiển HR — `admin.html`
 
@@ -177,7 +177,7 @@ frontend/
 | Xóa tin tuyển dụng / xóa hồ sơ | Chưa có | Chỉ có "Đóng tin" |
 | Tổng số hồ sơ để phân trang | Chưa có | Tải tối đa `limit=500`, đủ cho demo |
 | Gửi email (Mục 7) | Backend đang làm | Kéo thẻ sang *Phỏng vấn* **chưa** gửi thư. Không làm nút gửi email |
-| Đọc CV `.docx` | AI chưa đọc được ([Issue 06](Issues/06-cv-docx-khong-duoc-cham.md)) | Hồ sơ `.docx` sẽ có `ai_status = failed` |
+| Đọc CV `.docx` | Không hỗ trợ, API trả 400 ([Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md)) | Chỉ hồ sơ `.docx` cũ có `ai_status = failed` |
 
 Danh sách hồ sơ (A5) trả kèm toàn bộ kết quả AI của từng thẻ, nên dữ liệu khá lớn. Với quy mô demo thì chấp nhận được; **không tự sửa backend** để tối ưu. Nếu thấy chậm, ghi đề xuất vào `docs/Issues/`.
 
@@ -191,7 +191,7 @@ Cần thêm API hoặc trường dữ liệu: ghi đề xuất theo [quy tắc �
 | --- | --- | --- | --- |
 | 1 | Kanban **4 cột** (checklist) hay **5 trạng thái** (backend: `offer`, `rejected` tách riêng)? | A5, A6 | ✅ **5 cột**, khớp 5 trạng thái backend: Mới nộp, Sàng lọc, Phỏng vấn, Đề nghị nhận việc, Từ chối |
 | 2 | Cột *Applied*: AI chuyển hồ sơ sang `screening` ngay khi bắt đầu chấm, nên cột này gần như luôn trống | A5 | ✅ Giữ cột, ghi chú "Hồ sơ mới, AI đang xử lý" |
-| 3 | Có nhận CV `.docx` không? | P3, P4 | ⏳ Tạm chỉ nhận **PDF** cho tới khi xử lý xong [Issue 06](Issues/06-cv-docx-khong-duoc-cham.md) |
+| 3 | Có nhận CV `.docx` không? | P3, P4 | ✅ Chỉ nhận **PDF** (chốt 28/10/2026, [Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md)) |
 | 4 | Đăng nhập nằm trong `admin.html` hay tách `login.html`? | A1 | ✅ Trong `admin.html` (ẩn / hiện bằng JS) |
 | 5 | Mục *Tin tuyển dụng* trên thanh điều hướng | — | ✅ Thêm trang quản lý tin (checklist 6.9), là màn hình `#tin-tuyen-dung` trong `admin.html` |
 

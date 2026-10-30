@@ -133,6 +133,8 @@ def run_smoke_tests(client: httpx.Client, run_tag: str, processed_app_id: Option
             lambda: _expect(r.apply(state["job_id"], "ok"), 400) and None)
     r.check("Nộp hồ sơ", "Tệp sai định dạng (.txt) → 400",
             lambda: _expect(r.apply(state["job_id"], "txt", "cv.txt", b"hello"), 400) and None)
+    r.check("Nộp hồ sơ", "Tệp .docx (Issue 06: chỉ nhận PDF) → 400",
+            lambda: _expect(r.apply(state["job_id"], "docx", "cv.docx", b"PK\x03\x04docx"), 400) and None)
     r.check("Nộp hồ sơ", "Tệp quá 5MB → 400",
             lambda: _expect(r.apply(state["job_id"], "big", "big.pdf", b"%PDF-1.4\n" + b"0" * (5 * 1024 * 1024 + 10)), 400) and None)
     r.check("Nộp hồ sơ", "Tin không tồn tại → 404", lambda: _expect(r.apply(99999999, "nojob"), 404) and None)

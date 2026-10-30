@@ -179,8 +179,7 @@ const cvLabelEl = document.getElementById("apply-cv-label");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-. ]+$/;
 
-// 5.4 Quy tắc tệp CV. Chỉ nhận PDF cho tới khi xử lý xong Issue 06 (AI chưa đọc được .docx).
-// Nếu nhóm chốt nhận .docx: thêm ".docx" vào đây và vào thuộc tính accept của #apply-cv.
+// 5.4 Quy tắc tệp CV. Chỉ nhận PDF, khớp backend (Issue 06 chốt 28/10/2026: bỏ .docx vì AI chỉ đọc được PDF).
 const CV_ALLOWED_EXTENSIONS = [".pdf"];
 const CV_MAX_BYTES = 5 * 1024 * 1024; // backend giới hạn 5MB
 
@@ -189,8 +188,9 @@ function fileExtension(name) {
   return dot >= 0 ? name.slice(dot).toLowerCase() : "";
 }
 
+/** Làm tròn lên để tệp vượt 5MB một chút hiện "5.01 MB", không hiện "5.00 MB" như thể bằng giới hạn. */
 function formatFileSize(bytes) {
-  return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(2)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return bytes >= 1024 * 1024 ? `${(Math.ceil(bytes / 1024 / 1024 * 100) / 100).toFixed(2)} MB` : `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
 }
 
 function validateCvFile(file) {

@@ -4,6 +4,6 @@ Mỗi mục trong `checklist.md` Mục 8 có một file log riêng: làm gì, fi
 
 | File | Mục checklist | Trạng thái | Commit |
 | --- | --- | --- | --- |
-| [Phan 8.2.md](Phan%208.2.md) | 8.2 Kiểm thử toàn luồng ứng viên → HR Kanban (AI `auto` và `local`) | Xong (chưa gửi Gmail thật) | |
+| [Phan 8.2.md](Phan%208.2.md) | 8.2 Kiểm thử toàn luồng ứng viên → HR Kanban (AI `auto` và `local`) | Xong (chưa gửi Gmail thật) | `b6de8be` |
 
 **Mẫu một file log:** Mục tiêu → Đã làm → File thay đổi → Kiểm thử → Lưu ý.

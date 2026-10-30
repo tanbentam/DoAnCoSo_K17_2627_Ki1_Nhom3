@@ -15,8 +15,10 @@ from app.services import interview_generator
 from app.services.ai_errors import AIProviderError, StructuredResult
 from app.services.interview_generator import (
     INTERVIEW_SYSTEM_INSTRUCTION,
+    LOCAL_INTERVIEW_SYSTEM_INSTRUCTION,
     MAX_QUESTIONS,
     build_interview_prompt,
+    find_assumed_skill_questions,
     generate_interview_questions,
     normalize_interview_questions,
     strip_yes_no_opener,
@@ -188,6 +190,86 @@ class TestSchemaCompatibility(unittest.TestCase):
         from google.genai import types
         config = types.GenerateContentConfig(response_mime_type="application/json", response_schema=InterviewQuestionSet)
         self.assertIs(config.response_schema, InterviewQuestionSet)
+
+
+class TestAssumedSkillQuestions(unittest.TestCase):
+    """Issue 08: câu skill_gap giả định ứng viên đã dùng kỹ năng còn thiếu."""
+
+    MISSING = ["FastAPI", "SQLAlchemy", "MySQL"]
+
+    def test_detects_assumed_use(self):
+        data = InterviewQuestionSet(questions=[
+            _q("Hãy mô tả cách bạn đã sử dụng SQLAlchemy trong một dự án gần đây như thế nào?", "SQLAlchemy"),
+            _q("Kể về dự án bạn dùng FastAPI để xây dựng API ra sao?"),
+            _q("Kinh nghiệm của bạn với MySQL ra sao?", "MySQL"),
+            _q("Bạn đã làm việc với Flask. Nếu dự án yêu cầu FastAPI, bạn sẽ xây dựng API bất đồng bộ như thế nào?"),
+            _q("Trong dự án ở ABC, bạn đã sử dụng Python để tối ưu API như thế nào?", "Python", "experience"),
+        ])
+        self.assertEqual(find_assumed_skill_questions(data, self.MISSING), [0, 1, 2])
+
+    def test_bridge_question_not_flagged(self):
+        data = InterviewQuestionSet(questions=[
+            _q("Bạn đã làm việc với Flask, nếu cần FastAPI thì bạn sẽ chuyển API sang như thế nào?"),
+            _q("Bạn đã dùng PostgreSQL nếu chuyển MySQL bạn sẽ đổi gì ra sao?", "MySQL"),
+            _q("Bạn đã sử dụng ORM nào? Với SQLAlchemy bạn sẽ quản lý session như thế nào?", "SQLAlchemy"),
+        ])
+        self.assertEqual(find_assumed_skill_questions(data, self.MISSING), [])
+
+    def _result(self, questions, latency=2.0):
+        return StructuredResult(InterviewQuestionSet(questions=questions), "ollama", "qwen2.5:7b", latency, ["qwen2.5:7b: OK"])
+
+    GOOD = [
+        _q("Bạn đã làm việc với Flask. Nếu dự án yêu cầu FastAPI, bạn sẽ thiết kế API như thế nào?"),
+        _q("Bạn đã dùng PostgreSQL. Nếu hệ thống chuyển sang MySQL, bạn sẽ thiết kế chỉ mục ra sao?", "MySQL"),
+        _q("Trong dự án ở ABC, bạn xử lý lỗi khi API quá tải như thế nào?", "Xử lý sự cố", "experience"),
+    ]
+    BAD = _q("Hãy mô tả cách bạn đã sử dụng SQLAlchemy trong dự án như thế nào?", "SQLAlchemy")
+
+    def test_local_uses_local_instruction_and_retries_once(self):
+        first = self._result([self.BAD, *self.GOOD[:2]])
+        second = self._result(list(self.GOOD), latency=3.0)
+        with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, second]) as m:
+            result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
+        self.assertEqual(m.call_count, 2)
+        self.assertEqual(m.call_args_list[0].kwargs["local_system_instruction"], LOCAL_INTERVIEW_SYSTEM_INSTRUCTION)
+        self.assertIn(self.BAD.question, m.call_args_list[1].kwargs["prompt"])
+        self.assertEqual([q.question for q in result.data.questions], [q.question for q in self.GOOD])
+        self.assertEqual(result.latency_seconds, 5.0)
+
+    def test_drops_bad_questions_when_retry_still_bad(self):
+        first = self._result([self.BAD, *self.GOOD])
+        with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, first]):
+            result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
+        self.assertEqual(len(result.data.questions), 3)
+        self.assertNotIn(self.BAD.question, [q.question for q in result.data.questions])
+
+    def test_merges_good_questions_from_both_attempts(self):
+        # Trường hợp gặp ở test thật 28/10: mỗi lần chỉ có 2 câu đạt, gộp lại đủ 3 câu khác nhau
+        bad2 = _q("Kể về dự án bạn dùng FastAPI ra sao?")
+        first = self._result([self.BAD, bad2, *self.GOOD[:2]])
+        second = self._result([self.BAD, bad2, self.GOOD[0], self.GOOD[2]])
+        with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, second]):
+            result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
+        self.assertEqual([q.question for q in result.data.questions], [q.question for q in self.GOOD])
+
+    def test_keeps_only_good_questions_even_if_fewer_than_min(self):
+        first = self._result([self.BAD, *self.GOOD[:2]])
+        with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, AIProviderError("down")]):
+            result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
+        self.assertEqual([q.question for q in result.data.questions], [q.question for q in self.GOOD[:2]])
+
+    def test_keeps_first_result_when_no_good_question(self):
+        first = self._result([self.BAD])
+        with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, first]):
+            result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
+        self.assertEqual([q.question for q in result.data.questions], [self.BAD.question])
+
+    def test_gemini_result_not_checked(self):
+        gemini = StructuredResult(InterviewQuestionSet(questions=[self.BAD, *self.GOOD]), "gemini", "gemini-3.8-flash", 1.0)
+        with mock.patch.object(interview_generator, "generate_structured", return_value=gemini) as m:
+            result = generate_interview_questions(JOB, INFO, self.MISSING)
+        self.assertEqual(m.call_count, 1)
+        self.assertEqual(len(result.data.questions), 4)
 
 
 if __name__ == "__main__":

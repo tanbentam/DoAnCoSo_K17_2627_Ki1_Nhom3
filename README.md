@@ -7,7 +7,7 @@
 ## 📖 1. Giới thiệu Dự án
 
 **SmartRecruit AI** là một hệ thống ATS (Applicant Tracking System) hiện đại được thiết kế để giải quyết bài toán sàng lọc hồ sơ ứng viên tự động. Hệ thống hỗ trợ:
-- **Cổng thông tin Ứng viên (Candidate Portal):** Xem việc làm đang mở, tìm kiếm, xem chi tiết JD, nộp hồ sơ trực tuyến đính kèm file CV (hiện chỉ nhận **PDF**, < 5MB — xem [Issue 06](docs/Issues/06-cv-docx-khong-duoc-cham.md)).
+- **Cổng thông tin Ứng viên (Candidate Portal):** Xem việc làm đang mở, tìm kiếm, xem chi tiết JD, nộp hồ sơ trực tuyến đính kèm file CV (chỉ nhận **PDF**, < 5MB — xem [Issue 06](docs/Issues/done-06-cv-docx-khong-duoc-cham.md)).
 - **Cổng quản trị Nhân sự (HR Dashboard):** Đăng nhập; tạo / sửa / đóng tin tuyển dụng; bảng Kanban 5 cột kéo thả (SortableJS) với thẻ ứng viên tô màu theo điểm; modal hồ sơ chi tiết gồm đánh giá AI, kỹ năng khớp / thiếu, câu hỏi phỏng vấn gợi ý và CV gốc; trang quản lý tin tuyển dụng.
 - **Công cụ Đánh giá AI (AI Engine):** Trích xuất văn bản từ CV, bóc tách thông tin bằng LLM (Google Gemini, dự phòng Ollama), tính điểm Hybrid (40% lọc cứng + 60% tương đồng ngữ nghĩa bằng Sentence-Transformers) và sinh câu hỏi phỏng vấn.
 
@@ -187,7 +187,7 @@ Khi server đang chạy, mở một terminal khác tại `backend/` và chạy t
 | `GET` | `/api/jobs/{id}` | Public | Xem chi tiết 1 tin tuyển dụng |
 | `PUT` | `/api/jobs/{id}` | HR / Admin | Cập nhật thông tin tin tuyển dụng |
 | `PATCH` | `/api/jobs/{id}/close` | HR / Admin | Đóng tin tuyển dụng không nhận thêm hồ sơ |
-| `POST` | `/api/applications/apply` | Public | Ứng viên nộp hồ sơ đính kèm file CV (backend nhận .pdf/.docx; giao diện hiện chỉ cho chọn .pdf) |
+| `POST` | `/api/applications/apply` | Public | Ứng viên nộp hồ sơ đính kèm file CV (chỉ nhận .pdf, tối đa 5MB) |
 | `GET` | `/api/applications` | HR / Admin | Lấy danh sách hồ sơ ứng tuyển theo Job ID / Status |
 | `GET` | `/api/applications/{id}` | HR / Admin | Chi tiết một hồ sơ kèm ứng viên và tin tuyển dụng |
 | `PATCH` | `/api/applications/{id}/status` | HR / Admin | Cập nhật trạng thái ứng viên khi kéo thả Kanban |

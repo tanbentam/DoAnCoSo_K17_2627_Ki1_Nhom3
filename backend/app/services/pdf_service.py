@@ -116,7 +116,7 @@ def extract_pages_text(
                 return []
 
             for idx, page in enumerate(pdf.pages, start=1):
-                page_text = page.extract_text(layout=False) or ""
+                page_text = _extract_page_text(page)
                 
                 # Nếu trang có bảng biểu mà extract_text không lấy hết, lấy thêm text từ tables
                 if not page_text.strip():
@@ -232,6 +232,39 @@ def extract_text_from_candidate_cv(
 
 
 # ── Hàm bổ trợ nội bộ ────────────────────────────────────────────────────────
+# Issue 04: một số PDF (Canva, LaTeX font lạ) đặt ký tự sát nhau và không có dấu cách thật,
+# ngưỡng mặc định x_tolerance=3 làm các từ dính liền. CV bình thường có ≥ 0.13 dấu cách / chữ cái,
+# CV bị dính chỉ ~0.02. Dưới ngưỡng thì đọc lại trang với x_tolerance nhỏ hơn.
+MIN_SPACE_RATIO = 0.08
+FALLBACK_X_TOLERANCE = 1.5
+_MIN_LETTERS_FOR_RATIO = 50  # trang quá ít chữ thì tỷ lệ không có ý nghĩa
+
+
+def _space_ratio(text: str) -> float:
+    """Số dấu cách trên số chữ cái; trả 1.0 khi trang quá ít chữ để đánh giá."""
+    letters = sum(ch.isalpha() for ch in text)
+    if letters < _MIN_LETTERS_FOR_RATIO:
+        return 1.0
+    return text.count(" ") / letters
+
+
+def _extract_page_text(page) -> str:
+    """Đọc chữ một trang; nếu chữ bị dính liền (Issue 04) thì đọc lại với x_tolerance nhỏ hơn."""
+    text = page.extract_text(layout=False) or ""
+    ratio = _space_ratio(text)
+    if ratio >= MIN_SPACE_RATIO:
+        return text
+    retry = page.extract_text(x_tolerance=FALLBACK_X_TOLERANCE) or ""
+    retry_ratio = _space_ratio(retry)
+    if retry_ratio > ratio:
+        logger.info(
+            f"[PDFService] Trang {page.page_number}: chữ dính liền (tỷ lệ dấu cách {ratio:.3f}), "
+            f"đọc lại với x_tolerance={FALLBACK_X_TOLERANCE} → {retry_ratio:.3f}."
+        )
+        return retry
+    return text
+
+
 def _to_absolute_path(path_input: Union[str, Path]) -> Path:
     """Chuyển đổi đường dẫn tương đối về đường dẫn tuyệt đối theo BASE_DIR."""
     path_obj = Path(path_input)

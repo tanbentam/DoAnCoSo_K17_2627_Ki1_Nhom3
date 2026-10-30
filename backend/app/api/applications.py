@@ -50,7 +50,7 @@ async def apply_job(
     full_name: str = Form(..., max_length=150, description="Họ và tên ứng viên"),
     email: str = Form(..., max_length=255, description="Email liên hệ của ứng viên"),
     phone: Optional[str] = Form(None, max_length=30, description="Số điện thoại liên hệ"),
-    cv_file: UploadFile = File(..., description="Tệp CV định dạng PDF hoặc DOCX"),
+    cv_file: UploadFile = File(..., description="Tệp CV định dạng PDF"),
     background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db),
 ):
@@ -58,7 +58,7 @@ async def apply_job(
     API nộp hồ sơ ứng tuyển (Public):
     - Nhận dữ liệu multipart/form-data gồm thông tin ứng viên và tệp CV.
     - Kiểm tra định dạng email (sai trả 422) và tin tuyển dụng có mở nhận hồ sơ hay không.
-    - Kiểm tra định dạng tệp (.pdf, .docx) và kích thước tệp (tối đa 5MB).
+    - Kiểm tra định dạng tệp (chỉ .pdf, Issue 06) và kích thước tệp (tối đa 5MB).
     - Lưu tệp CV an toàn vào thư mục cục bộ uploads/cv với tên tệp ngẫu nhiên tránh ghi đè/tấn công path traversal.
     - Tạo hoặc cập nhật thông tin Candidate và tạo bản ghi Application (trạng thái: applied).
     """
@@ -91,10 +91,10 @@ async def apply_job(
         )
 
     ext = os.path.splitext(cv_file.filename)[1].lower()
-    if ext not in [".pdf", ".docx"]:
+    if ext != ".pdf":  # Issue 06: AI chỉ đọc được PDF
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf hoặc .docx",
+            detail="Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf",
         )
 
     # Đọc nội dung tệp và kiểm tra dung lượng
@@ -309,6 +309,7 @@ def get_application_ai_analysis(
     )
 
 
+# .docx chỉ còn cho hồ sơ cũ nộp trước khi API bỏ nhận .docx (Issue 06)
 _CV_MEDIA_TYPES = {
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

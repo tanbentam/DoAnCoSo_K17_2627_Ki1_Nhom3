@@ -27,4 +27,4 @@ Xem bảng chung ở [6.7](Phan%206.7.md#kiểm-thử-chung-67–68). Riêng 6.8
 - Giả lập: kỹ năng khớp gián tiếp có ghi chú "tương đương"; thiếu 1 kỹ năng → nhãn tab "1 thiếu"; câu hỏi dạng chuỗi; mọi trường `null`; XSS.
 
 ## Lưu ý
-- Chất lượng câu hỏi phụ thuộc AI. Với Ollama `qwen2.5:7b` có thể kém hơn ([Issue 08](../Issues/08-qwen-cau-hoi-phong-van-chat-luong-thap.md)); phần này do backend xử lý.
+- Chất lượng câu hỏi phụ thuộc AI. Với Ollama `qwen2.5:7b` có thể kém hơn ([Issue 08](../Issues/done-08-qwen-cau-hoi-phong-van-chat-luong-thap.md)); phần này do backend xử lý.

@@ -28,11 +28,11 @@ Dữ liệu test cũ được xóa ở đầu mỗi lần chạy `run_backend_te
 | [01](done-01-gemini-het-han-muc-mien-phi.md) | Gemini miễn phí chỉ có 20 lượt/ngày, hết lượt vẫn gọi lại vô ích | 🔴 Cao | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
 | [02](done-02-gemini-qua-tai-503.md) | Gemini thường xuyên quá tải (503), xử lý mất tới 98 giây | 🟠 Trung bình | `gemini_service.py` | ✅ Đã xử lý ([plan-4.9](../Plans/plan-4.9.md)) |
 | [03](done-03-ket-noi-aiven-chua-ssl.md) | Kết nối Aiven MySQL chưa mã hóa SSL | 🟠 Trung bình | `core/database.py` | ✅ Đã xử lý (TLS 1.3) |
-| [04](04-pdf-mat-dau-cach.md) | Một số PDF bị đọc ra chữ dính liền, mất dấu cách | 🟡 Thấp | `pdf_service.py` | Chưa xử lý |
+| [04](done-04-pdf-mat-dau-cach.md) | Một số PDF bị đọc ra chữ dính liền, mất dấu cách | 🟡 Thấp | `pdf_service.py` | ✅ Đã xử lý (28/10) |
 | [05](done-05-kinh-nghiem-tinh-du-cv-cu.md) | CV cũ ghi "hiện tại" bị tính dư số năm kinh nghiệm | 🟡 Thấp | `cv_extractor.py` | ✅ Đã xử lý |
-| [06](06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `ai_tasks.py` | Chưa xử lý |
-| [07](07-kinh-nghiem-trai-nganh-van-co-diem.md) | Kinh nghiệm trái ngành vẫn được tính đủ điểm | 🟡 Thấp | `hybrid_scoring.py` | Cần thảo luận |
-| [08](08-qwen-cau-hoi-phong-van-chat-luong-thap.md) | qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (giả định đã dùng kỹ năng còn thiếu) | 🟡 Thấp | `interview_generator.py` | Chưa xử lý |
+| [06](done-06-cv-docx-khong-duoc-cham.md) | API nhận CV `.docx` nhưng AI chỉ đọc được PDF | 🟡 Thấp | `applications.py` | ✅ Đã xử lý (28/10, chỉ nhận PDF) |
+| [07](done-07-kinh-nghiem-trai-nganh-van-co-diem.md) | Kinh nghiệm trái ngành vẫn được tính đủ điểm | 🟡 Thấp | `hybrid_scoring.py` | ✅ Đã chốt (28/10, giữ nguyên, ghi hạn chế) |
+| [08](done-08-qwen-cau-hoi-phong-van-chat-luong-thap.md) | qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (giả định đã dùng kỹ năng còn thiếu) | 🟡 Thấp | `interview_generator.py` | ✅ Đã xử lý (28/10) |
 
 Mức độ:
 - 🔴 Cao: chặn việc test và demo.
