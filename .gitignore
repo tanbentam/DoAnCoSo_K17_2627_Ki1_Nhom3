@@ -41,3 +41,9 @@ backend/models_cache/
 
 # Chứng chỉ CA của Aiven (DB_SSL_CA)
 backend/certs/
+
+# CV thật dùng để kiểm thử (dữ liệu cá nhân, không đưa lên Git)
+docs/CV for test/
+
+# Ảnh chụp/log của Playwright MCP
+.playwright-mcp/
