@@ -59,6 +59,29 @@ Kubernetes với khả năng tự mở rộng khi tải tăng, bạn sẽ chuy�
 giữa Compose (một máy) với Kubernetes (cụm nhiều node)."
 """
 
+# Issue 08: qwen2.5:7b tuân thủ kém các quy tắc phủ định dài và hay chép ví dụ mẫu. Bản cho Ollama ngắn hơn,
+# viết thành khuôn câu khẳng định cho từng loại câu hỏi, không có ví dụ nội dung cụ thể.
+LOCAL_INTERVIEW_SYSTEM_INSTRUCTION = f"""\
+Bạn là người phỏng vấn kỹ thuật. Soạn {MIN_QUESTIONS}–{MAX_QUESTIONS} câu hỏi phỏng vấn bằng tiếng Việt, \
+mỗi câu đánh giá một kỹ năng (target_skill), không trùng ý nhau.
+
+Chọn câu hỏi theo thứ tự:
+1. Mỗi kỹ năng trong missing_required_skills: một câu category "skill_gap". Ứng viên CHƯA có kỹ năng này, \
+nên viết theo khuôn: "Bạn đã làm việc với <kỹ năng gần nhất có trong candidate_profile>. Nếu dự án yêu cầu \
+<kỹ năng còn thiếu>, bạn sẽ <làm một việc cụ thể của vị trí> như thế nào?"
+2. Mỗi mục trong skills_to_verify: một câu "skill_verification", yêu cầu mô tả cách đã làm một việc cụ thể.
+3. Còn chỗ: một câu "experience" đào sâu dự án liên quan nhất trong work_experience, nêu đúng tên công ty \
+hoặc dự án có trong hồ sơ.
+4. Còn chỗ: một câu "behavioral" về một tình huống làm việc nhóm hoặc xử lý sự cố.
+
+Mỗi câu là câu hỏi mở, kết thúc bằng "như thế nào?", "vì sao?" hoặc "ra sao?". Chỉ dùng thông tin có trong \
+dữ liệu đã cho. Chỉ hỏi về công việc. good_answer_hints liệt kê 2–4 ý hoặc thuật ngữ cụ thể mà câu trả lời \
+tốt cần nêu.
+"""
+
+# Câu skill_gap giả định ứng viên ĐÃ dùng kỹ năng còn thiếu: "bạn đã sử dụng X...", "dự án bạn dùng X"
+_ASSUMED_USE_VERBS = r"(?:sử\s+dụng|dùng|làm\s+việc\s+với|áp\s+dụng|triển\s+khai|xây\s+dựng\s+bằng|làm\s+với)"
+
 
 def build_interview_prompt(
     job: Any,
@@ -136,13 +159,20 @@ def generate_interview_questions(
     if not (info.get("summary") or info.get("skills")) and not (cv_text or "").strip():
         raise ValueError("Không có thông tin ứng viên để sinh câu hỏi phỏng vấn.")
 
+    prompt = build_interview_prompt(job, extracted_info, missing_skills, scoring_details, cv_text)
     result = generate_structured(
-        prompt=build_interview_prompt(job, extracted_info, missing_skills, scoring_details, cv_text),
+        prompt=prompt,
         schema=InterviewQuestionSet,
         system_instruction=INTERVIEW_SYSTEM_INSTRUCTION,
         mode=mode,
+        local_system_instruction=LOCAL_INTERVIEW_SYSTEM_INSTRUCTION,
     )
     result.data = normalize_interview_questions(result.data)
+    if result.provider == "ollama":
+        result = _fix_assumed_skill_questions(result, prompt, missing_skills)
+    if len(result.data.questions) < MIN_QUESTIONS:
+        details = scoring_details or info.get("scoring_details") or {}
+        result.data = _top_up_with_templates(result.data, job, missing_skills, details)
     if len(result.data.questions) < MIN_QUESTIONS:
         logger.warning(
             f"[InterviewGenerator] {result.provider}/{result.model} chỉ sinh {len(result.data.questions)} câu hỏi "
@@ -200,6 +230,143 @@ def strip_yes_no_opener(question: str) -> str:
     if _DEPENDENT_FOLLOW_UP.match(rest):
         return question
     return rest[0].upper() + rest[1:]
+
+
+def find_assumed_skill_questions(data: InterviewQuestionSet, missing_skills: Sequence[str]) -> List[int]:
+    """
+    Vị trí các câu hỏi giả định ứng viên đã dùng một kỹ năng còn thiếu (Issue 08), VD với FastAPI còn thiếu:
+    "Hãy mô tả cách bạn đã sử dụng FastAPI..." hoặc "Kể về dự án bạn dùng FastAPI".
+    """
+    bad = []
+    for idx, q in enumerate(data.questions):
+        for skill in missing_skills or []:
+            s = re.escape(skill.strip())
+            if not s:
+                continue
+            pattern = (
+                # tối đa 3 từ chen giữa, không vượt qua dấu câu hay "nếu" ("Bạn đã dùng Flask, nếu cần X..." là câu đúng)
+                rf"\b(?:bạn|anh/chị|anh chị)\s+(?:đã\s+|từng\s+|đã\s+từng\s+)?{_ASSUMED_USE_VERBS}\s+"
+                rf"(?:(?!nếu\b)[^\s.,;:?!]+\s+){{0,3}}?{s}\b"
+                rf"|\bdự\s+án\s+(?:mà\s+)?(?:bạn\s+)?(?:đã\s+)?{_ASSUMED_USE_VERBS}\s+{s}\b"
+                rf"|\bkinh\s+nghiệm\s+(?:của\s+bạn\s+)?(?:với|về)\s+{s}\b"
+            )
+            if re.search(pattern, q.question, re.IGNORECASE):
+                bad.append(idx)
+                break
+    return bad
+
+
+def _fix_assumed_skill_questions(
+    result: StructuredResult[InterviewQuestionSet], prompt: str, missing_skills: Sequence[str]
+) -> StructuredResult[InterviewQuestionSet]:
+    """
+    Ollama: nếu có câu giả định đã dùng kỹ năng còn thiếu thì gọi lại 1 lần kèm góp ý, rồi gộp các câu đạt của
+    cả hai lần (mỗi cặp loại câu hỏi + kỹ năng một câu, tối đa MAX_QUESTIONS), kể cả khi ít hơn MIN_QUESTIONS.
+    Không còn câu đạt nào thì giữ nguyên lần đầu (câu hỏi kém vẫn hơn không có).
+    """
+    bad = find_assumed_skill_questions(result.data, missing_skills)
+    if not bad:
+        return result
+    quoted = "\n".join(f"- {result.data.questions[i].question}" for i in bad)
+    logger.info(f"[InterviewGenerator] {len(bad)} câu hỏi giả định ứng viên đã dùng kỹ năng còn thiếu, sinh lại 1 lần.")
+    feedback = (
+        f"{prompt}\n\nCác câu sau giả định ứng viên đã dùng kỹ năng mà hồ sơ còn thiếu "
+        f"({', '.join(missing_skills)}), hãy viết lại theo khuôn ở mục 1:\n{quoted}"
+    )
+    good = [q for i, q in enumerate(result.data.questions) if i not in bad]
+    try:
+        retry = generate_structured(
+            prompt=feedback,
+            schema=InterviewQuestionSet,
+            system_instruction=LOCAL_INTERVIEW_SYSTEM_INSTRUCTION,
+            mode="local",
+        )
+        retry_data = normalize_interview_questions(retry.data)
+        retry_bad = find_assumed_skill_questions(retry_data, missing_skills)
+        good += [q for i, q in enumerate(retry_data.questions) if i not in retry_bad]
+        result.attempts = [*result.attempts, *retry.attempts]
+        result.latency_seconds = (result.latency_seconds or 0) + (retry.latency_seconds or 0)
+    except Exception as e:  # sinh lại lỗi thì chỉ còn các câu đạt của lần đầu, không làm hỏng cả bước
+        logger.warning(f"[InterviewGenerator] Sinh lại câu hỏi lỗi ({type(e).__name__}).")
+
+    merged = _pick_distinct(good)
+    if merged:
+        # Ít câu đạt vẫn hơn câu sai: test 28/10 có 2/10 hồ sơ chỉ còn 2 câu đạt sau khi gộp
+        logger.info(f"[InterviewGenerator] Giữ {len(merged)} câu hỏi đạt sau khi bỏ các câu giả định đã dùng kỹ năng còn thiếu.")
+        result.data = InterviewQuestionSet(questions=merged)
+    else:
+        logger.warning("[InterviewGenerator] Không còn câu hỏi đạt nào, giữ nguyên kết quả lần đầu.")
+    return result
+
+
+def _pick_distinct(questions: Sequence[InterviewQuestion]) -> List[InterviewQuestion]:
+    """Bỏ câu trùng (cùng nội dung, hoặc cùng loại câu hỏi + kỹ năng), giữ thứ tự, tối đa MAX_QUESTIONS câu."""
+    seen = set()
+    picked: List[InterviewQuestion] = []
+    for q in normalize_interview_questions(InterviewQuestionSet(questions=list(questions))).questions:
+        key = (q.category, (q.target_skill or "").casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        picked.append(q)
+    return picked[:MAX_QUESTIONS]
+
+
+TEMPLATE_NOTE = "Câu hỏi mẫu do hệ thống bổ sung vì mô hình AI sinh chưa đủ 3 câu."
+
+
+def _top_up_with_templates(
+    data: InterviewQuestionSet, job: Any, missing_skills: Sequence[str], details: Dict[str, Any]
+) -> InterviewQuestionSet:
+    """
+    Bổ sung câu hỏi mẫu cho đủ MIN_QUESTIONS: lần lượt kỹ năng bắt buộc còn thiếu, kỹ năng ưu tiên còn thiếu
+    (bỏ kỹ năng đã có câu hỏi), cuối cùng một câu đào sâu kinh nghiệm. Test 30/10: CV trái ngành chạy qwen2.5:7b
+    3/3 lần chỉ còn 2 câu sau khi lọc câu giả định đã dùng kỹ năng còn thiếu (Issue 08).
+    """
+    questions = list(data.questions)
+    covered = {(q.target_skill or "").casefold() for q in questions}
+    skills = [*(missing_skills or []), *(details.get("missing_preferred_skills") or [])]
+    templates = [
+        InterviewQuestion(
+            question=(
+                f"Vị trí này yêu cầu {skill} nhưng hồ sơ của bạn chưa thể hiện kỹ năng này. Nếu được nhận, "
+                f"bạn sẽ học {skill} theo lộ trình nào để đáp ứng công việc trong 1–2 tháng đầu, và kinh nghiệm "
+                f"hiện có nào giúp bạn học nhanh hơn?"
+            ),
+            category="skill_gap",
+            target_skill=skill,
+            purpose=f"Đánh giá khả năng tự học và mức sẵn sàng với {skill}. {TEMPLATE_NOTE}",
+            good_answer_hints=(
+                f"Nêu lộ trình cụ thể (tài liệu chính thức, bài tập hoặc dự án nhỏ với {skill}), mốc thời gian "
+                f"hợp lý và liên hệ được kỹ năng sẵn có với {skill}."
+            ),
+        )
+        for skill in dict.fromkeys(s.strip() for s in skills if s and s.strip())
+    ]
+    title = getattr(job, "title", None) or "này"
+    templates.append(InterviewQuestion(
+        question=(
+            f"Hãy chọn công việc hoặc dự án gần đây mà bạn thấy liên quan nhất tới vị trí {title}: bạn phụ trách "
+            f"phần việc nào, gặp khó khăn gì và đã giải quyết ra sao?"
+        ),
+        category="experience",
+        target_skill="Kinh nghiệm liên quan",
+        purpose=f"Đánh giá kinh nghiệm thực tế có thể chuyển sang vị trí ứng tuyển. {TEMPLATE_NOTE}",
+        good_answer_hints="Mô tả rõ vai trò, khó khăn cụ thể, cách giải quyết và kết quả đo được (thời gian, số liệu).",
+    ))
+
+    added = 0
+    for t in templates:
+        if len(questions) >= MIN_QUESTIONS:
+            break
+        if t.target_skill.casefold() in covered:
+            continue
+        questions.append(t)
+        covered.add(t.target_skill.casefold())
+        added += 1
+    if added:
+        logger.info(f"[InterviewGenerator] Bổ sung {added} câu hỏi mẫu cho đủ {MIN_QUESTIONS} câu.")
+    return InterviewQuestionSet(questions=questions)
 
 
 # ── Hàm bổ trợ nội bộ ────────────────────────────────────────────────────────

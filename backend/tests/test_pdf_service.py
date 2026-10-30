@@ -10,9 +10,12 @@ from pathlib import Path
 
 from app.core.config import BASE_DIR
 from app.services.pdf_service import (
+    MIN_SPACE_RATIO,
     PDFCorruptedError,
     PDFFileNotFoundError,
     PDFServiceError,
+    _extract_page_text,
+    _space_ratio,
     extract_pages_text,
     extract_text_from_candidate_cv,
     extract_text_from_pdf,
@@ -20,10 +23,11 @@ from app.services.pdf_service import (
 )
 
 
-def _generate_minimal_pdf(text_content: str = "Nguyen Van A - Senior Backend Developer") -> bytes:
+def _generate_minimal_pdf(text_content: str = "Nguyen Van A - Senior Backend Developer", stream_content: bytes = None) -> bytes:
     """Tạo file PDF hợp lệ tối giản chuẩn PDF 1.4 có chứa text_content để test."""
-    escaped_text = text_content.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
-    stream_content = f"BT /F1 12 Tf 72 712 Td ({escaped_text}) Tj ET".encode("latin1")
+    if stream_content is None:
+        escaped_text = text_content.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        stream_content = f"BT /F1 12 Tf 72 712 Td ({escaped_text}) Tj ET".encode("latin1")
     stream_len = len(stream_content)
 
     pdf_template = (
@@ -152,11 +156,6 @@ class TestPDFService(unittest.TestCase):
                 dummy_docx.unlink()
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
-
 class TestPDFDocumentDate(unittest.TestCase):
     """Ngày lập CV từ metadata PDF (mốc "present" khi tính kinh nghiệm — docs/Issues/05)."""
 
@@ -189,3 +188,53 @@ class TestPDFDocumentDate(unittest.TestCase):
         from app.services import pdf_service
         with mock.patch.object(pdf_service, "get_pdf_metadata", side_effect=pdf_service.PDFCorruptedError("x")):
             self.assertIsNone(pdf_service.get_pdf_document_date("cv.pdf"))
+
+
+def _generate_tight_spacing_pdf(words) -> bytes:
+    """PDF đặt các từ sát nhau bằng TJ (khoảng hở ~2.4pt) và không có ký tự dấu cách, giống CV ở Issue 04."""
+    tj = " -200 ".join(f"({w})" for w in words)
+    return _generate_minimal_pdf(stream_content=f"BT /F1 12 Tf 40 712 Td [{tj}] TJ ET".encode("latin1"))
+
+
+class TestTightSpacingPDF(unittest.TestCase):
+    """Issue 04: chữ dính liền thì đọc lại với x_tolerance nhỏ hơn."""
+
+    WORDS = ["Proficient", "NodeJS", "backend", "developer", "with", "years", "experience", "designing", "APIs"]
+
+    def test_tight_spacing_is_split_into_words(self):
+        text = extract_text_from_pdf(_generate_tight_spacing_pdf(self.WORDS))
+        self.assertIn("Proficient NodeJS backend developer", text)
+        self.assertNotIn("ProficientNodeJS", text)
+
+    def test_space_ratio(self):
+        self.assertLess(_space_ratio("ProficientNodeJSbackendsoftwaredeveloper7yearsexperienceindesigningAPIs"), MIN_SPACE_RATIO)
+        self.assertGreater(_space_ratio("Proficient NodeJS backend software developer with seven years of experience"), MIN_SPACE_RATIO)
+        self.assertEqual(_space_ratio("Ngắn"), 1.0)  # quá ít chữ: không đánh giá
+
+    def test_normal_pdf_is_read_once(self):
+        calls = []
+
+        class FakePage:
+            page_number = 1
+
+            def extract_text(self, **kwargs):
+                calls.append(kwargs)
+                return "Experienced Software Engineer with four years of experience in Python backend"
+
+        _extract_page_text(FakePage())
+        self.assertEqual(len(calls), 1)
+
+    def test_keeps_original_when_retry_is_not_better(self):
+        glued = "ProficientNodeJSbackendsoftwaredeveloper7yearsexperienceindesigningAPIs"
+
+        class FakePage:
+            page_number = 1
+
+            def extract_text(self, **kwargs):
+                return glued
+
+        self.assertEqual(_extract_page_text(FakePage()), glued)
+
+
+if __name__ == "__main__":
+    unittest.main()

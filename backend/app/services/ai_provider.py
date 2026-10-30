@@ -41,9 +41,12 @@ def generate_structured(
     schema: Type[T],
     system_instruction: Optional[str] = None,
     mode: Optional[str] = None,
+    local_system_instruction: Optional[str] = None,
 ) -> StructuredResult[T]:
     """
     Sinh JSON có cấu trúc theo `schema` bằng nhà cung cấp được cấu hình.
+    `local_system_instruction`: chỉ dẫn riêng cho Ollama (mô hình nhỏ cần prompt ngắn hơn, Issue 08);
+    bỏ trống thì Ollama dùng chung `system_instruction`.
 
     Trả về:
         StructuredResult (dữ liệu + provider/model đã dùng + nhật ký các lần thử).
@@ -54,11 +57,12 @@ def generate_structured(
         ValueError: prompt rỗng.
     """
     mode = get_provider_mode(mode)
+    local_instruction = local_system_instruction or system_instruction
 
     if mode == "cloud":
         return gemini_service.generate_structured_detailed(prompt, schema, system_instruction)
     if mode == "local":
-        return ollama_service.generate_structured_detailed(prompt, schema, system_instruction)
+        return ollama_service.generate_structured_detailed(prompt, schema, local_instruction)
 
     # auto: Gemini → Ollama
     try:
@@ -66,7 +70,7 @@ def generate_structured(
     except GeminiServiceError as gemini_error:
         logger.warning(f"[AIProvider] Gemini không dùng được ({type(gemini_error).__name__}), chuyển sang Ollama cục bộ.")
         try:
-            result = ollama_service.generate_structured_detailed(prompt, schema, system_instruction)
+            result = ollama_service.generate_structured_detailed(prompt, schema, local_instruction)
         except OllamaServiceError as ollama_error:
             logger.error(f"[AIProvider] Ollama cũng lỗi: {ollama_error}")
             raise AIProviderError(

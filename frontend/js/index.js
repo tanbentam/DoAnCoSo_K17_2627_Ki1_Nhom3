@@ -27,7 +27,9 @@ function jobCardHtml(job) {
             <div class="job-icon"><i class="bi bi-briefcase"></i></div>
             <div>
               <h3 class="h6 fw-bold mb-1">${escapeHtml(job.title)}</h3>
-              <div class="small text-muted"><i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}</div>
+              <div class="small text-muted"><i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}</div>${job.location
+                ? `<div class="small text-muted text-break"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(job.location)}</div>`
+                : ""}
             </div>
           </div>
           <div class="d-flex flex-wrap gap-1 mb-3">${skills}</div>
@@ -44,7 +46,7 @@ function renderJobs() {
   const keyword = normalizeText(jobSearchEl.value.trim());
   const jobs = keyword
     ? allJobs.filter((job) =>
-        normalizeText([job.title, ...(job.required_skills ?? []), ...(job.preferred_skills ?? [])].join(" ")).includes(keyword))
+        normalizeText([job.title, job.location ?? "", ...(job.required_skills ?? []), ...(job.preferred_skills ?? [])].join(" ")).includes(keyword))
     : allJobs;
 
   if (allJobs.length === 0) {
@@ -98,7 +100,8 @@ let detailRequestId = 0; // bỏ qua kết quả cũ khi người dùng mở tin
 
 function jobMetaHtml(job) {
   return `<i class="bi bi-clock-history me-1"></i>${experienceLabel(job.experience_years_min)}`
-    + ` · <i class="bi bi-calendar3 ms-1 me-1"></i>Đăng ${formatDate(job.created_at, false)}`;
+    + ` · <i class="bi bi-calendar3 ms-1 me-1"></i>Đăng ${formatDate(job.created_at, false)}`
+    + (job.location ? ` · <i class="bi bi-geo-alt ms-1 me-1"></i>${escapeHtml(job.location)}` : "");
 }
 
 function skillTagsHtml(skills, cls) {
@@ -176,8 +179,7 @@ const cvLabelEl = document.getElementById("apply-cv-label");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9+\-. ]+$/;
 
-// 5.4 Quy tắc tệp CV. Chỉ nhận PDF cho tới khi xử lý xong Issue 06 (AI chưa đọc được .docx).
-// Nếu nhóm chốt nhận .docx: thêm ".docx" vào đây và vào thuộc tính accept của #apply-cv.
+// 5.4 Quy tắc tệp CV. Chỉ nhận PDF, khớp backend (Issue 06 chốt 28/10/2026: bỏ .docx vì AI chỉ đọc được PDF).
 const CV_ALLOWED_EXTENSIONS = [".pdf"];
 const CV_MAX_BYTES = 5 * 1024 * 1024; // backend giới hạn 5MB
 
@@ -186,8 +188,9 @@ function fileExtension(name) {
   return dot >= 0 ? name.slice(dot).toLowerCase() : "";
 }
 
+/** Làm tròn lên để tệp vượt 5MB một chút hiện "5.01 MB", không hiện "5.00 MB" như thể bằng giới hạn. */
 function formatFileSize(bytes) {
-  return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(2)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return bytes >= 1024 * 1024 ? `${(Math.ceil(bytes / 1024 / 1024 * 100) / 100).toFixed(2)} MB` : `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
 }
 
 function validateCvFile(file) {

@@ -58,6 +58,18 @@ class TestProviderSwitch(unittest.TestCase):
         self.assertEqual(result.attempts[0], "gemini: GeminiQuotaExhaustedError")
         self.ollama.assert_called_once_with("p", SampleSchema, "HR")
 
+    def test_local_system_instruction_only_for_ollama(self):
+        # Issue 08: Ollama nhận chỉ dẫn riêng, Gemini giữ chỉ dẫn chung
+        ai_provider.generate_structured("p", SampleSchema, "HR", mode="cloud", local_system_instruction="HR-local")
+        self.gemini.assert_called_once_with("p", SampleSchema, "HR")
+        ai_provider.generate_structured("p", SampleSchema, "HR", mode="local", local_system_instruction="HR-local")
+        self.ollama.assert_called_once_with("p", SampleSchema, "HR-local")
+
+    def test_auto_fallback_uses_local_system_instruction(self):
+        self.gemini.side_effect = GeminiQuotaExhaustedError("hết lượt", 429)
+        ai_provider.generate_structured("p", SampleSchema, "HR", mode="auto", local_system_instruction="HR-local")
+        self.ollama.assert_called_once_with("p", SampleSchema, "HR-local")
+
     def test_auto_falls_back_on_any_gemini_error(self):
         for error in (GeminiAPIError("503", 503), GeminiConfigError("thiếu key")):
             self.gemini.side_effect = error

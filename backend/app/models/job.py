@@ -38,6 +38,7 @@ class Job(Base):
         required_skills     : Danh sách kỹ năng bắt buộc dạng JSON array (VD: ["Python","SQL"]).
         preferred_skills    : Danh sách kỹ năng ưu tiên dạng JSON array (tùy chọn).
         experience_years_min: Số năm kinh nghiệm tối thiểu yêu cầu (mặc định 0).
+        location            : Địa điểm làm việc / chi nhánh (chữ tự do, tùy chọn).
         status              : Trạng thái tin — open | closed.
         created_by          : FK tới users.id — HR đã tạo tin.
         created_at          : Thời điểm tạo (UTC, tự động).
@@ -89,6 +90,12 @@ class Job(Base):
         default=0,
         server_default="0",
         comment="Số năm kinh nghiệm tối thiểu (0 = không yêu cầu)",
+    )
+
+    location: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        comment="Địa điểm làm việc / chi nhánh, VD: Chi nhánh Cầu Giấy, 123 Xuân Thủy, Hà Nội",
     )
 
     status: Mapped[JobStatus] = mapped_column(

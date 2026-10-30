@@ -91,10 +91,10 @@ Ký hiệu:
 
 ## 7. Supporting Services & Notifications
 
-* [ ] Xây dựng Service gửi Email tự động qua SMTP (sử dụng tài khoản Gmail App Password)
-* [ ] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
-* [ ] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview*
-* [ ] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
+* [x] Xây dựng Service gửi Email tự động qua SMTP (sử dụng tài khoản Gmail App Password) (xong 23/10/2026: `EMAIL_MODE=smtp|file|off`, mặc định `file` ghi `.eml`; chưa gửi thử Gmail thật vì chưa có App Password)
+* [x] Mẫu email 1: Xác nhận đã nhận hồ sơ gửi tự động cho ứng viên
+* [x] Mẫu email 2: Thư mời phỏng vấn tự động khi HR kéo ứng viên sang cột *Interview* (HR nhập giờ / địa điểm trong hộp xác nhận, bỏ trống thì thư báo sẽ liên hệ; tin tuyển dụng có thêm trường địa điểm)
+* [x] Mẫu email 3: Thư thông báo kết quả (Offer Letter hoặc Thư cảm ơn từ chối)
 * [x] Xây dựng bộ lọc danh sách ứng viên trên bảng Kanban theo điểm số từ cao xuống thấp (frontend xong 23/10/2026: ô *Sắp xếp* điểm cao → thấp / mới nộp trước, ô *Điểm tối thiểu* tất cả / từ 50 / từ 80)
 
 ## 8. Quality, Testing & Defense Preparation
@@ -105,7 +105,7 @@ Ký hiệu:
 * *CV 3:* Khác từ ngữ nhưng đồng nghĩa (kiểm tra tính năng Semantic Matching)
 
 
-* [~] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban (backend/API đã test, chờ frontend)
+* [x] Kiểm thử toàn bộ luồng hoạt động từ phía Ứng viên nộp bài đến HR thao tác trên Kanban (xong 28/10/2026 với AI `auto` và `local`, email chế độ `file`; chưa gửi Gmail thật. Báo cáo: `docs/Test-Reports/2026-10-28_1711_toan-app-8.2.md`)
 * [~] Kiểm thử hiệu năng và độ ổn định của API xử lý nền (`BackgroundTasks`) (10 hồ sơ nộp lần lượt ổn định, chưa test nhiều hồ sơ cùng lúc)
 * [~] Kiểm thử chuyển đổi sang chạy mô hình Local Ollama trên GPU RTX 4060 ở trạng thái ngắt mạng (đã chạy `local`, chưa ngắt mạng)
 * [ ] Tối ưu hóa mã nguồn Frontend, loại bỏ code thừa và chuẩn hóa thông báo lỗi giao diện
@@ -116,11 +116,11 @@ Ký hiệu:
 
 Chi tiết từng vấn đề: `docs/Issues/`. Lịch sử test: `docs/Test-Reports/`.
 
-* [ ] Chạy test Gemini đầy đủ hạn mức (`AI_PROVIDER=auto`) vào đầu ngày 17/10
-* [ ] Issue 04: Một số PDF bị đọc ra chữ dính liền, mất dấu cách
-* [ ] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt giữ hay bỏ `.docx`)
-* [ ] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (cần thảo luận nhóm)
-* [ ] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp
+* [x] Chạy test Gemini đầy đủ hạn mức (`AI_PROVIDER=auto`) (đã chạy 28/10/2026 trong Mục 8.2: `docs/Test-Reports/2026-10-28_1711_backend-auto.md`)
+* [x] Issue 04: Một số PDF bị đọc ra chữ dính liền, mất dấu cách (xong 28/10/2026: đọc lại trang với `x_tolerance=1.5`)
+* [x] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt 28/10/2026: bỏ `.docx`, API và form chỉ nhận PDF)
+* [x] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (chốt 28/10/2026: giữ nguyên công thức, ghi là hạn chế trong báo cáo)
+* [x] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (xong 28/10/2026: prompt riêng cho Ollama, kiểm tra và sinh lại, ghi chú trên giao diện; bổ sung 30/10/2026: thêm câu hỏi mẫu khi còn dưới 3 câu)
 * [x] Chốt cách hiển thị Kanban: 5 cột theo 5 trạng thái backend (`offer` và `rejected` tách riêng), chốt 17/10/2026
 * [ ] Tải CA certificate Aiven và đặt `DB_SSL_CA` để bật xác minh chứng chỉ máy chủ
 * [x] Viết tài liệu API cho frontend (`docs/API cho Frontend.md`)

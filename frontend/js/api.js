@@ -128,10 +128,11 @@ const ApplicationAPI = {
   list:          (params)     => apiFetch(`/api/applications${toQuery(params)}`, { auth: true }),
   getDetail:     (id)         => apiFetch(`/api/applications/${id}`, { auth: true }),
   getAiAnalysis: (id)         => apiFetch(`/api/applications/${id}/ai-analysis`, { auth: true }),
-  updateStatus:  (id, status) => apiFetch(`/api/applications/${id}/status`, {
+  /** extra (Mục 7): send_email, interview_at (ISO có múi giờ), interview_location. */
+  updateStatus:  (id, status, extra = {}) => apiFetch(`/api/applications/${id}/status`, {
     auth: true,
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, ...extra }),
   }),
   /** Tệp CV gốc dạng Blob; dùng với URL.createObjectURL() rồi gán vào <iframe>. */
   getCvBlob: async (id) => (await apiFetch(`/api/applications/${id}/cv`, { auth: true, raw: true })).blob(),

@@ -41,6 +41,7 @@ def create_job(
         required_skills=job_in.required_skills,
         preferred_skills=job_in.preferred_skills,
         experience_years_min=job_in.experience_years_min,
+        location=job_in.location,
         status=JobStatus.open,
         created_by=current_user.id
     )

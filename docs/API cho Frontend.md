@@ -69,6 +69,7 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
   "required_skills": ["Python", "FastAPI", "SQLAlchemy", "MySQL"],
   "preferred_skills": ["Docker", "Redis", "Linux"],
   "experience_years_min": 2,
+  "location": "Chi nhánh Cầu Giấy, 123 Xuân Thủy, Hà Nội",
   "status": "open",
   "created_by": 1,
   "created_at": "2026-10-07T14:00:13",
@@ -76,7 +77,7 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
 }
 ```
 
-`preferred_skills` có thể là `null`.
+`preferred_skills` và `location` (địa điểm làm việc / chi nhánh, chữ tự do ≤ 255 ký tự, thêm ở Mục 7.3) có thể là `null`.
 
 **Ngày giờ** (`created_at`, `updated_at`) là **giờ UTC, không kèm múi giờ**, vì CSDL Aiven chạy UTC. Hiển thị: `new Date(value + "Z").toLocaleString("vi-VN")`.
 
@@ -88,7 +89,7 @@ const res = await fetch(`${API}/api/auth/login`, { method: "POST", body });
 | `full_name` | ✅ | ≤ 150 ký tự |
 | `email` | ✅ | ≤ 255 ký tự. Mỗi email chỉ nộp 1 lần cho mỗi tin |
 | `phone` | | ≤ 30 ký tự |
-| `cv_file` | ✅ | `.pdf` (khuyến nghị) hoặc `.docx`, **tối đa 5MB** |
+| `cv_file` | ✅ | Chỉ `.pdf` ([Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md), chốt 28/10/2026), **tối đa 5MB** |
 
 ```js
 const form = new FormData();
@@ -105,15 +106,16 @@ const res = await fetch(`${API}/api/applications/apply`, { method: "POST", body:
 | --- | --- | --- |
 | 201 | Thành công | `{"message": "Nộp hồ sơ ứng tuyển thành công!", "application_id": 51, "candidate_id": 47, "job_id": 1, "status": "applied", "ai_status": "pending"}` |
 | 400 | Tin đã đóng | "Tin tuyển dụng này đã đóng, không tiếp nhận thêm hồ sơ" |
-| 400 | Sai định dạng | "Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf hoặc .docx" |
+| 400 | Sai định dạng | "Định dạng tệp không hợp lệ. Hệ thống chỉ hỗ trợ tệp .pdf" (kể cả `.docx`) |
 | 400 | Quá dung lượng | "Dung lượng tệp vượt quá giới hạn cho phép (5MB)" |
 | 400 | Nộp trùng | "Bạn đã nộp hồ sơ ứng tuyển vào vị trí này rồi" |
 | 404 | Tin không tồn tại | "Tin tuyển dụng không tồn tại" |
+| 422 | Email sai định dạng | "Email không hợp lệ, vui lòng kiểm tra lại" (`detail` là **chuỗi**) |
 | 422 | Thiếu trường / sai kiểu | `detail` là **mảng** lỗi của FastAPI. Nên kiểm tra form ở frontend trước khi gửi |
 
-> ⚠️ **CV `.docx`** được nhận nhưng AI **chưa đọc được**: hồ sơ sẽ có `ai_status = "failed"` ([Issue 06](Issues/06-cv-docx-khong-duoc-cham.md)). Nhóm cần chốt: giữ `.docx`, hoặc form chỉ nhận PDF.
+> ℹ️ Từ 28/10/2026 API **không nhận `.docx`** nữa vì AI chỉ đọc được PDF ([Issue 06](Issues/done-06-cv-docx-khong-duoc-cham.md)). Hồ sơ `.docx` cũ vẫn xem/tải được qua API CV gốc.
 
-Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giây sau đó.
+Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giây sau đó. Hệ thống cũng gửi ngầm **email xác nhận đã nhận hồ sơ** tới địa chỉ ứng viên nhập (Mục 7.2).
 
 ---
 
@@ -124,8 +126,8 @@ Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giâ
 | Method | Endpoint | Body / Ghi chú |
 | --- | --- | --- |
 | GET | `/api/jobs?status=open\|closed` | Mọi tin (gồm cả tin đã đóng), có thể lọc theo trạng thái. **Không cần token.** Cổng ứng viên dùng `/api/jobs/open` |
-| POST | `/api/jobs` | JSON: `title`, `description`, `requirements` (bắt buộc); `required_skills` (mảng), `preferred_skills`, `experience_years_min` → **201** |
-| PUT | `/api/jobs/{id}` | Chỉ gửi các trường cần đổi, trường không gửi được giữ nguyên |
+| POST | `/api/jobs` | JSON: `title`, `description`, `requirements` (bắt buộc); `required_skills` (mảng), `preferred_skills`, `experience_years_min`, `location` → **201** |
+| PUT | `/api/jobs/{id}` | Chỉ gửi các trường cần đổi, trường không gửi được giữ nguyên. `location: null` hoặc chuỗi rỗng → xóa địa điểm |
 | PATCH | `/api/jobs/{id}/close` | Đóng tin: tin biến khỏi `/api/jobs/open`, không nhận hồ sơ mới |
 
 **Gợi ý form tạo tin:** `required_skills` nên là ô nhập dạng tag (mỗi kỹ năng một phần tử, viết tên chuẩn như "FastAPI", "MySQL"). Hệ thống chấm điểm so khớp theo từng phần tử này.
@@ -140,7 +142,7 @@ Nộp xong, ứng viên **không cần chờ AI**. AI chấm ngầm 30–40 giâ
 | `sort_by` | `score_desc` | `newest` (mặc định), `oldest`, `score_desc`, `score_asc`. Hồ sơ chưa có điểm luôn xếp cuối |
 | `skip`, `limit` | `0`, `100` | Phân trang (`limit` tối đa 500) |
 
-Mỗi phần tử có `id`, `job_id`, `status`, `ai_status`, `ai_error`, `matching_score`, `semantic_score`, `hard_filter_score`, `matched_skills`, `missing_skills`, `interview_questions`, `ai_summary`, `ai_extracted_info`, `created_at`, `updated_at`, kèm `candidate` (`id`, `full_name`, `email`, `phone`) và `job` (đầy đủ như mục 3).
+Mỗi phần tử có `id`, `job_id`, `status`, `ai_status`, `ai_error`, `matching_score`, `semantic_score`, `hard_filter_score`, `matched_skills`, `missing_skills`, `interview_questions`, `ai_summary`, `ai_extracted_info`, `interview_at`, `interview_location`, `created_at`, `updated_at`, kèm `candidate` (`id`, `full_name`, `email`, `phone`) và `job` (đầy đủ như mục 3).
 
 Gợi ý: gọi 1 lần `GET /api/applications?job_id=X&sort_by=score_desc` rồi tự chia thẻ vào các cột theo `status` ở frontend. Chức năng này đáp ứng Mục 7.5 "lọc theo điểm số từ cao xuống thấp".
 
@@ -150,12 +152,32 @@ Gợi ý: gọi 1 lần `GET /api/applications?job_id=X&sort_by=score_desc` rồ
 await fetch(`${API}/api/applications/${id}/status`, {
   method: "PATCH",
   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-  body: JSON.stringify({ status: "interview" }),
+  body: JSON.stringify({
+    status: "interview",
+    interview_at: "2026-10-28T02:30:00.000Z",   // tùy chọn, ISO có múi giờ (Date.toISOString())
+    interview_location: "Phòng họp tầng 5",       // tùy chọn
+    send_email: true,                             // mặc định true
+  }),
 });
-// 200 → hồ sơ đầy đủ (giống phần tử của danh sách); 422 → status không hợp lệ; 404 → không có hồ sơ
+// 200 → hồ sơ đầy đủ (giống phần tử của danh sách) + email_queued; 400 → interview_at đã qua;
+// 422 → status không hợp lệ; 404 → không có hồ sơ
 ```
 
-Trong `onEnd` của SortableJS: gọi API; nếu lỗi thì **trả thẻ về cột cũ** và báo lỗi.
+**Email tự động (Mục 7.2–7.4):**
+
+| Chuyển sang | Thư gửi ứng viên | Ghi chú |
+| --- | --- | --- |
+| `interview` | Thư mời phỏng vấn | Ghi `interview_at` (giờ Việt Nam) và `interview_location`. Bỏ trống thì thư báo "Bộ phận tuyển dụng sẽ liên hệ để thống nhất" |
+| `offer` | Thư báo trúng tuyển | |
+| `rejected` | Thư cảm ơn, báo chưa phù hợp | |
+| `applied`, `screening` | Không gửi | |
+
+- Chỉ gửi khi trạng thái **thật sự đổi** (thả lại cùng cột không gửi lại). `send_email: false` → chỉ đổi cột, không gửi (dùng khi kéo nhầm).
+- `interview_at`, `interview_location` chỉ được lưu khi `status = "interview"`; trả về dạng giờ UTC không kèm múi giờ như các trường ngày giờ khác.
+- `email_queued: true` nghĩa là thư đã được xếp gửi ngầm sau khi trả response. Gửi lỗi (sai mật khẩu Gmail, mất mạng) chỉ ghi log ở backend, **không** làm hỏng việc đổi trạng thái.
+- Chế độ gửi do `EMAIL_MODE` trong `.env` quyết định: `smtp` gửi thật, `file` ghi tệp `.eml` vào `backend/outbox/` (mặc định, để thử), `off` tắt (khi đó `email_queued` luôn `false`).
+
+Trong `onEnd` của SortableJS: gọi API; nếu lỗi thì **trả thẻ về cột cũ** và báo lỗi. Khi thả vào `interview` / `offer` / `rejected`, `admin.html` hỏi xác nhận trước (nhập lịch phỏng vấn, chọn có gửi email hay không).
 
 **Các trạng thái Kanban (`status`):** `applied`, `screening`, `interview`, `offer`, `rejected`.
 
@@ -171,7 +193,7 @@ Trong `onEnd` của SortableJS: gọi API; nếu lỗi thì **trả thẻ về c
 | `processing` | AI đang chấm (30–40s) | Spinner "AI đang chấm..." |
 | `done` | Hoàn tất mọi bước | Huy hiệu điểm (≥ 80 xanh, 50–79 vàng, < 50 đỏ) |
 | `partial` | Có điểm nhưng thiếu một số kết quả (VD: chưa có câu hỏi phỏng vấn) | Huy hiệu điểm + biểu tượng ⚠️, tooltip = `ai_error` |
-| `failed` | Không chấm được (CV hỏng, `.docx`, lỗi hệ thống) | Nhãn "Không chấm được", tooltip = `ai_error` |
+| `failed` | Không chấm được (CV hỏng, `.docx` cũ, lỗi hệ thống) | Nhãn "Không chấm được", tooltip = `ai_error` |
 
 Khi trên bảng còn thẻ `pending` / `processing`, gọi lại danh sách mỗi **5–10 giây**. Khi mọi thẻ đã `done` / `partial` / `failed` thì dừng gọi.
 
