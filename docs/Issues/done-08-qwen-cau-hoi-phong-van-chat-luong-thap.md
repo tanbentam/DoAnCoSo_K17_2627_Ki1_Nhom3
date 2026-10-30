@@ -66,3 +66,5 @@ Làm theo hướng 1, 2 và 4 trong đề xuất. Không đổi model (hướng 
 - Câu hỏi của qwen vẫn kém tự nhiên hơn Gemini: hay mở đầu "Bạn có thể chia sẻ…", đôi khi 2 câu `experience` gần giống nhau.
 - qwen không suy luận được "hệ quản trị CSDL quan hệ mã nguồn mở của Oracle" là MySQL như Gemini (CV3), nên CV3 ở `local` được 54.36 điểm so với 62.36 khi dùng Gemini.
 - Mỗi hồ sơ có câu sai tốn thêm khoảng 13 giây cho lần sinh lại.
+
+**Bổ sung 30/10/2026:** test lại trước PR, CV2 (trái ngành) 3/3 lần chỉ còn 2 câu sau khi lọc. Thêm bước `_top_up_with_templates`: còn dưới 3 câu thì bổ sung câu hỏi mẫu theo kỹ năng bắt buộc còn thiếu, rồi kỹ năng ưu tiên, cuối cùng một câu kinh nghiệm; câu mẫu ghi rõ trong mục đích là do hệ thống bổ sung. Sau khi sửa: unit 226/226, smoke 37/37, E2E 3/3 (biên bản `docs/Test-Reports/2026-10-30_1708_backend-local.md`). Log: `docs/Phan 9/Phan 9 - Issue 08 bo sung cau hoi mau.md`.

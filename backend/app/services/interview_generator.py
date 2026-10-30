@@ -171,6 +171,9 @@ def generate_interview_questions(
     if result.provider == "ollama":
         result = _fix_assumed_skill_questions(result, prompt, missing_skills)
     if len(result.data.questions) < MIN_QUESTIONS:
+        details = scoring_details or info.get("scoring_details") or {}
+        result.data = _top_up_with_templates(result.data, job, missing_skills, details)
+    if len(result.data.questions) < MIN_QUESTIONS:
         logger.warning(
             f"[InterviewGenerator] {result.provider}/{result.model} chỉ sinh {len(result.data.questions)} câu hỏi "
             f"(yêu cầu tối thiểu {MIN_QUESTIONS})."
@@ -307,6 +310,63 @@ def _pick_distinct(questions: Sequence[InterviewQuestion]) -> List[InterviewQues
         seen.add(key)
         picked.append(q)
     return picked[:MAX_QUESTIONS]
+
+
+TEMPLATE_NOTE = "Câu hỏi mẫu do hệ thống bổ sung vì mô hình AI sinh chưa đủ 3 câu."
+
+
+def _top_up_with_templates(
+    data: InterviewQuestionSet, job: Any, missing_skills: Sequence[str], details: Dict[str, Any]
+) -> InterviewQuestionSet:
+    """
+    Bổ sung câu hỏi mẫu cho đủ MIN_QUESTIONS: lần lượt kỹ năng bắt buộc còn thiếu, kỹ năng ưu tiên còn thiếu
+    (bỏ kỹ năng đã có câu hỏi), cuối cùng một câu đào sâu kinh nghiệm. Test 30/10: CV trái ngành chạy qwen2.5:7b
+    3/3 lần chỉ còn 2 câu sau khi lọc câu giả định đã dùng kỹ năng còn thiếu (Issue 08).
+    """
+    questions = list(data.questions)
+    covered = {(q.target_skill or "").casefold() for q in questions}
+    skills = [*(missing_skills or []), *(details.get("missing_preferred_skills") or [])]
+    templates = [
+        InterviewQuestion(
+            question=(
+                f"Vị trí này yêu cầu {skill} nhưng hồ sơ của bạn chưa thể hiện kỹ năng này. Nếu được nhận, "
+                f"bạn sẽ học {skill} theo lộ trình nào để đáp ứng công việc trong 1–2 tháng đầu, và kinh nghiệm "
+                f"hiện có nào giúp bạn học nhanh hơn?"
+            ),
+            category="skill_gap",
+            target_skill=skill,
+            purpose=f"Đánh giá khả năng tự học và mức sẵn sàng với {skill}. {TEMPLATE_NOTE}",
+            good_answer_hints=(
+                f"Nêu lộ trình cụ thể (tài liệu chính thức, bài tập hoặc dự án nhỏ với {skill}), mốc thời gian "
+                f"hợp lý và liên hệ được kỹ năng sẵn có với {skill}."
+            ),
+        )
+        for skill in dict.fromkeys(s.strip() for s in skills if s and s.strip())
+    ]
+    title = getattr(job, "title", None) or "này"
+    templates.append(InterviewQuestion(
+        question=(
+            f"Hãy chọn công việc hoặc dự án gần đây mà bạn thấy liên quan nhất tới vị trí {title}: bạn phụ trách "
+            f"phần việc nào, gặp khó khăn gì và đã giải quyết ra sao?"
+        ),
+        category="experience",
+        target_skill="Kinh nghiệm liên quan",
+        purpose=f"Đánh giá kinh nghiệm thực tế có thể chuyển sang vị trí ứng tuyển. {TEMPLATE_NOTE}",
+        good_answer_hints="Mô tả rõ vai trò, khó khăn cụ thể, cách giải quyết và kết quả đo được (thời gian, số liệu).",
+    ))
+
+    added = 0
+    for t in templates:
+        if len(questions) >= MIN_QUESTIONS:
+            break
+        if t.target_skill.casefold() in covered:
+            continue
+        questions.append(t)
+        covered.add(t.target_skill.casefold())
+        added += 1
+    if added:
+        logger.info(f"[InterviewGenerator] Bổ sung {added} câu hỏi mẫu cho đủ {MIN_QUESTIONS} câu.")
+    return InterviewQuestionSet(questions=questions)
 
 
 # ── Hàm bổ trợ nội bộ ────────────────────────────────────────────────────────

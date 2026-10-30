@@ -17,6 +17,7 @@ from app.services.interview_generator import (
     INTERVIEW_SYSTEM_INSTRUCTION,
     LOCAL_INTERVIEW_SYSTEM_INSTRUCTION,
     MAX_QUESTIONS,
+    TEMPLATE_NOTE,
     build_interview_prompt,
     find_assumed_skill_questions,
     generate_interview_questions,
@@ -156,11 +157,33 @@ class TestGenerate(unittest.TestCase):
         self.assertEqual(kwargs["mode"], "local")
         self.assertEqual(len(result.data.questions), 4)
 
-    def test_too_few_questions_logged_not_failed(self):
+    def test_too_few_questions_topped_up_with_templates(self):
+        # Câu có sẵn đã hỏi FastAPI → bổ sung SQLAlchemy (bắt buộc còn thiếu) rồi Redis (ưu tiên còn thiếu)
+        with mock.patch.object(interview_generator, "generate_structured", return_value=self._result([_q("Một câu?")])):
+            result = generate_interview_questions(JOB, INFO, ["FastAPI", "SQLAlchemy"])
+        questions = result.data.questions
+        self.assertEqual([q.target_skill for q in questions], ["FastAPI", "SQLAlchemy", "Redis"])
+        self.assertEqual([q.category for q in questions[1:]], ["skill_gap", "skill_gap"])
+        self.assertIn(TEMPLATE_NOTE, questions[1].purpose)
+        self.assertIn("SQLAlchemy", questions[1].question)
+        # Câu mẫu không được rơi vào lỗi Issue 08 (giả định đã dùng kỹ năng còn thiếu)
+        self.assertEqual(find_assumed_skill_questions(result.data, ["SQLAlchemy", "Redis"]), [])
+
+    def test_top_up_falls_back_to_experience_question(self):
+        info = {**INFO, "scoring_details": {"missing_preferred_skills": []}}
         with mock.patch.object(interview_generator, "generate_structured", return_value=self._result([_q("Một câu?")])):
             with self.assertLogs("app.services.interview_generator", level="WARNING"):
-                result = generate_interview_questions(JOB, INFO, ["FastAPI"])
-        self.assertEqual(len(result.data.questions), 1)
+                result = generate_interview_questions(JOB, info, [])
+        # Không còn kỹ năng thiếu nào → chỉ thêm được 1 câu kinh nghiệm, vẫn dưới 3 câu nên ghi cảnh báo
+        self.assertEqual([q.category for q in result.data.questions], ["skill_gap", "experience"])
+        self.assertIn(JOB.title, result.data.questions[1].question)
+
+    def test_enough_questions_not_topped_up(self):
+        questions = [_q(f"Câu {i}?", skill=f"Kỹ năng {i}") for i in range(3)]
+        with mock.patch.object(interview_generator, "generate_structured", return_value=self._result(questions)):
+            result = generate_interview_questions(JOB, INFO, ["FastAPI", "SQLAlchemy"])
+        self.assertTrue(all(TEMPLATE_NOTE not in q.purpose for q in result.data.questions))
+        self.assertEqual(len(result.data.questions), 3)
 
     def test_no_candidate_data_raises(self):
         with mock.patch.object(interview_generator, "generate_structured") as m:
@@ -252,17 +275,24 @@ class TestAssumedSkillQuestions(unittest.TestCase):
             result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
         self.assertEqual([q.question for q in result.data.questions], [q.question for q in self.GOOD])
 
-    def test_keeps_only_good_questions_even_if_fewer_than_min(self):
+    def test_keeps_only_good_questions_then_tops_up(self):
+        # Chỉ còn 2 câu đạt (FastAPI, MySQL) → bỏ câu sai, bổ sung câu mẫu cho SQLAlchemy (test thật 30/10)
         first = self._result([self.BAD, *self.GOOD[:2]])
         with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, AIProviderError("down")]):
             result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
-        self.assertEqual([q.question for q in result.data.questions], [q.question for q in self.GOOD[:2]])
+        questions = result.data.questions
+        self.assertEqual([q.question for q in questions[:2]], [q.question for q in self.GOOD[:2]])
+        self.assertEqual(len(questions), 3)
+        self.assertEqual(questions[2].target_skill, "SQLAlchemy")
+        self.assertNotIn(self.BAD.question, [q.question for q in questions])
 
     def test_keeps_first_result_when_no_good_question(self):
         first = self._result([self.BAD])
         with mock.patch.object(interview_generator, "generate_structured", side_effect=[first, first]):
             result = generate_interview_questions(JOB, INFO, self.MISSING, mode="local")
-        self.assertEqual([q.question for q in result.data.questions], [self.BAD.question])
+        questions = result.data.questions
+        self.assertEqual(questions[0].question, self.BAD.question)
+        self.assertEqual([q.target_skill for q in questions[1:]], ["FastAPI", "MySQL"])
 
     def test_gemini_result_not_checked(self):
         gemini = StructuredResult(InterviewQuestionSet(questions=[self.BAD, *self.GOOD]), "gemini", "gemini-3.8-flash", 1.0)

@@ -21,6 +21,11 @@ Ký hiệu:
 | 2026-10-28 18:11 | `b6de8be`* | `local` | 222 ✅ | 37/37 | 10/10 | ✅ | [2026-10-28_1811_backend-local.md](2026-10-28_1811_backend-local.md) — Sau khi sửa Issue 04 (PDF dính chữ), 06 (chỉ nhận PDF), 08 (prompt riêng Ollama + kiểm tra câu hỏi); AI local, E2E đủ CV mẫu + CV thật |
 | 2026-10-28 18:24 | `b6de8be`* | `local` | 223 ✅ | 37/37 | 10/10 | ❌ | [2026-10-28_1824_backend-local.md](2026-10-28_1824_backend-local.md) — Issue 04, 06, 08 (bản sửa gộp câu hỏi đạt của 2 lần sinh); AI local, E2E đủ CV mẫu + CV thật. ❌ chỉ do mục "mô hình nhúng đã nạp" (server vừa khởi động lại, báo động giả) |
 | 2026-10-28 18:59 | `b6de8be`* | `local` | 224 ✅ | 37/37 | 10/10 | ❌ | [2026-10-28_1859_backend-local.md](2026-10-28_1859_backend-local.md) — Lần chạy cuối trước bảo vệ (code sau Issue 04, 06, 08), dùng số liệu cho báo cáo; AI local |
+| 2026-10-30 16:50 | `2960309`* | `local` | 224 ✅ | 36/37 | 0/3 | ❌ | [2026-10-30_1650_backend-local.md](2026-10-30_1650_backend-local.md) — Kiem thu lai truoc PR feature/email -> main (sau commit muc 9) |
+| 2026-10-30 16:53 | `2960309`* | `local` | 224 ✅ | 37/37 | 2/3 | ❌ | [2026-10-30_1653_backend-local.md](2026-10-30_1653_backend-local.md) — Kiem thu lai truoc PR feature/email -> main (sau commit muc 9), da bat Ollama |
+| 2026-10-30 16:56 | `2960309`* | `local` | — | — | 2/3 | ❌ | [2026-10-30_1656_backend-local.md](2026-10-30_1656_backend-local.md) — Chay lai E2E de kiem tra CV2 thieu cau hoi co ngau nhien khong |
+| 2026-10-30 17:04 | `2960309`* | `local` | — | — | 2/3 | ❌ | [2026-10-30_1704_backend-local.md](2026-10-30_1704_backend-local.md) — Lan 3: kiem tra CV2 thieu cau hoi |
+| 2026-10-30 17:08 | `2960309`* | `local` | 226 ✅ | 37/37 | 3/3 | ❌ | [2026-10-30_1708_backend-local.md](2026-10-30_1708_backend-local.md) — Sau khi them cau hoi mau bo sung cho du 3 cau (CV2 qwen chi con 2 cau) |
 <!-- Dòng mới được thêm tự động phía trên dòng này -->
 
 ## Các lần test thủ công trước khi có script tự động (16/10/2026)

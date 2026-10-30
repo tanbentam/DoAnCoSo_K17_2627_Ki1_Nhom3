@@ -120,7 +120,7 @@ Chi tiết từng vấn đề: `docs/Issues/`. Lịch sử test: `docs/Test-Repo
 * [x] Issue 04: Một số PDF bị đọc ra chữ dính liền, mất dấu cách (xong 28/10/2026: đọc lại trang với `x_tolerance=1.5`)
 * [x] Issue 06: CV `.docx` được nhận nhưng AI chưa đọc được (chốt 28/10/2026: bỏ `.docx`, API và form chỉ nhận PDF)
 * [x] Issue 07: Kinh nghiệm trái ngành vẫn được tính đủ điểm (chốt 28/10/2026: giữ nguyên công thức, ghi là hạn chế trong báo cáo)
-* [x] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (xong 28/10/2026: prompt riêng cho Ollama, kiểm tra và sinh lại, ghi chú trên giao diện)
+* [x] Issue 08: qwen2.5:7b sinh câu hỏi phỏng vấn chất lượng thấp (xong 28/10/2026: prompt riêng cho Ollama, kiểm tra và sinh lại, ghi chú trên giao diện; bổ sung 30/10/2026: thêm câu hỏi mẫu khi còn dưới 3 câu)
 * [x] Chốt cách hiển thị Kanban: 5 cột theo 5 trạng thái backend (`offer` và `rejected` tách riêng), chốt 17/10/2026
 * [ ] Tải CA certificate Aiven và đặt `DB_SSL_CA` để bật xác minh chứng chỉ máy chủ
 * [x] Viết tài liệu API cho frontend (`docs/API cho Frontend.md`)
